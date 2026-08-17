@@ -488,15 +488,17 @@
 
   <!-- ===== NEWSLETTER ===== -->
   <section class="blog-newsletter-section">
-    <div class="container blog-newsletter-inner">
-      <div class="blog-nl-icon"><i class="fa-regular fa-envelope"></i></div>
-      <h2 class="blog-nl-title">Get the Latest Tips in Your Inbox</h2>
-      <p class="blog-nl-sub">Join 5,000+ Nigerian families and domestic professionals who get our weekly hiring and career tips.</p>
-      <form class="blog-nl-form" onsubmit="return false;">
-        <input type="email" placeholder="Enter your email address" class="blog-nl-input" />
-        <button type="submit" class="btn btn-primary">Subscribe <i class="fa-solid fa-arrow-right"></i></button>
-      </form>
-      <p class="blog-nl-note"><i class="fa-solid fa-lock"></i> No spam. Unsubscribe at any time.</p>
+    <div class="blog-newsletter-inner">
+      <div class="container">
+        <div class="blog-nl-icon"><i class="fa-regular fa-envelope"></i></div>
+        <h2 class="blog-nl-title">Get the Latest Tips in Your Inbox</h2>
+        <p class="blog-nl-sub">Join 5,000+ Nigerian families and domestic professionals who get our weekly hiring and career tips.</p>
+        <form class="blog-nl-form" onsubmit="return false;">
+          <input type="email" placeholder="Enter your email address" class="blog-nl-input" />
+          <button type="submit" class="btn btn-primary">Subscribe <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
+        <p class="blog-nl-note"><i class="fa-solid fa-lock"></i> No spam. Unsubscribe at any time.</p>
+      </div>
     </div>
   </section>
 
@@ -592,62 +594,54 @@
     </div>
   </footer>
 
+  <script src="nav.js"></script>
   <script>
-    // Hamburger toggle
-    const hamburger = document.getElementById('hamburger');
-    hamburger.addEventListener('click', function () {
-      const isOpen = document.querySelector('.nav-links').classList.toggle('open');
-      hamburger.setAttribute('aria-expanded', isOpen);
-      hamburger.classList.toggle('is-open', isOpen);
-    });
-
     // Reading progress bar
-    window.addEventListener('scroll', () => {
-      const article = document.querySelector('.post-article');
+    window.addEventListener('scroll', function () {
+      var article = document.querySelector('.post-article');
       if (!article) return;
-      const articleTop = article.getBoundingClientRect().top + window.scrollY;
-      const articleHeight = article.offsetHeight;
-      const scrolled = window.scrollY - articleTop;
-      const progress = Math.max(0, Math.min(100, (scrolled / articleHeight) * 100));
-      const bar = document.getElementById('readBar');
-      const label = document.getElementById('readLabel');
-      if (bar) bar.style.width = progress + '%';
+      var articleTop    = article.getBoundingClientRect().top + window.scrollY;
+      var articleHeight = article.offsetHeight;
+      var scrolled      = window.scrollY - articleTop;
+      var progress      = Math.max(0, Math.min(100, (scrolled / articleHeight) * 100));
+      var bar   = document.getElementById('readBar');
+      var label = document.getElementById('readLabel');
+      if (bar)   bar.style.width = progress + '%';
       if (label) {
-        const minsLeft = Math.max(0, Math.round(7 * (1 - progress / 100)));
+        var minsLeft = Math.max(0, Math.round(7 * (1 - progress / 100)));
         label.textContent = Math.round(progress) + '% complete · ' + (minsLeft > 0 ? minsLeft + ' min left' : 'Done!');
       }
     });
 
     // Copy link button
-    document.querySelectorAll('.post-share-btn, .post-share-bar-btn--copy').forEach(btn => {
+    document.querySelectorAll('.post-share-btn, .post-share-bar-btn--copy').forEach(function (btn) {
       if (btn.querySelector('.fa-link')) {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', function (e) {
           e.preventDefault();
-          navigator.clipboard.writeText(window.location.href).then(() => {
-            const original = btn.innerHTML;
+          navigator.clipboard.writeText(window.location.href).then(function () {
+            var original = btn.innerHTML;
             btn.innerHTML = btn.classList.contains('post-share-bar-btn--copy')
               ? '<i class="fa-solid fa-check"></i> Copied!'
               : '<i class="fa-solid fa-check"></i>';
-            setTimeout(() => { btn.innerHTML = original; }, 2000);
+            setTimeout(function () { btn.innerHTML = original; }, 2000);
           });
         });
       }
     });
 
     // Highlight active TOC item on scroll
-    const tocLinks = document.querySelectorAll('.post-toc a');
-    const headings = document.querySelectorAll('.post-h2');
-    window.addEventListener('scroll', () => {
-      let current = '';
-      headings.forEach(h => {
+    var tocLinks = document.querySelectorAll('.post-toc a');
+    var headings = document.querySelectorAll('.post-h2');
+    window.addEventListener('scroll', function () {
+      var current = '';
+      headings.forEach(function (h) {
         if (window.scrollY >= h.offsetTop - 120) current = h.textContent.trim();
       });
-      tocLinks.forEach(link => {
+      tocLinks.forEach(function (link) {
         link.classList.toggle('active', link.textContent.trim() === current.replace(/^\d+\s*/, '').trim());
       });
     });
   </script>
-
   <script src="animations.js" defer></script>
 </body>
 </html>

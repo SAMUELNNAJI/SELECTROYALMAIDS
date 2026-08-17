@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact Us – SelectRoyalMaids</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="animations.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -514,8 +515,7 @@
       .contact-card-item:nth-child(3) { border-right: 1px solid #f1f5f9; }
     }
     @media (max-width: 600px) {
-      .contact-cards-inner { grid-template-columns: 1fr 1fr; border-radius: 16px; margin-top: -24px; }
-      .contact-card-item { padding: 20px 16px; }
+      .contact-cards-strip { display: none; }
       .contact-form-card { padding: 24px 20px; }
       .cf-row { grid-template-columns: 1fr; }
       .contact-faq-grid { grid-template-columns: 1fr; }
@@ -523,7 +523,6 @@
       .cs-info-block, .cs-hours-block, .cs-social-block { padding: 22px 20px; }
     }
     @media (max-width: 420px) {
-      .contact-cards-inner { grid-template-columns: 1fr; }
       .contact-card-item { border-right: none; border-bottom: 1px solid #f1f5f9; }
     }
   </style>
@@ -971,6 +970,7 @@
     </div>
   </footer>
 
+  <script src="nav.js"></script>
   <script src="script.js"></script>
   <script>
     /* ---- Subject chips ---- */
@@ -1006,7 +1006,6 @@
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Please enter a valid email address.'); return; }
       if (!message) { showErr('Please enter your message.'); return; }
 
-      /* Simulate submission */
       var btn = document.getElementById('cfSubmit');
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending…';
       btn.disabled = true;
@@ -1017,5 +1016,6 @@
       }, 1400);
     });
   </script>
+  <script src="animations.js" defer></script>
 </body>
 </html>

@@ -184,10 +184,15 @@
 }
 
 /* ---- Services hero visual cards ---- */
-.srv-float-card--1 { animation: hero-sub-in 0.6s ease 0.5s both, floatCard 4s ease-in-out 1.2s infinite; }
-.srv-float-card--2 { animation: hero-sub-in 0.6s ease 0.7s both, floatCard 4s ease-in-out 1.4s infinite; }
-.srv-float-card--3 { animation: hero-sub-in 0.6s ease 0.9s both, floatCard 4s ease-in-out 1.6s infinite; }
-.srv-rating-badge  { animation: hero-cta-in 0.65s ease 0.65s both; }
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+.srv-float-card--1 { animation: hero-sub-in 0.6s ease 0.5s both, floatCard 3.6s ease-in-out 1.2s infinite; }
+.srv-float-card--2 { animation: hero-sub-in 0.6s ease 0.7s both, floatCard 4.2s ease-in-out 1.4s infinite; }
+.srv-float-card--3 { animation: hero-sub-in 0.6s ease 0.9s both, floatCard 3.9s ease-in-out 1.6s infinite; }
+.srv-rating-badge  { animation: hero-cta-in 0.65s ease 0.65s both, floatCard 4.5s ease-in-out 1.8s infinite; }
 
 /* ---- HIW hero ---- */
 .hiw-hero .hiw-eyebrow {
@@ -223,9 +228,7 @@
 }
 .policy-hero .policy-meta {
   animation: hero-cta-in 0.55s cubic-bezier(0.22,1,0.36,1) 0.55s both;
-}
-
-/* ============================================================
+}/* ============================================================
    DECORATIVE FLOATING ORBS
    Added via JS to hero sections
    ============================================================ */
@@ -284,4 +287,15 @@
 }
 .navbar {
   transition: box-shadow 0.3s ease;
+}
+
+/* ---- Contact hero ---- */
+.contact-hero .contact-hero-pill {
+  animation: hero-badge-in 0.55s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+}
+.contact-hero .contact-hero-title {
+  animation: hero-title-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.30s both;
+}
+.contact-hero .contact-hero-sub {
+  animation: hero-sub-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.45s both;
 }

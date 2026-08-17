@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>How It Works – SelectRoyal Maids</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="how-it-works.css" />
   <link rel="stylesheet" href="animations.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -390,17 +391,13 @@
     </div>
   </footer>
 
+  <script src="nav.js"></script>
   <script>
-    /* Hamburger */
-    document.getElementById('hamburger').addEventListener('click', function () {
-      document.querySelector('.nav-links').classList.toggle('open');
-    });
-
     /* FAQ accordion */
     document.querySelectorAll('.faq-question').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        const item = this.closest('.faq-item');
-        const isOpen = item.classList.contains('faq-item--open');
+        var item   = this.closest('.faq-item');
+        var isOpen = item.classList.contains('faq-item--open');
         document.querySelectorAll('.faq-item').forEach(function (i) {
           i.classList.remove('faq-item--open');
           i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');

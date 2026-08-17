@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Our Services – SelectRoyal Maids</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="services.css" />
   <link rel="stylesheet" href="animations.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -539,15 +540,11 @@
     </div>
   </footer>
 
+  <script src="nav.js"></script>
   <script>
-    /* Hamburger */
-    document.getElementById('hamburger').addEventListener('click', function () {
-      document.querySelector('.nav-links').classList.toggle('open');
-    });
-
     /* Service tabs */
-    const tabs = document.querySelectorAll('.srv-tab');
-    const panels = document.querySelectorAll('.srv-panel');
+    var tabs   = document.querySelectorAll('.srv-tab');
+    var panels = document.querySelectorAll('.srv-panel');
 
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {

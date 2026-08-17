@@ -103,33 +103,100 @@
 })();
 
 /* ============================================================
-   NAVBAR MOBILE HAMBURGER
+   NAVBAR MOBILE HAMBURGER  (shared utility — used by index.html
+   and any page that loads script.js)
    ============================================================ */
 (function () {
+  'use strict';
+
   const hamburger = document.getElementById('hamburger');
   const navLinks  = document.querySelector('.nav-links');
   const navCta    = document.querySelector('.nav-cta');
 
-  if (!hamburger) return;
+  if (!hamburger || !navLinks) return;
 
-  hamburger.addEventListener('click', function () {
-    const isOpen = navLinks.classList.toggle('open');
-    hamburger.setAttribute('aria-expanded', String(isOpen));
-    hamburger.classList.toggle('is-open', isOpen);
-    // Lock body scroll and keep hamburger on top of overlay
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    hamburger.style.zIndex = isOpen ? '100' : '';
-    if (navCta) navCta.style.display = isOpen ? 'inline-flex' : '';
+  /* ── helpers ── */
+  function openMenu() {
+    navLinks.classList.add('open');
+    hamburger.setAttribute('aria-expanded', 'true');
+    hamburger.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    hamburger.style.zIndex = '101';
+    injectMobileCta();
+  }
+
+  function closeMenu() {
+    navLinks.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    hamburger.classList.remove('is-open');
+    document.body.style.overflow = '';
+    hamburger.style.zIndex = '';
+    removeMobileCta();
+  }
+
+  function isOpen() {
+    return navLinks.classList.contains('open');
+  }
+
+  /* ── inject Login + Find a Maid buttons into the mobile overlay ── */
+  function injectMobileCta() {
+    if (navLinks.querySelector('.mobile-nav-cta')) return; // already injected
+
+    var loginHref = 'login.html';
+    var findHref  = 'find-a-maid.html';
+
+    // Grab actual hrefs from the desktop CTA if present
+    if (navCta) {
+      var loginAnchor = navCta.querySelector('.nav-login');
+      var findAnchor  = navCta.querySelector('.nav-find-btn');
+      if (loginAnchor) loginHref = loginAnchor.getAttribute('href');
+      if (findAnchor)  findHref  = findAnchor.getAttribute('href');
+    }
+
+    var ctaDiv = document.createElement('li');
+    ctaDiv.innerHTML =
+      '<div class="mobile-nav-cta">' +
+        '<a href="' + loginHref + '" class="mobile-login-btn">Login</a>' +
+        '<a href="' + findHref  + '" class="btn btn-primary">' +
+          '<i class="fa-solid fa-magnifying-glass"></i> FIND A MAID' +
+        '</a>' +
+      '</div>';
+    navLinks.appendChild(ctaDiv);
+  }
+
+  function removeMobileCta() {
+    var existing = navLinks.querySelector('.mobile-nav-cta');
+    if (existing && existing.parentElement) {
+      existing.parentElement.remove();
+    }
+  }
+
+  /* ── toggle on hamburger click ── */
+  hamburger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    isOpen() ? closeMenu() : openMenu();
   });
 
+  /* ── close when a nav link is tapped ── */
+  navLinks.addEventListener('click', function (e) {
+    var target = e.target.closest('a');
+    if (target) closeMenu();
+  });
+
+  /* ── close on outside click / Escape key ── */
   document.addEventListener('click', function (e) {
-    if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
-      navLinks.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      hamburger.classList.remove('is-open');
-      document.body.style.overflow = '';
-      hamburger.style.zIndex = '';
+    if (isOpen() && !hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+      closeMenu();
     }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && isOpen()) closeMenu();
+  });
+
+  /* ── close menu on viewport resize back to desktop ── */
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 900 && isOpen()) closeMenu();
   });
 })();
 

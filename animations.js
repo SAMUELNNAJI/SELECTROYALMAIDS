@@ -87,6 +87,7 @@
       '.post-hero',
       '.srv-hero',
       '.hiw-hero',
+      '.contact-hero',
     ];
     heroSelectors.forEach((sel) => {
       const hero = document.querySelector(sel);
