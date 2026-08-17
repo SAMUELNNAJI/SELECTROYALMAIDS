@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog – SelectRoyal Maids</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="animations.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-icon-wrap"><i class="fa-solid fa-shield-halved"></i></span>
+        <div class="logo-text-wrap">
+          <span class="logo-text"><span class="logo-accent">SelectRoyal</span></span>
+          <span class="logo-sub">MAIDS</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="find-a-maid.html">Find a Maid</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="how-it-works.html">How It Works</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="blog.html" class="nav-active">Blog</a></li>
+        <li><a href="about.html#contact">Contact</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="request-maid.html" class="nav-login">Login</a>
+        <a href="find-a-maid.html" class="btn btn-primary nav-find-btn"><i class="fa-solid fa-magnifying-glass"></i> FIND A MAID</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="container page-hero-inner">
+      <div class="page-hero-pill"><i class="fa-regular fa-newspaper"></i> INSIGHTS & GUIDES</div>
+      <h1 class="page-hero-title">The SelectRoyal <span class="accent-light">Blog</span></h1>
+      <p class="page-hero-sub">Tips, guides, and insights for Nigerian families hiring domestic staff — and for domestic professionals building their careers.</p>
+    </div>
+  </section>
+
+  <!-- ===== FEATURED POST ===== -->
+  <section class="blog-featured-section">
+    <div class="container">
+      <div class="blog-featured-card" data-reveal="up">
+        <div class="blog-featured-img-wrap">
+          <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80" alt="Featured post" />
+          <span class="blog-cat-tag">Hiring Tips</span>
+        </div>
+        <div class="blog-featured-content">
+          <p class="blog-featured-label"><i class="fa-solid fa-fire"></i> Featured Article</p>
+          <h2 class="blog-featured-title">10 Things You Must Check Before Hiring a House Maid in Nigeria</h2>
+          <p class="blog-featured-excerpt">Hiring domestic help in Nigeria requires more than a phone interview. From NIN verification to reference checks, here's a complete checklist every employer should follow before bringing someone into their home.</p>
+          <div class="blog-featured-meta">
+            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Adaeze Okafor" class="blog-meta-avatar" />
+            <div>
+              <p class="blog-meta-author">Adaeze Okafor</p>
+              <p class="blog-meta-date"><i class="fa-regular fa-calendar"></i> 10 August 2026 &nbsp;·&nbsp; <i class="fa-regular fa-clock"></i> 7 min read</p>
+            </div>
+          </div>
+          <a href="blog-post.html" class="btn btn-primary">Read Article <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FILTERS ===== -->
+  <section class="blog-filter-section">
+    <div class="container blog-filter-inner">
+      <div class="blog-filter-tabs" id="blogTabs">
+        <button class="blog-filter-tab active" data-cat="all">All Posts</button>
+        <button class="blog-filter-tab" data-cat="hiring">Hiring Tips</button>
+        <button class="blog-filter-tab" data-cat="safety">Safety</button>
+        <button class="blog-filter-tab" data-cat="career">Career Advice</button>
+        <button class="blog-filter-tab" data-cat="family">Family Life</button>
+        <button class="blog-filter-tab" data-cat="guides">How-To Guides</button>
+      </div>
+      <div class="blog-search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Search articles…" class="blog-search-input" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== POSTS GRID ===== -->
+  <section class="blog-posts-section">
+    <div class="container">
+      <div class="blog-grid" data-stagger="100">
+
+        <article class="blog-card">
+          <div class="blog-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1527515637462-cff94ebb95ac?w=500&q=80" alt="Blog post" />
+            <span class="blog-card-tag">Safety</span>
+          </div>
+          <div class="blog-card-body">
+            <h3 class="blog-card-title">How to Safely Introduce a New Live-In Maid to Your Family</h3>
+            <p class="blog-card-excerpt">The first week with a new live-in maid sets the tone for the entire relationship. Here's how to make it smooth and safe for everyone.</p>
+            <div class="blog-card-meta">
+              <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Funke Adesanya" />
+              <div>
+                <p class="blog-card-author">Funke Adesanya</p>
+                <p class="blog-card-date">5 Aug 2026 · 5 min read</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card">
+          <div class="blog-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1507048331197-7d4ac70811cf?w=500&q=80" alt="Blog post" />
+            <span class="blog-card-tag blog-tag--green">Career Advice</span>
+          </div>
+          <div class="blog-card-body">
+            <h3 class="blog-card-title">5 Skills That Make Domestic Professionals Stand Out in Nigeria</h3>
+            <p class="blog-card-excerpt">From cooking skills to communication, these are the qualities employers look for most when hiring domestic staff in 2026.</p>
+            <div class="blog-card-meta">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Taiwo Ogundimu" />
+              <div>
+                <p class="blog-card-author">Taiwo Ogundimu</p>
+                <p class="blog-card-date">28 Jul 2026 · 4 min read</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card">
+          <div class="blog-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=500&q=80" alt="Blog post" />
+            <span class="blog-card-tag blog-tag--purple">Family Life</span>
+          </div>
+          <div class="blog-card-body">
+            <h3 class="blog-card-title">Choosing Between a Babysitter and a Nanny: What's Right for Your Family?</h3>
+            <p class="blog-card-excerpt">Both provide childcare, but the differences matter. We break down costs, responsibilities, and what each option means for your household.</p>
+            <div class="blog-card-meta">
+              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Adaeze Okafor" />
+              <div>
+                <p class="blog-card-author">Adaeze Okafor</p>
+                <p class="blog-card-date">20 Jul 2026 · 6 min read</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card">
+          <div class="blog-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=500&q=80" alt="Blog post" />
+            <span class="blog-card-tag blog-tag--orange">Hiring Tips</span>
+          </div>
+          <div class="blog-card-body">
+            <h3 class="blog-card-title">What to Include in a Domestic Staff Employment Contract in Nigeria</h3>
+            <p class="blog-card-excerpt">A written contract protects both you and your employee. Here are the key clauses every domestic staff agreement should contain.</p>
+            <div class="blog-card-meta">
+              <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Chukwuemeka Bello" />
+              <div>
+                <p class="blog-card-author">Chukwuemeka Bello</p>
+                <p class="blog-card-date">12 Jul 2026 · 8 min read</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card">
+          <div class="blog-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=500&q=80" alt="Blog post" />
+            <span class="blog-card-tag">Guides</span>
+          </div>
+          <div class="blog-card-body">
+            <h3 class="blog-card-title">How to Conduct a Video Interview with a Domestic Professional</h3>
+            <p class="blog-card-excerpt">Video interviews save time and help you make better hiring decisions. Use this guide to get the most out of every virtual meeting.</p>
+            <div class="blog-card-meta">
+              <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Funke Adesanya" />
+              <div>
+                <p class="blog-card-author">Funke Adesanya</p>
+                <p class="blog-card-date">5 Jul 2026 · 4 min read</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="blog-card">
+          <div class="blog-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1587691592099-24045742c181?w=500&q=80" alt="Blog post" />
+            <span class="blog-card-tag blog-tag--green">Career Advice</span>
+          </div>
+          <div class="blog-card-body">
+            <h3 class="blog-card-title">Building a Professional Domestic Career: A Guide for Nigerian Helpers</h3>
+            <p class="blog-card-excerpt">Domestic work is a skilled profession. Discover how to build your reputation, get better opportunities, and grow your career with SelectRoyal Maids.</p>
+            <div class="blog-card-meta">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Taiwo Ogundimu" />
+              <div>
+                <p class="blog-card-author">Taiwo Ogundimu</p>
+                <p class="blog-card-date">28 Jun 2026 · 5 min read</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Pagination -->
+      <div class="blog-pagination" data-reveal="up">
+        <button class="blog-page-btn blog-page-btn--active">1</button>
+        <button class="blog-page-btn">2</button>
+        <button class="blog-page-btn">3</button>
+        <span class="blog-page-dots">…</span>
+        <button class="blog-page-btn">8</button>
+        <button class="blog-page-next">Next <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== NEWSLETTER ===== -->
+  <section class="blog-newsletter-section">
+    <div class="container blog-newsletter-inner" data-reveal="scale-up">
+      <div class="blog-nl-icon"><i class="fa-regular fa-envelope"></i></div>
+      <h2 class="blog-nl-title">Get the Latest Tips in Your Inbox</h2>
+      <p class="blog-nl-sub">Join 5,000+ Nigerian families and domestic professionals who get our weekly hiring and career tips.</p>
+      <form class="blog-nl-form" onsubmit="return false;">
+        <input type="email" placeholder="Enter your email address" class="blog-nl-input" />
+        <button type="submit" class="btn btn-primary">Subscribe <i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+      <p class="blog-nl-note"><i class="fa-solid fa-lock"></i> No spam. Unsubscribe at any time.</p>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <!-- Top strip -->
+    <div class="footer-top-strip">
+      <div class="container footer-top-inner">
+        <div class="footer-top-left">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Nigeria's most trusted verified domestic staffing platform</span>
+        </div>
+        <div class="footer-top-right">
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://twitter.com/" target="_blank" rel="noopener" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-inner">
+      <div class="footer-col footer-brand">
+        <a href="index.html" class="footer-logo">
+          <span class="footer-logo-icon"><i class="fa-solid fa-shield-halved"></i></span>
+          <div>
+            <span class="footer-logo-name">SelectRoyal<span>Maids</span></span>
+            <span class="footer-logo-tag">VERIFIED DOMESTIC STAFF</span>
+          </div>
+        </a>
+        <p>Find verified maids, cooks, nannies, drivers and caregivers across Lagos, Abuja, Port Harcourt and 20+ Nigerian cities.</p>
+        <div class="footer-badges">
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 10,000+ Families</span>
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 2,500+ Staff</span>
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 4.9★ Rated</span>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Services</h4>
+        <ul class="footer-links">
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Maid / House Help</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Cook / Chef</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Baby Sitter</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Driver</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Elderly Care</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Nanny / Governess</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Company</h4>
+        <ul class="footer-links">
+          <li><a href="about.html"><i class="fa-solid fa-chevron-right"></i> About Us</a></li>
+          <li><a href="how-it-works.html"><i class="fa-solid fa-chevron-right"></i> How It Works</a></li>
+          <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Pricing</a></li>
+          <li><a href="blog.html"><i class="fa-solid fa-chevron-right"></i> Blog</a></li>
+          <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Careers</a></li>
+          <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-heading">Support &amp; Legal</h4>
+        <ul class="footer-links">
+          <li><a href="how-it-works.html#faq"><i class="fa-solid fa-chevron-right"></i> FAQ</a></li>
+          <li><a href="safety-guidelines.html"><i class="fa-solid fa-chevron-right"></i> Safety Guidelines</a></li>
+          <li><a href="terms-of-service.html"><i class="fa-solid fa-chevron-right"></i> Terms of Service</a></li>
+          <li><a href="privacy-policy.html"><i class="fa-solid fa-chevron-right"></i> Privacy Policy</a></li>
+          <li><a href="refund-policy.html"><i class="fa-solid fa-chevron-right"></i> Refund Policy</a></li>
+        </ul>
+        <div class="footer-contact-block">
+          <a href="tel:+2348000000000" class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-phone"></i></span>
+            <span>+234 800 000 0000</span>
+          </a>
+          <a href="mailto:hello@selectroyalmaids.ng" class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-envelope"></i></span>
+            <span>hello@selectroyalmaids.ng</span>
+          </a>
+          <div class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-location-dot"></i></span>
+            <span>14 Victoria Island, Lagos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 SelectRoyal Maids Nigeria. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="terms-of-service.html">Terms</a>
+          <a href="privacy-policy.html">Privacy</a>
+          <a href="refund-policy.html">Refunds</a>
+        </div>
+        <p>Made with <i class="fa-solid fa-heart"></i> in Nigeria</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('hamburger').addEventListener('click', function () {
+      document.querySelector('.nav-links').classList.toggle('open');
+    });
+  </script>
+  <script src="animations.js" defer></script>
+</body>
+</html>
+

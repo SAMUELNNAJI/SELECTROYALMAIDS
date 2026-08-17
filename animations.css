@@ -1,0 +1,287 @@
+/* ============================================================
+   ANIMATIONS — SelectRoyal Maids
+   Scroll-reveal + Hero entrance animations
+   ============================================================ */
+
+/* ── Respect user preference ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
+}
+
+/* ============================================================
+   SCROLL REVEAL — base state (hidden)
+   ============================================================ */
+[data-reveal] {
+  opacity: 0;
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Directions */
+[data-reveal="fade"]        { transform: none; }
+[data-reveal="up"]          { transform: translateY(36px); }
+[data-reveal="down"]        { transform: translateY(-28px); }
+[data-reveal="left"]        { transform: translateX(-40px); }
+[data-reveal="right"]       { transform: translateX(40px); }
+[data-reveal="scale"]       { transform: scale(0.92); }
+[data-reveal="scale-up"]    { transform: scale(0.88) translateY(20px); }
+[data-reveal="flip-up"]     { transform: perspective(600px) rotateX(12deg) translateY(28px); }
+
+/* ── Revealed state ── */
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Stagger delays via data-delay ── */
+[data-delay="100"]  { transition-delay: 0.10s; }
+[data-delay="150"]  { transition-delay: 0.15s; }
+[data-delay="200"]  { transition-delay: 0.20s; }
+[data-delay="250"]  { transition-delay: 0.25s; }
+[data-delay="300"]  { transition-delay: 0.30s; }
+[data-delay="350"]  { transition-delay: 0.35s; }
+[data-delay="400"]  { transition-delay: 0.40s; }
+[data-delay="450"]  { transition-delay: 0.45s; }
+[data-delay="500"]  { transition-delay: 0.50s; }
+[data-delay="600"]  { transition-delay: 0.60s; }
+[data-delay="700"]  { transition-delay: 0.70s; }
+[data-delay="800"]  { transition-delay: 0.80s; }
+
+/* ============================================================
+   HERO ENTRANCE ANIMATIONS
+   Applied immediately on page load (no JS needed)
+   ============================================================ */
+
+/* Floating orbs / blobs in hero backgrounds */
+@keyframes hero-float-slow {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-18px) scale(1.04); }
+}
+@keyframes hero-float-medium {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(-12px) rotate(6deg); }
+}
+@keyframes hero-blob-spin {
+  from { transform: rotate(0deg) scale(1); }
+  to   { transform: rotate(360deg) scale(1.08); }
+}
+
+/* Badge / pill drop-in */
+@keyframes hero-badge-in {
+  from { opacity: 0; transform: translateY(-16px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Title slide-up */
+@keyframes hero-title-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Subtitle fade-up */
+@keyframes hero-sub-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* CTA fade-scale */
+@keyframes hero-cta-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Card slide-in from right */
+@keyframes hero-card-in {
+  from { opacity: 0; transform: translateX(40px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+/* Decorative orb pulse */
+@keyframes hero-orb-pulse {
+  0%, 100% { opacity: 0.28; transform: scale(1); }
+  50%       { opacity: 0.42; transform: scale(1.08); }
+}
+/* Shimmer sweep */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+/* Subtle glow ring */
+@keyframes glow-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+  50%       { box-shadow: 0 0 0 8px rgba(37,99,235,0.12); }
+}
+
+/* ---- Dark gradient hero (page-hero, post-hero, srv-hero, hiw-hero) ---- */
+.page-hero .page-hero-pill,
+.post-hero .post-hero-tag,
+.srv-hero .srv-hero-pill {
+  animation: hero-badge-in 0.55s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+}
+
+.page-hero .page-hero-title,
+.post-hero .post-hero-title,
+.srv-hero .srv-hero-title {
+  animation: hero-title-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.30s both;
+}
+
+.page-hero .page-hero-sub,
+.post-hero .post-hero-excerpt,
+.srv-hero .srv-hero-sub {
+  animation: hero-sub-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.45s both;
+}
+
+.page-hero .page-hero-actions,
+.post-hero .post-hero-meta,
+.srv-hero .srv-hero-actions {
+  animation: hero-cta-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.60s both;
+}
+
+/* Hero breadcrumb (blog post) */
+.post-hero .post-breadcrumb {
+  animation: hero-badge-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.05s both;
+}
+
+/* Cover image drop */
+.post-cover-wrap {
+  animation: hero-sub-in 0.7s cubic-bezier(0.22,1,0.36,1) 0.5s both;
+}
+
+/* ---- About hero ---- */
+.about-hero .about-eyebrow {
+  animation: hero-badge-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+}
+.about-hero .about-hero-title {
+  animation: hero-title-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.28s both;
+}
+.about-hero .about-hero-text {
+  animation: hero-sub-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.42s both;
+}
+.about-hero .about-hero-actions {
+  animation: hero-cta-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.56s both;
+}
+.about-hero .about-hero-visual {
+  animation: hero-card-in 0.75s cubic-bezier(0.22,1,0.36,1) 0.35s both;
+}
+
+/* ---- Index hero carousel ---- */
+.hero-slide.active .hero-badge {
+  animation: hero-badge-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+}
+.hero-slide.active .hero-title {
+  animation: hero-title-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.25s both;
+}
+.hero-slide.active .hero-subtitle {
+  animation: hero-sub-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.40s both;
+}
+.hero-slide.active .hero-search-box,
+.hero-slide.active .hero-hint {
+  animation: hero-cta-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.55s both;
+}
+.hero-slide.active .hero-visual {
+  animation: hero-card-in 0.75s cubic-bezier(0.22,1,0.36,1) 0.30s both;
+}
+
+/* ---- Services hero visual cards ---- */
+.srv-float-card--1 { animation: hero-sub-in 0.6s ease 0.5s both, floatCard 4s ease-in-out 1.2s infinite; }
+.srv-float-card--2 { animation: hero-sub-in 0.6s ease 0.7s both, floatCard 4s ease-in-out 1.4s infinite; }
+.srv-float-card--3 { animation: hero-sub-in 0.6s ease 0.9s both, floatCard 4s ease-in-out 1.6s infinite; }
+.srv-rating-badge  { animation: hero-cta-in 0.65s ease 0.65s both; }
+
+/* ---- HIW hero ---- */
+.hiw-hero .hiw-eyebrow {
+  animation: hero-badge-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+}
+.hiw-hero .hiw-hero-title {
+  animation: hero-title-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.30s both;
+}
+.hiw-hero .hiw-hero-sub {
+  animation: hero-sub-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.45s both;
+}
+
+/* ---- Blog hero ---- */
+.blog-hero-animated .page-hero-pill {
+  animation: hero-badge-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+}
+.blog-hero-animated .page-hero-title {
+  animation: hero-title-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.30s both;
+}
+.blog-hero-animated .page-hero-sub {
+  animation: hero-sub-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.45s both;
+}
+
+/* ---- Policy / shared page hero ---- */
+.policy-hero .policy-hero-icon {
+  animation: hero-badge-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.10s both;
+}
+.policy-hero .policy-hero-title {
+  animation: hero-title-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.25s both;
+}
+.policy-hero .policy-hero-sub {
+  animation: hero-sub-in 0.65s cubic-bezier(0.22,1,0.36,1) 0.40s both;
+}
+.policy-hero .policy-meta {
+  animation: hero-cta-in 0.55s cubic-bezier(0.22,1,0.36,1) 0.55s both;
+}
+
+/* ============================================================
+   DECORATIVE FLOATING ORBS
+   Added via JS to hero sections
+   ============================================================ */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-orb--1 {
+  width: 340px; height: 340px;
+  background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%);
+  top: -80px; right: -60px;
+  animation: hero-orb-pulse 6s ease-in-out infinite;
+}
+.hero-orb--2 {
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(147,197,253,0.14) 0%, transparent 70%);
+  bottom: -40px; left: 10%;
+  animation: hero-orb-pulse 8s ease-in-out 1s infinite;
+}
+.hero-orb--3 {
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+  top: 40%; right: 20%;
+  animation: hero-float-slow 10s ease-in-out infinite;
+}
+
+/* ============================================================
+   CARD HOVER GLOW  (enhances existing hover)
+   ============================================================ */
+.blog-card,
+.service-card,
+.maid-card,
+.hiw-card,
+.step-card-v2,
+.about-value-card,
+.about-team-card,
+.srv-why-card,
+.stat-card {
+  will-change: transform;
+}
+
+/* ============================================================
+   COUNTER NUMBER  (used by JS countUp)
+   ============================================================ */
+.count-up {
+  display: inline-block;
+}
+
+/* ============================================================
+   NAVBAR SCROLL SHRINK
+   ============================================================ */
+.navbar.scrolled {
+  box-shadow: 0 4px 20px rgba(0,0,0,.10);
+}
+.navbar {
+  transition: box-shadow 0.3s ease;
+}
