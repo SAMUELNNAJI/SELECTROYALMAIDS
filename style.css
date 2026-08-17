@@ -2090,3 +2090,34 @@ ul { list-style: none; }
 }
 .footer-bottom-links a:hover { color: #60a5fa; }
 
+
+/* ============================================================
+   FOOTER RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+  .footer-brand p { max-width: 100%; }
+  .footer-badges { flex-direction: row; flex-wrap: wrap; gap: 16px; }
+}
+
+@media (max-width: 640px) {
+  .footer-top-strip { display: none; }
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 40px 0 36px;
+  }
+  .footer-brand { grid-column: auto; }
+  .footer-bottom-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  .footer-bottom-links { justify-content: center; }
+}

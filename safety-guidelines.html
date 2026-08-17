@@ -58,7 +58,7 @@
     <div class="container policy-layout">
 
       <!-- Sidebar TOC -->
-      <aside class="policy-toc">
+      <aside class="policy-toc" data-reveal="left">
         <p class="policy-toc-title">On This Page</p>
         <ul>
           <li><a href="#verification">Our Verification Process</a></li>
@@ -72,7 +72,7 @@
       </aside>
 
       <!-- Main content -->
-      <div class="policy-content">
+      <div class="policy-content" data-stagger="120">
 
         <div class="policy-block" id="verification">
           <h2><i class="fa-solid fa-circle-check"></i> Our Verification Process</h2>
@@ -285,6 +285,7 @@
       document.querySelector('.nav-links').classList.toggle('open');
     });
   </script>
+  <script src="animations.js" defer></script>
 </body>
 </html>
 

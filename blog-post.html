@@ -31,10 +31,10 @@
         <li><a href="how-it-works.html">How It Works</a></li>
         <li><a href="about.html">About Us</a></li>
         <li><a href="blog.html" class="nav-active">Blog</a></li>
-        <li><a href="about.html#contact">Contact</a></li>
+        <li><a href="contact.html">Contact</a></li>
       </ul>
       <div class="nav-cta">
-        <a href="request-maid.html" class="nav-login">Login</a>
+        <a href="login.html" class="nav-login">Login</a>
         <a href="index.html#maids" class="btn btn-primary nav-find-btn"><i class="fa-solid fa-magnifying-glass"></i> FIND A MAID</a>
       </div>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
@@ -340,7 +340,7 @@
       </article>
 
       <!-- ── RIGHT: Sticky Sidebar ── -->
-      <aside class="post-sidebar">
+      <aside class="post-sidebar" data-reveal="right" data-delay="200">
 
         <!-- Table of Contents -->
         <div class="post-sidebar-card">
@@ -417,7 +417,7 @@
   <!-- ===== RELATED POSTS ===== -->
   <section class="post-related-section">
     <div class="container">
-      <div class="post-related-header">
+      <div class="post-related-header" data-reveal="up">
         <div>
           <p class="post-related-eyebrow"><i class="fa-solid fa-layer-group"></i> Keep Reading</p>
           <h2 class="post-related-title">More Articles You'll Find Useful</h2>
@@ -425,7 +425,7 @@
         <a href="blog.html" class="btn btn-outline btn-sm">View All <i class="fa-solid fa-arrow-right"></i></a>
       </div>
 
-      <div class="blog-grid">
+      <div class="blog-grid" data-stagger="120">
 
         <article class="blog-card">
           <div class="blog-card-img-wrap">
@@ -501,62 +501,92 @@
 
   <!-- ===== FOOTER ===== -->
   <footer class="footer">
-    <div class="container footer-inner">
-      <div class="footer-col footer-brand">
-        <a href="index.html" class="logo logo--light">
-          <span class="logo-icon-wrap" style="background:rgba(255,255,255,.15)"><i class="fa-solid fa-shield-halved"></i></span>
-          <div class="logo-text-wrap">
-            <span class="logo-text" style="color:#fff">SelectRoyal<span style="color:#93c5fd">Maids</span></span>
-          </div>
-        </a>
-        <p>Nigeria's most trusted platform for verified domestic staff.</p>
-        <div class="footer-socials">
+    <div class="footer-top-strip">
+      <div class="container footer-top-inner">
+        <div class="footer-top-left">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Nigeria's most trusted verified domestic staffing platform</span>
+        </div>
+        <div class="footer-top-right">
           <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
           <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
           <a href="https://twitter.com/" target="_blank" rel="noopener" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
           <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
         </div>
       </div>
+    </div>
+    <div class="container footer-inner">
+      <div class="footer-col footer-brand">
+        <a href="index.html" class="footer-logo">
+          <span class="footer-logo-icon"><i class="fa-solid fa-shield-halved"></i></span>
+          <div>
+            <span class="footer-logo-name">SelectRoyal<span>Maids</span></span>
+            <span class="footer-logo-tag">VERIFIED DOMESTIC STAFF</span>
+          </div>
+        </a>
+        <p>Find verified maids, cooks, nannies, drivers and caregivers across Lagos, Abuja, Port Harcourt and 20+ Nigerian cities.</p>
+        <div class="footer-badges">
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 10,000+ Families</span>
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 2,500+ Staff</span>
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 4.9★ Rated</span>
+        </div>
+      </div>
       <div class="footer-col">
-        <h4>Services</h4>
-        <ul>
-          <li><a href="services.html">Maid / House Help</a></li>
-          <li><a href="services.html">Cook / Chef</a></li>
-          <li><a href="services.html">Baby Sitter</a></li>
-          <li><a href="services.html">Driver</a></li>
-          <li><a href="services.html">Elderly Care</a></li>
-          <li><a href="services.html">Nanny / Governess</a></li>
+        <h4 class="footer-heading">Services</h4>
+        <ul class="footer-links">
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Maid / House Help</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Cook / Chef</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Baby Sitter</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Driver</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Elderly Care</a></li>
+          <li><a href="services.html"><i class="fa-solid fa-chevron-right"></i> Nanny / Governess</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="about.html">About Us</a></li>
-          <li><a href="how-it-works.html">How It Works</a></li>
-          <li><a href="services.html">Pricing</a></li>
-          <li><a href="blog.html">Blog</a></li>
-          <li><a href="about.html#contact">Contact</a></li>
+        <h4 class="footer-heading">Company</h4>
+        <ul class="footer-links">
+          <li><a href="about.html"><i class="fa-solid fa-chevron-right"></i> About Us</a></li>
+          <li><a href="how-it-works.html"><i class="fa-solid fa-chevron-right"></i> How It Works</a></li>
+          <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Pricing</a></li>
+          <li><a href="blog.html"><i class="fa-solid fa-chevron-right"></i> Blog</a></li>
+          <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Careers</a></li>
+          <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Contact</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Support</h4>
-        <ul>
-          <li><a href="safety-guidelines.html">FAQ</a></li>
-          <li><a href="safety-guidelines.html">Safety Guidelines</a></li>
-          <li><a href="terms-of-service.html">Terms of Service</a></li>
-          <li><a href="privacy-policy.html">Privacy Policy</a></li>
-          <li><a href="refund-policy.html">Refund Policy</a></li>
+        <h4 class="footer-heading">Support &amp; Legal</h4>
+        <ul class="footer-links">
+          <li><a href="how-it-works.html#faq"><i class="fa-solid fa-chevron-right"></i> FAQ</a></li>
+          <li><a href="safety-guidelines.html"><i class="fa-solid fa-chevron-right"></i> Safety Guidelines</a></li>
+          <li><a href="terms-of-service.html"><i class="fa-solid fa-chevron-right"></i> Terms of Service</a></li>
+          <li><a href="privacy-policy.html"><i class="fa-solid fa-chevron-right"></i> Privacy Policy</a></li>
+          <li><a href="refund-policy.html"><i class="fa-solid fa-chevron-right"></i> Refund Policy</a></li>
         </ul>
-        <div class="footer-contact">
-          <p><i class="fa-solid fa-phone"></i> +234 800 000 0000</p>
-          <p><i class="fa-solid fa-envelope"></i> hello@selectroyalmaids.ng</p>
+        <div class="footer-contact-block">
+          <a href="tel:+2348000000000" class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-phone"></i></span>
+            <span>+234 800 000 0000</span>
+          </a>
+          <a href="mailto:hello@selectroyalmaids.ng" class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-envelope"></i></span>
+            <span>hello@selectroyalmaids.ng</span>
+          </a>
+          <div class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-location-dot"></i></span>
+            <span>14 Victoria Island, Lagos</span>
+          </div>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <div class="container">
-        <p>&copy; 2026 SelectRoyal Maids. All rights reserved.</p>
-        <p>Made with <i class="fa-solid fa-heart" style="color:#f87171"></i> in Nigeria</p>
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 SelectRoyal Maids Nigeria. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="terms-of-service.html">Terms</a>
+          <a href="privacy-policy.html">Privacy</a>
+          <a href="refund-policy.html">Refunds</a>
+        </div>
+        <p>Made with <i class="fa-solid fa-heart"></i> in Nigeria</p>
       </div>
     </div>
   </footer>
