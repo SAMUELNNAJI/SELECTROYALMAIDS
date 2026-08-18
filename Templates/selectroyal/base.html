@@ -1,0 +1,274 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SelectRoyalMaids – Nigeria's Most Trusted Domestic Staffing Platform{% endblock %}</title>
+  <link rel="icon" href="{% static 'image/logo.png' %}" type="image/png" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5" />
+  <link rel="stylesheet" href="{% static 'css/animations.css' %}" />
+  {% block extra_css %}{% endblock %}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="{% url 'MaidApp:index' %}" class="logo">
+        <img src="{% static 'image/logo.png' %}" alt="SelectRoyalMaids" class="logo-img" />
+        <div class="logo-text-wrap">
+          <span class="logo-text"><span class="logo-accent">SelectRoyal</span></span>
+          <span class="logo-sub">MAIDS</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="{% url 'MaidApp:index' %}">Home</a></li>
+        <li><a href="{% url 'MaidApp:find-a-maid' %}">Find A Maid</a></li>
+        <li><a href="{% url 'MaidApp:services' %}">Services</a></li>
+        <li><a href="{% url 'MaidApp:how-it-works' %}">How It Works</a></li>
+        <li><a href="{% url 'MaidApp:about' %}">About Us</a></li>
+        <li><a href="{% url 'MaidApp:blog' %}">Blog</a></li>
+        <li><a href="{% url 'MaidApp:contact' %}">Contact</a></li>
+      </ul>
+      <div class="nav-cta">
+        {% if user.is_authenticated %}
+          {% if user.is_superuser %}
+            <a href="{% url 'Authentication:admin_dashboard' %}" class="nav-login">Dashboard</a>
+          {% else %}
+            <a href="{% url 'Authentication:employer_dashboard' %}" class="nav-login">Dashboard</a>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'Authentication:login' %}" class="nav-login">Login</a>
+        {% endif %}
+        <a href="{% url 'MaidApp:request-maid' %}" class="btn btn-primary nav-find-btn"><i class="fa-solid fa-magnifying-glass"></i> FIND A MAID</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== PAGE CONTENT ===== -->
+  {% block content %}{% endblock %}
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <!-- Top strip -->
+    <div class="footer-top-strip">
+      <div class="container footer-top-inner">
+        <div class="footer-top-left">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Nigeria's most trusted verified domestic staffing platform</span>
+        </div>
+        <div class="footer-top-right">
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://twitter.com/" target="_blank" rel="noopener" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main footer grid -->
+    <div class="container footer-inner">
+
+      <!-- Brand col -->
+      <div class="footer-col footer-brand">
+        <a href="{% url 'MaidApp:index' %}" class="footer-logo">
+          <img src="{% static 'image/logo.png' %}" alt="SelectRoyalMaids" class="footer-logo-img" />
+          <div>
+            <span class="footer-logo-name">SelectRoyal<span>Maids</span></span>
+            <span class="footer-logo-tag">VERIFIED DOMESTIC STAFF</span>
+          </div>
+        </a>
+        <p>Find verified maids, cooks, nannies, drivers and caregivers across Lagos, Abuja, Port Harcourt and 20+ Nigerian cities. Safe, fast, and trusted.</p>
+        <div class="footer-badges">
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 10,000+ Families</span>
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 2,500+ Staff</span>
+          <span class="footer-badge"><i class="fa-solid fa-circle-check"></i> 4.9★ Rated</span>
+        </div>
+      </div>
+
+      <!-- Services col -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Services</h4>
+        <ul class="footer-links">
+          <li><a href="{% url 'MaidApp:services' %}"><i class="fa-solid fa-chevron-right"></i> Maid / House Help</a></li>
+          <li><a href="{% url 'MaidApp:services' %}"><i class="fa-solid fa-chevron-right"></i> Cook / Chef</a></li>
+          <li><a href="{% url 'MaidApp:services' %}"><i class="fa-solid fa-chevron-right"></i> Baby Sitter</a></li>
+          <li><a href="{% url 'MaidApp:services' %}"><i class="fa-solid fa-chevron-right"></i> Elderly Care</a></li>
+        </ul>
+      </div>
+
+      <!-- Company col -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Company</h4>
+        <ul class="footer-links">
+          <li><a href="{% url 'MaidApp:about' %}"><i class="fa-solid fa-chevron-right"></i> About Us</a></li>
+          <li><a href="{% url 'MaidApp:how-it-works' %}"><i class="fa-solid fa-chevron-right"></i> How It Works</a></li>
+          <li><a href="{% url 'MaidApp:services' %}"><i class="fa-solid fa-chevron-right"></i> Pricing</a></li>
+          <li><a href="{% url 'MaidApp:blog' %}"><i class="fa-solid fa-chevron-right"></i> Blog</a></li>
+          <li><a href="{% url 'MaidApp:about' %}"><i class="fa-solid fa-chevron-right"></i> Careers</a></li>
+          <li><a href="{% url 'MaidApp:contact' %}"><i class="fa-solid fa-chevron-right"></i> Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Support col -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Support &amp; Legal</h4>
+        <ul class="footer-links">
+          <li><a href="{% url 'MaidApp:how-it-works' %}#faq"><i class="fa-solid fa-chevron-right"></i> FAQ</a></li>
+          <li><a href="{% url 'MaidApp:safety-guidelines' %}"><i class="fa-solid fa-chevron-right"></i> Safety Guidelines</a></li>
+          <li><a href="{% url 'MaidApp:terms-of-service' %}"><i class="fa-solid fa-chevron-right"></i> Terms of Service</a></li>
+          <li><a href="{% url 'MaidApp:privacy-policy' %}"><i class="fa-solid fa-chevron-right"></i> Privacy Policy</a></li>
+          <li><a href="{% url 'MaidApp:refund-policy' %}"><i class="fa-solid fa-chevron-right"></i> Refund Policy</a></li>
+        </ul>
+        <div class="footer-contact-block">
+          <a href="tel:+2348000000000" class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-phone"></i></span>
+            <span>+234 913 789 4958</span>
+          </a>
+          <a href="mailto:info@selectroyalmaids.com.ng" class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-envelope"></i></span>
+            <span>info@selectroyalmaids.com.ng</span>
+          </a>
+          <div class="footer-contact-item">
+            <span class="footer-contact-icon"><i class="fa-solid fa-location-dot"></i></span>
+            <span>14 Victoria Island, Lagos</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; 2026 SelectRoyal Maids Nigeria. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="{% url 'MaidApp:terms-of-service' %}">Terms</a>
+          <a href="{% url 'MaidApp:privacy-policy' %}">Privacy</a>
+          <a href="{% url 'MaidApp:refund-policy' %}">Refunds</a>
+        </div>
+        <p>Made with <i class="fa-solid fa-heart"></i> in Nigeria</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== WHATSAPP WIDGET ===== -->
+  <div id="whatsapp-widget" class="whatsapp-widget" draggable="true">
+    <a href="https://wa.me/2349137894958?text=Hello%20SelectRoyalMaids" target="_blank" rel="noopener noreferrer" class="whatsapp-link">
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
+  </div>
+
+  <script>
+    // WhatsApp Widget Draggable Functionality
+    const whatsappWidget = document.getElementById('whatsapp-widget');
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+
+    whatsappWidget.addEventListener('dragstart', (e) => {
+      isDragging = true;
+      initialX = e.clientX - whatsappWidget.offsetLeft;
+      initialY = e.clientY - whatsappWidget.offsetTop;
+    });
+
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    document.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (isDragging) {
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+        
+        // Keep widget within viewport bounds
+        const maxX = window.innerWidth - whatsappWidget.offsetWidth;
+        const maxY = window.innerHeight - whatsappWidget.offsetHeight;
+        
+        currentX = Math.max(0, Math.min(currentX, maxX));
+        currentY = Math.max(0, Math.min(currentY, maxY));
+        
+        whatsappWidget.style.left = currentX + 'px';
+        whatsappWidget.style.top = currentY + 'px';
+        whatsappWidget.style.right = 'auto';
+        whatsappWidget.style.bottom = 'auto';
+        
+        isDragging = false;
+      }
+    });
+  </script>
+
+  <style>
+    /* WhatsApp Widget Styling */
+    .whatsapp-widget {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background-color: #25d366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+      cursor: grab;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      user-select: none;
+    }
+
+    .whatsapp-widget:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(37, 211, 102, 0.6);
+    }
+
+    .whatsapp-widget:active {
+      cursor: grabbing;
+    }
+
+    .whatsapp-link {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 28px;
+      text-decoration: none;
+    }
+
+    .whatsapp-link:hover {
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .whatsapp-widget {
+        width: 55px;
+        height: 55px;
+        bottom: 20px;
+        right: 20px;
+      }
+
+      .whatsapp-link {
+        font-size: 24px;
+      }
+    }
+  </style>
+
+  <script src="{% static 'js/script.js' %}"></script>
+  <script src="{% static 'js/animations.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

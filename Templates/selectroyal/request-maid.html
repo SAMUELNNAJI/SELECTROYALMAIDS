@@ -1,0 +1,401 @@
+{% extends 'selectroyal/base.html' %}
+{% load static %}
+{% block title %}Request a Maid – SelectRoyalMaids{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/request-maid.css' %}" />
+{% endblock %}
+
+{% block content %}
+<!-- ===== PAGE HERO ===== -->
+  <section class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="container page-hero-inner">
+      <div class="page-hero-pill"><i class="fa-solid fa-paper-plane"></i> REQUEST A MAID</div>
+      <h1 class="page-hero-title">Request a <span class="accent-light">Maid</span></h1>
+      <p class="page-hero-sub">Complete the form below and our placement team will match you with the perfect candidate within 24 hours.</p>
+      <div class="page-hero-actions">
+        <a href="{% url 'MaidApp:how-it-works' %}" class="btn btn-outline-white btn-lg"><i class="fa-regular fa-circle-play"></i> How It Works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MULTI-STEP FORM ===== -->
+  <section class="rm-section">
+    <div class="container rm-container">
+
+      <!-- Trust strip -->
+      <div class="rm-trust-strip">
+        <div class="rm-trust-item"><i class="fa-solid fa-shield-halved"></i> All candidates NIN verified</div>
+        <div class="rm-trust-item"><i class="fa-solid fa-clock"></i> Matched within 24 hours</div>
+        <div class="rm-trust-item"><i class="fa-solid fa-rotate-left"></i> Free replacement guarantee</div>
+        <div class="rm-trust-item"><i class="fa-solid fa-star"></i> 4.9★ average rating</div>
+      </div>
+
+      <!-- Step tabs -->
+      <div class="rm-tabs" id="rmTabs" role="tablist">
+        <button class="rm-tab active" data-step="1" role="tab" aria-selected="true">
+          <span class="rm-tab-num">1</span> Service
+        </button>
+        <button class="rm-tab" data-step="2" role="tab" aria-selected="false">
+          <span class="rm-tab-num">2</span> Location
+        </button>
+        <button class="rm-tab" data-step="3" role="tab" aria-selected="false">
+          <span class="rm-tab-num">3</span> Requirements
+        </button>
+        <button class="rm-tab" data-step="4" role="tab" aria-selected="false">
+          <span class="rm-tab-num">4</span> Schedule
+        </button>
+        <button class="rm-tab" data-step="5" role="tab" aria-selected="false">
+          <span class="rm-tab-num">5</span> Review
+        </button>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="rm-progress-track">
+        <div class="rm-progress-fill" id="rmProgress" style="width:20%"></div>
+      </div>
+
+      <!-- Form card -->
+      <div class="rm-card" id="rmCard">
+
+        <!-- ── STEP 1: Service ── -->
+        <div class="rm-step active" data-step="1">
+          <h2 class="rm-step-title">Which service do you need?</h2>
+          <p class="rm-step-sub">Select the type of domestic help you are looking for.</p>
+
+          <div class="rm-service-grid">
+            <label class="rm-service-option">
+              <input type="radio" name="service" value="maid" />
+              <div class="rm-service-card">
+                <div class="rm-svc-icon"><i class="fa-solid fa-broom"></i></div>
+                <span class="rm-svc-name">Maid / House Help</span>
+                <span class="rm-svc-desc">Daily or live-in household management</span>
+              </div>
+            </label>
+            <label class="rm-service-option">
+              <input type="radio" name="service" value="cook" />
+              <div class="rm-service-card">
+                <div class="rm-svc-icon"><i class="fa-solid fa-utensils"></i></div>
+                <span class="rm-svc-name">Cook / Chef</span>
+                <span class="rm-svc-desc">Daily meals, events &amp; special occasions</span>
+              </div>
+            </label>
+            <label class="rm-service-option">
+              <input type="radio" name="service" value="babysitter" />
+              <div class="rm-service-card">
+                <div class="rm-svc-icon"><i class="fa-solid fa-baby"></i></div>
+                <span class="rm-svc-name">Baby Sitter</span>
+                <span class="rm-svc-desc">Safe, caring child supervision</span>
+              </div>
+            </label>
+            <label class="rm-service-option">
+              <input type="radio" name="service" value="elderly" />
+              <div class="rm-service-card">
+                <div class="rm-svc-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <span class="rm-svc-name">Elderly Care</span>
+                <span class="rm-svc-desc">Compassionate senior assistance</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Also keep a select fallback / additional detail -->
+          <div class="rm-field rm-field--mt">
+            <label class="rm-label">Or select from the dropdown</label>
+            <div class="rm-select-wrap">
+              <select class="rm-select" id="serviceSelect">
+                <option value="" disabled selected>Select a service</option>
+                <option value="maid">Maid / House Help</option>
+                <option value="cook">Cook / Chef</option>
+                <option value="babysitter">Baby Sitter</option>
+                <option value="elderly">Elderly Care</option>
+              </select>
+              <i class="fa-solid fa-chevron-down rm-select-arrow"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 2: Location ── -->
+        <div class="rm-step" data-step="2">
+          <h2 class="rm-step-title">Where are you located?</h2>
+          <p class="rm-step-sub">We'll find candidates available in your area.</p>
+
+          <div class="rm-fields-row">
+            <div class="rm-field">
+              <label class="rm-label" for="stateField">State <span class="rm-req">*</span></label>
+              <div class="rm-select-wrap">
+                <select class="rm-select" id="stateField" required>
+                  <option value="" disabled selected>Select state</option>
+                  <option>Lagos</option>
+                  <option>Abuja (FCT)</option>
+                  <option>Rivers</option>
+                  <option>Oyo</option>
+                  <option>Kano</option>
+                  <option>Enugu</option>
+                  <option>Edo</option>
+                  <option>Kaduna</option>
+                  <option>Delta</option>
+                  <option>Imo</option>
+                  <option>Anambra</option>
+                  <option>Ogun</option>
+                </select>
+                <i class="fa-solid fa-chevron-down rm-select-arrow"></i>
+              </div>
+            </div>
+            <div class="rm-field">
+              <label class="rm-label" for="cityField">City / Area <span class="rm-req">*</span></label>
+              <div class="rm-input-wrap">
+                <i class="fa-solid fa-location-dot rm-input-icon"></i>
+                <input type="text" class="rm-input" id="cityField" placeholder="e.g. Victoria Island, Lekki" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="rm-field">
+            <label class="rm-label" for="addressField">Full Address <span class="rm-req">*</span></label>
+            <div class="rm-input-wrap">
+              <i class="fa-solid fa-map-pin rm-input-icon"></i>
+              <input type="text" class="rm-input" id="addressField" placeholder="House / flat number, street name" required />
+            </div>
+          </div>
+
+          <div class="rm-field">
+            <label class="rm-label" for="landmarkField">Closest Landmark <span class="rm-opt">(optional)</span></label>
+            <div class="rm-input-wrap">
+              <i class="fa-regular fa-map rm-input-icon"></i>
+              <input type="text" class="rm-input" id="landmarkField" placeholder="e.g. Near Shoprite, off Admiralty Way" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 3: Requirements ── -->
+        <div class="rm-step" data-step="3">
+          <h2 class="rm-step-title">Tell us your requirements</h2>
+          <p class="rm-step-sub">The more detail you give, the better the match.</p>
+
+          <div class="rm-fields-row">
+            <div class="rm-field">
+              <label class="rm-label">Work Type <span class="rm-req">*</span></label>
+              <div class="rm-radio-group">
+                <label class="rm-radio-opt">
+                  <input type="radio" name="worktype" value="live-in" />
+                  <span class="rm-radio-box"><i class="fa-solid fa-house-user"></i> Live-in</span>
+                </label>
+                <label class="rm-radio-opt">
+                  <input type="radio" name="worktype" value="live-out" />
+                  <span class="rm-radio-box"><i class="fa-solid fa-right-from-bracket"></i> Live-out</span>
+                </label>
+                <label class="rm-radio-opt">
+                  <input type="radio" name="worktype" value="part-time" />
+                  <span class="rm-radio-box"><i class="fa-regular fa-clock"></i> Part-time</span>
+                </label>
+              </div>
+            </div>
+            <div class="rm-field">
+              <label class="rm-label" for="experienceField">Minimum Experience</label>
+              <div class="rm-select-wrap">
+                <select class="rm-select" id="experienceField">
+                  <option value="" disabled selected>Select experience</option>
+                  <option>No preference</option>
+                  <option>1+ years</option>
+                  <option>2+ years</option>
+                  <option>3+ years</option>
+                  <option>5+ years</option>
+                  <option>10+ years</option>
+                </select>
+                <i class="fa-solid fa-chevron-down rm-select-arrow"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="rm-field">
+            <label class="rm-label">Skills Required</label>
+            <div class="rm-checkbox-group">
+              <label class="rm-check-opt"><input type="checkbox" value="cleaning" /><span>General Cleaning</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="cooking" /><span>Cooking</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="laundry" /><span>Laundry &amp; Ironing</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="childcare" /><span>Child Care</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="elderlycare" /><span>Elderly Care</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="deepclean" /><span>Deep Cleaning</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="shopping" /><span>Grocery Shopping</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="petcare" /><span>Pet Care</span></label>
+            </div>
+          </div>
+
+          <div class="rm-fields-row">
+            <div class="rm-field">
+              <label class="rm-label" for="genderPref">Gender Preference</label>
+              <div class="rm-select-wrap">
+                <select class="rm-select" id="genderPref">
+                  <option value="" disabled selected>No preference</option>
+                  <option>Female only</option>
+                  <option>Male only</option>
+                  <option>No preference</option>
+                </select>
+                <i class="fa-solid fa-chevron-down rm-select-arrow"></i>
+              </div>
+            </div>
+            <div class="rm-field">
+              <label class="rm-label" for="budgetField">Monthly Budget (₦) <span class="rm-req">*</span></label>
+              <div class="rm-select-wrap">
+                <select class="rm-select" id="budgetField" required>
+                  <option value="" disabled selected>Select budget range</option>
+                  <option>₦20,000 – ₦40,000</option>
+                  <option>₦40,000 – ₦70,000</option>
+                  <option>₦70,000 – ₦100,000</option>
+                  <option>₦100,000 – ₦150,000</option>
+                  <option>₦150,000+</option>
+                </select>
+                <i class="fa-solid fa-chevron-down rm-select-arrow"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="rm-field">
+            <label class="rm-label" for="notesField">Additional Notes <span class="rm-opt">(optional)</span></label>
+            <textarea class="rm-textarea" id="notesField" rows="4" placeholder="Any special instructions, language preferences, allergies, pets, or other requirements…"></textarea>
+          </div>
+        </div>
+
+        <!-- ── STEP 4: Schedule ── -->
+        <div class="rm-step" data-step="4">
+          <h2 class="rm-step-title">When do you need them?</h2>
+          <p class="rm-step-sub">Let us know your preferred start date and interview availability.</p>
+
+          <div class="rm-fields-row">
+            <div class="rm-field">
+              <label class="rm-label" for="startDateField">Preferred Start Date <span class="rm-req">*</span></label>
+              <div class="rm-input-wrap">
+                <i class="fa-regular fa-calendar rm-input-icon"></i>
+                <input type="date" class="rm-input" id="startDateField" required />
+              </div>
+            </div>
+            <div class="rm-field">
+              <label class="rm-label" for="urgencyField">Urgency</label>
+              <div class="rm-select-wrap">
+                <select class="rm-select" id="urgencyField">
+                  <option value="" disabled selected>Select urgency</option>
+                  <option>As soon as possible</option>
+                  <option>Within 1 week</option>
+                  <option>Within 2 weeks</option>
+                  <option>Within a month</option>
+                  <option>No rush – flexible</option>
+                </select>
+                <i class="fa-solid fa-chevron-down rm-select-arrow"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="rm-field">
+            <label class="rm-label">Preferred Interview Method</label>
+            <div class="rm-radio-group">
+              <label class="rm-radio-opt">
+                <input type="radio" name="interview" value="in-person" />
+                <span class="rm-radio-box"><i class="fa-solid fa-user-check"></i> In-Person</span>
+              </label>
+              <label class="rm-radio-opt">
+                <input type="radio" name="interview" value="video" />
+                <span class="rm-radio-box"><i class="fa-solid fa-video"></i> Video Call</span>
+              </label>
+              <label class="rm-radio-opt">
+                <input type="radio" name="interview" value="phone" />
+                <span class="rm-radio-box"><i class="fa-solid fa-phone"></i> Phone Call</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="rm-field">
+            <label class="rm-label">Preferred Interview Days</label>
+            <div class="rm-checkbox-group">
+              <label class="rm-check-opt"><input type="checkbox" value="mon" /><span>Monday</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="tue" /><span>Tuesday</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="wed" /><span>Wednesday</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="thu" /><span>Thursday</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="fri" /><span>Friday</span></label>
+              <label class="rm-check-opt"><input type="checkbox" value="sat" /><span>Saturday</span></label>
+            </div>
+          </div>
+
+          <!-- Contact info -->
+          <div class="rm-divider"><span>Your Contact Details</span></div>
+
+          <div class="rm-fields-row">
+            <div class="rm-field">
+              <label class="rm-label" for="fullNameField">Full Name <span class="rm-req">*</span></label>
+              <div class="rm-input-wrap">
+                <i class="fa-regular fa-user rm-input-icon"></i>
+                <input type="text" class="rm-input" id="fullNameField" placeholder="e.g. Chioma Adeyemi" required />
+              </div>
+            </div>
+            <div class="rm-field">
+              <label class="rm-label" for="phoneField">Phone Number <span class="rm-req">*</span></label>
+              <div class="rm-input-wrap">
+                <i class="fa-solid fa-phone rm-input-icon"></i>
+                <input type="tel" class="rm-input" id="phoneField" placeholder="e.g. 08012345678" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="rm-field">
+            <label class="rm-label" for="emailField">Email Address <span class="rm-req">*</span></label>
+            <div class="rm-input-wrap">
+              <i class="fa-regular fa-envelope rm-input-icon"></i>
+              <input type="email" class="rm-input" id="emailField" placeholder="e.g. chioma@example.com" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 5: Review ── -->
+        <div class="rm-step" data-step="5">
+          <h2 class="rm-step-title">Review your request</h2>
+          <p class="rm-step-sub">Please confirm everything looks correct before submitting.</p>
+
+          <div class="rm-review-grid" id="rmReviewGrid">
+            <!-- Populated by JS -->
+          </div>
+
+          <div class="rm-review-notice">
+            <i class="fa-solid fa-circle-info"></i>
+            <p>Once submitted, a SelectRoyalMaids placement advisor will contact you within <strong>24 hours</strong> to discuss candidates that match your requirements.</p>
+          </div>
+
+          <div class="rm-field">
+            <label class="rm-check-opt rm-terms-check">
+              <input type="checkbox" id="termsCheck" required />
+              <span>I agree to the <a href="{% url 'MaidApp:terms-of-service' %}" target="_blank">Terms of Service</a> and <a href="{% url 'MaidApp:privacy-policy' %}" target="_blank">Privacy Policy</a></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- ── Step nav buttons ── -->
+        <div class="rm-step-nav">
+          <button class="rm-btn rm-btn--back" id="rmBack" disabled>
+            <i class="fa-solid fa-arrow-left"></i> Back
+          </button>
+          <div class="rm-step-indicator" id="rmStepIndicator">Step 1 of 5</div>
+          <button class="rm-btn rm-btn--next" id="rmNext">
+            Continue <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+      </div><!-- /.rm-card -->
+
+      <!-- Success state (hidden until submit) -->
+      <div class="rm-success" id="rmSuccess" hidden>
+        <div class="rm-success-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h2>Request Submitted!</h2>
+        <p>Thank you! A SelectRoyalMaids placement advisor will contact you within <strong>24 hours</strong> with matched candidates.</p>
+        <div class="rm-success-actions">
+          <a href="{% url 'MaidApp:index' %}" class="btn btn-primary btn-lg">Back to Home</a>
+          <a href="{% url 'MaidApp:index' %}#maids" class="btn btn-ghost btn-lg">Browse Maids</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/request-maid.js' %}"></script>
+{% endblock %}

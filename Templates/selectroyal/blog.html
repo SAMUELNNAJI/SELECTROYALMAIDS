@@ -1,0 +1,153 @@
+{% extends 'selectroyal/base.html' %}
+{% load static %}
+{% block title %}Blog – SelectRoyal Maids{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/blog.css' %}" />
+{% endblock %}
+
+{% block content %}
+<!-- ===== HERO ===== -->
+  <section class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="container page-hero-inner">
+      <div class="page-hero-pill"><i class="fa-regular fa-newspaper"></i> INSIGHTS & GUIDES</div>
+      <h1 class="page-hero-title">The SelectRoyal <span class="accent-light">Blog</span></h1>
+      <p class="page-hero-sub">Tips, guides, and insights for Nigerian families hiring domestic staff — and for domestic professionals building their careers.</p>
+    </div>
+  </section>
+
+  <!-- ===== FEATURED POST ===== -->
+  <section class="blog-featured-section">
+    <div class="container">
+      {% if featured %}
+      <div class="blog-featured-card" data-reveal="up">
+        <div class="blog-featured-img-wrap">
+          <img src="{{ featured.cover_image }}" alt="{{ featured.title }}" />
+          <span class="blog-cat-tag">{{ featured.get_category_display }}</span>
+        </div>
+        <div class="blog-featured-content">
+          <p class="blog-featured-label"><i class="fa-solid fa-fire"></i> Featured Article</p>
+          <h2 class="blog-featured-title">{{ featured.title }}</h2>
+          <p class="blog-featured-excerpt">{{ featured.excerpt }}</p>
+          <div class="blog-featured-meta">
+            {% if featured.author_avatar %}
+            <img src="{{ featured.author_avatar }}" alt="{{ featured.author_name }}" class="blog-meta-avatar" />
+            {% endif %}
+            <div>
+              <p class="blog-meta-author">{{ featured.author_name }}</p>
+              <p class="blog-meta-date">
+                <i class="fa-regular fa-calendar"></i>
+                {{ featured.published_at|date:"d F Y" }} &nbsp;·&nbsp;
+                <i class="fa-regular fa-clock"></i> {{ featured.read_time }} min read
+              </p>
+            </div>
+          </div>
+          <a href="{% url 'MaidApp:blog-post' featured.slug %}" class="btn btn-primary">
+            Read Article <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ===== FILTERS ===== -->
+  <section class="blog-filter-section">
+    <div class="container blog-filter-inner">
+      <div class="blog-filter-tabs" id="blogTabs">
+        <a href="?cat=all" class="blog-filter-tab {% if active_cat == 'all' %}active{% endif %}">All Posts</a>
+        {% for val, label in categories %}
+        <a href="?cat={{ val }}" class="blog-filter-tab {% if active_cat == val %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+      </div>
+      <div class="blog-search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Search articles…" class="blog-search-input" id="blogSearch" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== POSTS GRID ===== -->
+  <section class="blog-posts-section">
+    <div class="container">
+      <div class="blog-grid" data-stagger="100">
+
+        {% for post in page_obj %}
+        <article class="blog-card">
+          <div class="blog-card-img-wrap">
+            {% if post.cover_image %}
+            <img src="{{ post.cover_image }}" alt="{{ post.title }}" loading="lazy" />
+            {% endif %}
+            <span class="blog-card-tag">{{ post.get_category_display }}</span>
+          </div>
+          <div class="blog-card-body">
+            <h3 class="blog-card-title">{{ post.title }}</h3>
+            <p class="blog-card-excerpt">{{ post.excerpt }}</p>
+            <div class="blog-card-meta">
+              {% if post.author_avatar %}
+              <img src="{{ post.author_avatar }}" alt="{{ post.author_name }}" />
+              {% endif %}
+              <div>
+                <p class="blog-card-author">{{ post.author_name }}</p>
+                <p class="blog-card-date">
+                  {{ post.published_at|date:"d M Y" }} · {{ post.read_time }} min read
+                </p>
+              </div>
+            </div>
+            <a href="{% url 'MaidApp:blog-post' post.slug %}"
+               style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--accent-primary,#2563eb);margin-top:10px;text-decoration:none;">
+              Read more <i class="fa-solid fa-arrow-right" style="font-size:.75rem;"></i>
+            </a>
+          </div>
+        </article>
+        {% empty %}
+        <p style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b;">
+          No posts found in this category.
+        </p>
+        {% endfor %}
+
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <div class="blog-pagination" data-reveal="up">
+        {% if page_obj.has_previous %}
+          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}page={{ page_obj.previous_page_number }}"
+             class="blog-page-btn">‹</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}page={{ num }}"
+             class="blog-page-btn {% if num == page_obj.number %}blog-page-btn--active{% endif %}">{{ num }}</a>
+        {% endfor %}
+        {% if page_obj.has_next %}
+          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}page={{ page_obj.next_page_number }}"
+             class="blog-next btn-next">Next <i class="fa-solid fa-arrow-right"></i></a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    </div>
+  </section>
+
+  <!-- ===== NEWSLETTER ===== -->
+  <section class="blog-newsletter-section">
+    <div class="blog-newsletter-inner" data-reveal="scale-up">
+      <div class="container">
+        <div class="blog-nl-icon"><i class="fa-regular fa-envelope"></i></div>
+        <h2 class="blog-nl-title">Get the Latest Tips in Your Inbox</h2>
+        <p class="blog-nl-sub">Join 5,000+ Nigerian families and domestic professionals who get our weekly hiring and career tips.</p>
+        <form class="blog-nl-form" onsubmit="return false;">
+          <input type="email" placeholder="Enter your email address" class="blog-nl-input" />
+          <button type="submit" class="btn btn-primary">Subscribe <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
+        <p class="blog-nl-note"><i class="fa-solid fa-lock"></i> No spam. Unsubscribe at any time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/nav.js' %}"></script>
+{% endblock %}

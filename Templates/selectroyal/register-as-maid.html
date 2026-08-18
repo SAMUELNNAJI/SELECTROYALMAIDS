@@ -1,0 +1,56 @@
+{% extends 'selectroyal/base.html' %}
+{% load static %}
+{% block title %}Register as a Maid | SelectRoyal Maids{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/register-as-maid.css' %}" />{% endblock %}
+
+{% block content %}
+<section class="ram-hero">
+  <div class="container">
+    <span class="ram-eyebrow"><i class="fa-solid fa-id-badge"></i> JOIN SELECTROYAL MAIDS</span>
+    <h1>Build a profile employers can <span>trust.</span></h1>
+    <p>Tell us about your experience, skills and availability. Our team will review your application and guide you through verification.</p>
+  </div>
+</section>
+
+<section class="ram-section">
+  <div class="container ram-layout">
+    <aside class="ram-aside">
+      <div class="ram-aside-card">
+        <div class="ram-step-number">1</div><div><strong>Create your profile</strong><span>Share the details employers need.</span></div>
+        <div class="ram-step-number">2</div><div><strong>Get verified</strong><span>We check your identity and references.</span></div>
+        <div class="ram-step-number">3</div><div><strong>Meet employers</strong><span>Receive suitable interview requests.</span></div>
+      </div>
+      <div class="ram-note"><i class="fa-solid fa-shield-halved"></i><p><strong>Your details stay protected.</strong><br />Your NIN is used only by our verification team and is never displayed publicly.</p></div>
+    </aside>
+
+    <div class="ram-card">
+      {% if messages %}{% for message in messages %}<div class="ram-success"><i class="fa-solid fa-circle-check"></i> {{ message }}</div>{% endfor %}{% endif %}
+      <div class="ram-card-heading"><h2>Create your maid profile</h2><p>Fields marked <b>*</b> are required.</p></div>
+      <form method="post" enctype="multipart/form-data" class="ram-form">
+        {% csrf_token %}
+        <fieldset><legend><i class="fa-regular fa-user"></i> Personal details</legend>
+          <div class="ram-grid"><label>First name *<input name="first_name" required autocomplete="given-name" /></label><label>Last name *<input name="last_name" required autocomplete="family-name" /></label>
+          <label>Email address *<input type="email" name="email" required autocomplete="email" /></label><label>Phone number *<input type="tel" name="phone" required placeholder="e.g. 0801 234 5678" /></label>
+          <label>Date of birth *<input type="date" name="date_of_birth" required /></label><label>Gender *<select name="gender" required><option value="" selected disabled>Select gender</option><option>Female</option><option>Male</option></select></label></div>
+          <label class="ram-full">Profile photo <span>(optional)</span><input type="file" name="profile_photo" accept="image/*" /></label>
+        </fieldset>
+        <fieldset><legend><i class="fa-solid fa-briefcase"></i> Work profile</legend>
+          <div class="ram-grid"><label>Professional role *<select name="role" required><option value="" selected disabled>Select your role</option><option value="maid">Maid / House Help</option><option value="cook">Cook / Chef</option><option value="nanny">Nanny / Babysitter</option><option value="caregiver">Caregiver</option><option value="driver">Driver</option></select></label>
+          <label>Preferred work type *<select name="work_type" required><option value="" selected disabled>Select work type</option><option value="live_in">Live-in</option><option value="live_out">Live-out</option><option value="both">Live-in or Live-out</option></select></label>
+          <label>Years of experience *<input type="number" name="years_experience" min="0" max="60" required /></label><label>Available to start *<select name="availability" required><option value="" selected disabled>Select availability</option><option>Immediately</option><option>Within 1 week</option><option>Within 2 weeks</option><option>Within 1 month</option></select></label>
+          <label>Expected monthly salary *<input name="expected_salary" required placeholder="e.g. ₦120,000 – ₦150,000" /></label><label>Languages spoken *<input name="languages" required placeholder="e.g. English, Yoruba, Igbo" /></label></div>
+          <label class="ram-full">Skills & specialisations *<textarea name="skills" required placeholder="e.g. Housekeeping, Nigerian cooking, childcare, laundry and ironing"></textarea></label>
+          <label class="ram-full">About you *<textarea name="bio" required placeholder="Briefly describe your experience, strengths and the kind of work you enjoy."></textarea></label>
+        </fieldset>
+        <fieldset><legend><i class="fa-solid fa-location-dot"></i> Location & verification</legend>
+          <div class="ram-grid"><label>State *<select name="state" required><option value="" selected disabled>Select state</option><option>Lagos</option><option>Abuja (FCT)</option><option>Rivers</option><option>Oyo</option><option>Ogun</option><option>Other</option></select></label><label>City / area *<input name="city" required placeholder="e.g. Lekki, Lagos" /></label>
+          <label>NIN (11 digits) *<input name="nin" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required placeholder="Used for verification only" /></label><label>Reference name *<input name="reference_name" required placeholder="Former employer or referee" /></label>
+          <label>Reference phone number *<input type="tel" name="reference_phone" required /></label></div>
+        </fieldset>
+        <label class="ram-consent"><input type="checkbox" required /> <span>I confirm that the information provided is accurate and I agree to the verification process.</span></label>
+        <button class="btn btn-primary ram-submit" type="submit">Submit application <i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

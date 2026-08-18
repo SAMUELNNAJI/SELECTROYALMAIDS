@@ -1,0 +1,97 @@
+/* ===================================================
+   LOGIN PAGE  –  page-specific styles
+   =================================================== */
+
+/* Login-specific overrides */
+.auth-page { min-height: 100vh; }
+.auth-right-inner { max-width: 420px; }
+
+.af-input { padding: 12px 12px 12px 36px; }
+
+/* Select arrow (login uses cf- prefix from original template) */
+.cf-select-arrow { position: absolute; right: 14px; color: #94a3b8; font-size: 12px; pointer-events: none; }
+
+/* Remember me row */
+.login-remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.login-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+  cursor: pointer;
+}
+.login-remember input { accent-color: #2563eb; width: 15px; height: 15px; }
+.login-forgot {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+}
+.login-forgot:hover { text-decoration: underline; }
+
+/* Signup link row */
+.login-signup-row {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 4px;
+}
+.login-signup-row a {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+.login-signup-row a:hover { text-decoration: underline; }
+
+/* Account type tabs */
+.login-type-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.login-type-tab {
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.login-type-tab + .login-type-tab { border-left: 1.5px solid #e2e8f0; }
+.login-type-tab.active { background: #2563eb; color: #fff; }
+.login-type-tab:hover:not(.active) { background: #f8fafc; }
+
+/* Forgot password panel */
+.forgot-panel { display: none; }
+.forgot-back {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding: 0;
+}
+.forgot-back:hover { text-decoration: underline; }

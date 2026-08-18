@@ -1,0 +1,191 @@
+{% extends 'selectroyal/base.html' %}
+{% load static %}
+{% block title %}Refund Policy – SelectRoyal Maids{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/policy.css' %}" />
+{% endblock %}
+
+{% block content %}
+<!-- ===== PAGE HERO ===== -->
+  <section class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="container page-hero-inner">
+      <div class="page-hero-pill"><i class="fa-solid fa-rotate-left"></i> SATISFACTION GUARANTEED</div>
+      <h1 class="page-hero-title">Refund <span class="accent-light">Policy</span></h1>
+      <p class="page-hero-sub">We want you to be completely satisfied with our service. Here's everything you need to know about refunds and replacements.</p>
+      <p class="page-hero-meta"><i class="fa-regular fa-calendar"></i> Last updated: January 2026</p>
+    </div>
+  </section>
+
+  <!-- ===== CONTENT ===== -->
+  <section class="policy-section">
+    <div class="container policy-layout">
+
+      <!-- Sidebar TOC -->
+      <aside class="policy-toc">
+        <p class="policy-toc-title">On This Page</p>
+        <ul>
+          <li><a href="#overview">Overview <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+          <li><a href="#replacement">Replacement Guarantee <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+          <li><a href="#eligible">Eligible Refund Scenarios <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+          <li><a href="#non-refundable">Non-Refundable Situations <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+          <li><a href="#process">How to Request a Refund <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+          <li><a href="#timeline">Refund Timeline <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+          <li><a href="#partial">Partial Refunds <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+          <li><a href="#disputes">Disputes <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+          <li><a href="#contact-refund">Contact Us <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+        </ul>
+      </aside>
+
+      <!-- Main content -->
+      <div class="policy-content">
+
+        <div class="policy-block" id="overview">
+          <h2><i class="fa-solid fa-circle-info"></i> Overview</h2>
+          <p>At SelectRoyal Maids, we are committed to providing a service you can trust. Our refund policy is designed to be fair to both employers and domestic professionals while protecting the integrity of the placement process.</p>
+          <p>All fees paid to SelectRoyal Maids are for our placement and intermediary services — not for the employment of any individual. The terms below govern when refunds or replacements are available.</p>
+          <div class="policy-notice policy-notice--blue">
+            <i class="fa-solid fa-info-circle"></i>
+            <p>In most cases, we offer a <strong>free replacement</strong> before a monetary refund. A replacement is typically faster and more practical for employers needing immediate help.</p>
+          </div>
+        </div>
+
+        <div class="policy-block" id="replacement">
+          <h2><i class="fa-solid fa-arrows-rotate"></i> Replacement Guarantee</h2>
+          <p>All placements made through SelectRoyal Maids come with our <strong>Replacement Guarantee</strong>. If your hired candidate does not work out within the guarantee period, we will find you a suitable replacement at no additional charge.</p>
+
+          <h3>Guarantee Periods by Service Type</h3>
+          <div class="policy-table-wrap">
+            <table class="policy-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Guarantee Period</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Maid / House Help (Live-in)</td><td>30 days</td></tr>
+                <tr><td>Maid / House Help (Live-out)</td><td>14 days</td></tr>
+                <tr><td>Cook / Chef</td><td>21 days</td></tr>
+                <tr><td>Baby Sitter / Nanny</td><td>21 days</td></tr>
+                <tr><td>Driver</td><td>14 days</td></tr>
+                <tr><td>Elderly Care</td><td>30 days</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>The guarantee period begins on the candidate's first official day of employment. To activate the replacement guarantee, you must notify us within the period above.</p>
+        </div>
+
+        <div class="policy-block" id="eligible">
+          <h2><i class="fa-solid fa-circle-check"></i> Eligible Refund Scenarios</h2>
+          <p>A full or partial monetary refund may be issued in the following circumstances:</p>
+          <ul>
+            <li><strong>No Suitable Replacement Found</strong> — If we are unable to provide a suitable replacement within 21 business days after you activate the guarantee.</li>
+            <li><strong>Candidate Misrepresentation</strong> — If a candidate is found to have materially misrepresented their identity, qualifications, or experience and we cannot provide a replacement.</li>
+            <li><strong>Failed Verification</strong> — If a candidate passes our screening but is later found to have a serious undisclosed criminal record that we failed to detect.</li>
+            <li><strong>Duplicate Payment</strong> — If you were charged more than once for the same placement due to a system error.</li>
+            <li><strong>Cancelled Before Match</strong> — If you paid a placement fee and we have not yet matched you with any candidates, a full refund is available within 7 days of payment.</li>
+          </ul>
+        </div>
+
+        <div class="policy-block" id="non-refundable">
+          <h2><i class="fa-solid fa-circle-xmark"></i> Non-Refundable Situations</h2>
+          <p>Refunds will <strong>not</strong> be issued in the following circumstances:</p>
+          <ul>
+            <li>The guarantee period has expired at the time of the complaint.</li>
+            <li>The candidate was dismissed due to personal disagreements, personality conflicts, or changed household circumstances unrelated to performance.</li>
+            <li>The employer changed their requirements after placement (e.g. different duties, hours, or location).</li>
+            <li>The employer failed to provide reasonable working conditions as agreed.</li>
+            <li>The complaint was not submitted through our official support channels.</li>
+            <li>The placement fee was paid more than 90 days ago.</li>
+            <li>The employer violated the candidate's rights or our Terms of Service.</li>
+          </ul>
+          <div class="policy-notice policy-notice--orange">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <p>Platform subscription fees, consultation fees, and profile promotion fees are non-refundable once services have been rendered.</p>
+          </div>
+        </div>
+
+        <div class="policy-block" id="process">
+          <h2><i class="fa-regular fa-paper-plane"></i> How to Request a Refund</h2>
+          <p>To request a refund or activate the replacement guarantee, follow these steps:</p>
+          <ol>
+            <li>Contact our support team within the applicable guarantee period.</li>
+            <li>Provide your account email, placement reference number, and a clear description of the issue.</li>
+            <li>Our team will review your request within <strong>3 business days</strong>.</li>
+            <li>If a replacement is appropriate, we will begin sourcing within 5 business days.</li>
+            <li>If a monetary refund is approved, it will be processed within the timeline below.</li>
+          </ol>
+          <p>You can reach our support team via:</p>
+          <ul>
+            <li>Email: <strong>support@selectroyalmaids.ng</strong></li>
+            <li>Phone: <strong>+234 913 789 4958</strong> (Mon–Fri, 8am–6pm)</li>
+            <li>In-platform: Use the "Help & Support" section in your account dashboard</li>
+          </ul>
+        </div>
+
+        <div class="policy-block" id="timeline">
+          <h2><i class="fa-regular fa-clock"></i> Refund Timeline</h2>
+          <p>Once a refund is approved, processing times are as follows:</p>
+          <div class="policy-table-wrap">
+            <table class="policy-table">
+              <thead>
+                <tr>
+                  <th>Payment Method</th>
+                  <th>Refund Timeline</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Bank Transfer (Nigerian Banks)</td><td>3–5 business days</td></tr>
+                <tr><td>Debit / Credit Card</td><td>5–10 business days</td></tr>
+                <tr><td>Mobile Money (e.g. OPay, PalmPay)</td><td>2–3 business days</td></tr>
+                <tr><td>Platform Wallet Credit</td><td>Within 24 hours</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Refunds are always returned to the original payment method used. We cannot redirect refunds to a different account.</p>
+        </div>
+
+        <div class="policy-block" id="partial">
+          <h2><i class="fa-solid fa-percent"></i> Partial Refunds</h2>
+          <p>In certain situations, we may issue a partial refund based on the proportion of service already rendered. For example:</p>
+          <ul>
+            <li>If you activate the replacement guarantee but a replacement is found, no monetary refund is issued — the replacement is your remedy.</li>
+            <li>If you cancel a multi-placement package after one placement has been completed, a partial refund may apply to the unused portion.</li>
+            <li>Partial refund amounts are calculated at our discretion based on the circumstances and value of services already provided.</li>
+          </ul>
+        </div>
+
+        <div class="policy-block" id="disputes">
+          <h2><i class="fa-solid fa-scale-balanced"></i> Disputes</h2>
+          <p>If you disagree with a refund decision made by our team, you may escalate the matter as follows:</p>
+          <ul>
+            <li>Submit a formal dispute in writing to <strong>disputes@selectroyalmaids.ng</strong> within 14 days of the initial decision.</li>
+            <li>Our senior management team will review the dispute within 10 business days.</li>
+            <li>If still unresolved, the dispute may be referred to mediation under Nigerian law.</li>
+          </ul>
+          <p>We are committed to resolving all disputes fairly and promptly. Our goal is always a satisfactory outcome for both parties.</p>
+        </div>
+
+        <div class="policy-block" id="contact-refund">
+          <h2><i class="fa-regular fa-envelope"></i> Contact Us</h2>
+          <p>For all refund and replacement enquiries:</p>
+          <ul>
+            <li>Email: <strong>support@selectroyalmaids.ng</strong></li>
+            <li>Phone: <strong>+234 913 789 4958</strong></li>
+            <li>Hours: Monday – Friday, 8:00am – 6:00pm WAT</li>
+            <li>Address: 14 Victoria Island, Lagos, Nigeria</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/nav.js' %}"></script>
+{% endblock %}

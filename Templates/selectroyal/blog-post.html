@@ -1,0 +1,277 @@
+{% extends 'selectroyal/base.html' %}
+{% load static %}
+{% block title %}{{ post.title }} – SelectRoyal Maids{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/blog-post.css' %}" />
+{% endblock %}
+
+{% block content %}
+<!-- ===== POST HERO ===== -->
+  <section class="post-hero">
+    <div class="post-hero-bg"></div>
+    <div class="container post-hero-inner">
+      <nav class="post-breadcrumb" aria-label="breadcrumb">
+        <a href="{% url 'MaidApp:index' %}"><i class="fa-solid fa-house"></i></a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <a href="{% url 'MaidApp:blog' %}">Blog</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>{{ post.get_category_display }}</span>
+      </nav>
+
+      <div class="post-hero-tag">
+        <i class="fa-solid fa-tag"></i> {{ post.get_category_display }}
+      </div>
+
+      <h1 class="post-hero-title">{{ post.title }}</h1>
+      <p class="post-hero-excerpt">{{ post.excerpt }}</p>
+
+      <div class="post-hero-meta">
+        {% if post.author_avatar %}
+        <img src="{{ post.author_avatar }}" alt="{{ post.author_name }}" class="post-hero-avatar" />
+        {% endif %}
+        <div class="post-hero-meta-text">
+          <p class="post-hero-author">{{ post.author_name }}</p>
+          <p class="post-hero-meta-sub">
+            <span><i class="fa-regular fa-calendar"></i> {{ post.published_at|date:"d F Y" }}</span>
+            <span class="post-meta-dot">·</span>
+            <span><i class="fa-regular fa-clock"></i> {{ post.read_time }} min read</span>
+            <span class="post-meta-dot">·</span>
+            <span><i class="fa-regular fa-eye"></i> {{ post.views }} views</span>
+          </p>
+        </div>
+        <div class="post-hero-share">
+          <span class="post-share-label">Share:</span>
+          <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+             target="_blank" rel="noopener" class="post-share-btn" aria-label="Share on Facebook">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+          <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title|urlencode }}"
+             target="_blank" rel="noopener" class="post-share-btn" aria-label="Share on Twitter/X">
+            <i class="fa-brands fa-x-twitter"></i>
+          </a>
+          <a href="https://api.whatsapp.com/send?text={{ post.title|urlencode }}%20{{ request.build_absolute_uri }}"
+             target="_blank" rel="noopener" class="post-share-btn" aria-label="Share on WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i>
+          </a>
+          <a href="#" class="post-share-btn js-copy-link" aria-label="Copy link">
+            <i class="fa-solid fa-link"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COVER IMAGE ===== -->
+  {% if post.cover_image %}
+  <div class="post-cover-wrap container">
+    <img src="{{ post.cover_image }}" alt="{{ post.title }}" class="post-cover-img" />
+  </div>
+  {% endif %}
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <section class="post-body-section">
+    <div class="container post-body-layout">
+
+      <!-- ── LEFT: Article ── -->
+      <article class="post-article" data-reveal="up">
+        <div class="post-content">
+          {{ post.content|safe }}
+        </div>
+
+        <!-- Tags -->
+        {% if post.tags_list %}
+        <div class="post-tags">
+          <span class="post-tags-label">Tags:</span>
+          {% for tag in post.tags_list %}
+          <a href="{% url 'MaidApp:blog' %}" class="post-tag">{{ tag }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Share bar -->
+        <div class="post-share-bar">
+          <p class="post-share-bar-label">Found this helpful? Share it:</p>
+          <div class="post-share-bar-btns">
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+               target="_blank" rel="noopener" class="post-share-bar-btn post-share-bar-btn--fb">
+              <i class="fa-brands fa-facebook-f"></i> Facebook
+            </a>
+            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title|urlencode }}"
+               target="_blank" rel="noopener" class="post-share-bar-btn post-share-bar-btn--x">
+              <i class="fa-brands fa-x-twitter"></i> Twitter/X
+            </a>
+            <a href="https://api.whatsapp.com/send?text={{ post.title|urlencode }}%20{{ request.build_absolute_uri }}"
+               target="_blank" rel="noopener" class="post-share-bar-btn post-share-bar-btn--wa">
+              <i class="fa-brands fa-whatsapp"></i> WhatsApp
+            </a>
+            <a href="#" class="post-share-bar-btn post-share-bar-btn--copy js-copy-link">
+              <i class="fa-solid fa-link"></i> Copy Link
+            </a>
+          </div>
+        </div>
+
+        <!-- Author bio -->
+        {% if post.author_name %}
+        <div class="post-author-bio">
+          {% if post.author_avatar %}
+          <img src="{{ post.author_avatar }}" alt="{{ post.author_name }}" class="post-author-bio-avatar" />
+          {% endif %}
+          <div class="post-author-bio-text">
+            <p class="post-author-bio-name">{{ post.author_name }}</p>
+            <p class="post-author-bio-role">Contributor, SelectRoyal Maids</p>
+            {% if post.author_bio %}
+            <p class="post-author-bio-desc">{{ post.author_bio }}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </article>
+
+      <!-- ── RIGHT: Sidebar ── -->
+      <aside class="post-sidebar" data-reveal="right" data-delay="200">
+
+        <!-- CTA -->
+        <div class="post-sidebar-cta">
+          <div class="post-sidebar-cta-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3>Hire Verified Staff Today</h3>
+          <p>Every professional on SelectRoyal Maids is NIN-verified, background-checked, and reference-confirmed.</p>
+          <a href="{% url 'MaidApp:find-a-maid' %}" class="btn btn-primary w-full">
+            Browse Maids <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <a href="{% url 'MaidApp:how-it-works' %}" class="btn btn-outline w-full" style="margin-top:10px;">
+            How It Works
+          </a>
+        </div>
+
+        <!-- Reading progress -->
+        <div class="post-sidebar-card">
+          <h3 class="post-sidebar-card-title"><i class="fa-regular fa-clock"></i> Reading Time</h3>
+          <div class="post-read-progress">
+            <div class="post-read-bar" id="readBar"></div>
+          </div>
+          <p class="post-read-label" id="readLabel">0% complete · {{ post.read_time }} min left</p>
+        </div>
+
+        <!-- Related posts -->
+        {% if related %}
+        <div class="post-sidebar-card">
+          <h3 class="post-sidebar-card-title"><i class="fa-solid fa-newspaper"></i> Related Articles</h3>
+          <div class="post-sidebar-related">
+            {% for rel in related %}
+            <a href="{% url 'MaidApp:blog-post' rel.slug %}" class="post-sidebar-rel-item">
+              {% if rel.cover_image %}
+              <img src="{{ rel.cover_image }}" alt="{{ rel.title }}" />
+              {% endif %}
+              <div>
+                <p>{{ rel.title|truncatechars:60 }}</p>
+                <span>{{ rel.read_time }} min read</span>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===== RELATED POSTS ===== -->
+  {% if related %}
+  <section class="post-related-section">
+    <div class="container">
+      <div class="post-related-header" data-reveal="up">
+        <div>
+          <p class="post-related-eyebrow"><i class="fa-solid fa-layer-group"></i> Keep Reading</p>
+          <h2 class="post-related-title">More Articles You'll Find Useful</h2>
+        </div>
+        <a href="{% url 'MaidApp:blog' %}" class="btn btn-outline btn-sm">
+          View All <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="blog-grid" data-stagger="120">
+        {% for rel in related %}
+        <article class="blog-card">
+          <div class="blog-card-img-wrap">
+            {% if rel.cover_image %}
+            <img src="{{ rel.cover_image }}" alt="{{ rel.title }}" loading="lazy" />
+            {% endif %}
+            <span class="blog-card-tag">{{ rel.get_category_display }}</span>
+          </div>
+          <div class="blog-card-body">
+            <h3 class="blog-card-title">{{ rel.title }}</h3>
+            <p class="blog-card-excerpt">{{ rel.excerpt|truncatechars:120 }}</p>
+            <div class="blog-card-meta">
+              {% if rel.author_avatar %}
+              <img src="{{ rel.author_avatar }}" alt="{{ rel.author_name }}" />
+              {% endif %}
+              <div>
+                <p class="blog-card-author">{{ rel.author_name }}</p>
+                <p class="blog-card-date">{{ rel.published_at|date:"d M Y" }} · {{ rel.read_time }} min read</p>
+              </div>
+            </div>
+            <a href="{% url 'MaidApp:blog-post' rel.slug %}"
+               style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:#2563eb;margin-top:10px;text-decoration:none;">
+              Read more <i class="fa-solid fa-arrow-right" style="font-size:.75rem;"></i>
+            </a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===== NEWSLETTER ===== -->
+  <section class="blog-newsletter-section">
+    <div class="blog-newsletter-inner">
+      <div class="container">
+        <div class="blog-nl-icon"><i class="fa-regular fa-envelope"></i></div>
+        <h2 class="blog-nl-title">Get the Latest Tips in Your Inbox</h2>
+        <p class="blog-nl-sub">Join 5,000+ Nigerian families and domestic professionals who get our weekly hiring and career tips.</p>
+        <form class="blog-nl-form" onsubmit="return false;">
+          <input type="email" placeholder="Enter your email address" class="blog-nl-input" />
+          <button type="submit" class="btn btn-primary">Subscribe <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
+        <p class="blog-nl-note"><i class="fa-solid fa-lock"></i> No spam. Unsubscribe at any time.</p>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/nav.js' %}"></script>
+<script>
+  // Reading progress bar
+  window.addEventListener('scroll', function () {
+    var article = document.querySelector('.post-article');
+    if (!article) return;
+    var articleTop    = article.getBoundingClientRect().top + window.scrollY;
+    var articleHeight = article.offsetHeight;
+    var scrolled      = window.scrollY - articleTop;
+    var progress      = Math.max(0, Math.min(100, (scrolled / articleHeight) * 100));
+    var bar   = document.getElementById('readBar');
+    var label = document.getElementById('readLabel');
+    if (bar)   bar.style.width = progress + '%';
+    if (label) {
+      var minsLeft = Math.max(0, Math.round({{ post.read_time }} * (1 - progress / 100)));
+      label.textContent = Math.round(progress) + '% complete · ' + (minsLeft > 0 ? minsLeft + ' min left' : 'Done!');
+    }
+  });
+
+  // Copy link buttons
+  document.querySelectorAll('.js-copy-link').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      navigator.clipboard.writeText(window.location.href).then(function () {
+        var original = btn.innerHTML;
+        btn.innerHTML = btn.classList.contains('post-share-bar-btn--copy')
+          ? '<i class="fa-solid fa-check"></i> Copied!'
+          : '<i class="fa-solid fa-check"></i>';
+        setTimeout(function () { btn.innerHTML = original; }, 2000);
+      });
+    });
+  });
+</script>
+{% endblock %}

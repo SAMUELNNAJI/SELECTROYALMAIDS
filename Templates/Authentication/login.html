@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login – SelectRoyalMaids</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Mobile logo bar -->
+  <a href="{% url 'MaidApp:index' %}" class="auth-page-mobile-logo">
+    <img src="{% static 'image/logo.png' %}" alt="SelectRoyalMaids" class="auth-mobile-logo-img" />
+    <div class="logo-text-wrap">
+      <span class="logo-text"><span class="logo-accent">SelectRoyal</span></span>
+      <span class="logo-sub">MAIDS</span>
+    </div>
+  </a>
+
+  <div class="auth-page">
+
+    <!-- ===== LEFT PANEL ===== -->
+    <div class="auth-left">
+      <div class="auth-circle auth-circle--1"></div>
+      <div class="auth-circle auth-circle--2"></div>
+
+      <a href="{% url 'MaidApp:index' %}" class="auth-left-logo">
+        <img src="{% static 'image/logo.png' %}" alt="SelectRoyalMaids" class="auth-left-logo-img" />
+        <div class="auth-logo-text">
+          <strong>SelectRoyalMaids</strong>
+          <span>Nigeria's Trusted Platform</span>
+        </div>
+      </a>
+
+      <div class="auth-left-body">
+        <div class="auth-left-tag"><i class="fa-solid fa-star"></i> Welcome Back</div>
+        <h2 class="auth-left-title">Your Trusted Home<br /><span>Help Awaits</span></h2>
+        <p class="auth-left-desc">Log back in to manage your profile, browse new candidates, chat with your placement advisor, and track your active staff.</p>
+
+        <div class="auth-benefits">
+          <div class="auth-benefit">
+            <div class="auth-benefit-icon"><i class="fa-solid fa-users"></i></div>
+            <div class="auth-benefit-text">
+              <strong>Browse 2,500+ Verified Maids</strong>
+              <span>All background-checked and NIN verified</span>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <div class="auth-benefit-icon"><i class="fa-regular fa-message"></i></div>
+            <div class="auth-benefit-text">
+              <strong>Chat With Your Advisor</strong>
+              <span>Get personalised help from a real placement specialist</span>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <div class="auth-benefit-icon"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="auth-benefit-text">
+              <strong>Schedule Interviews</strong>
+              <span>Book in-person or video interviews in seconds</span>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <div class="auth-benefit-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="auth-benefit-text">
+              <strong>Track All Your Placements</strong>
+              <span>View history, ratings, and renewal reminders</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-left-footer">
+        <div class="auth-testimonial">
+          <p class="auth-testimonial-text">"I've been using SelectRoyalMaids for 2 years. Logging back in each time feels like returning to a service that genuinely cares about my family's needs."</p>
+          <div class="auth-testimonial-author">
+            <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Emeka Nwachukwu" />
+            <div>
+              <p class="auth-testimonial-name">Emeka Nwachukwu</p>
+              <p class="auth-testimonial-loc"><i class="fa-solid fa-location-dot" style="font-size:10px;color:#93c5fd;margin-right:3px"></i> Port Harcourt, Nigeria</p>
+            </div>
+            <div class="auth-testimonial-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RIGHT PANEL ===== -->
+    <div class="auth-right">
+      <div class="auth-right-inner">
+
+        <!-- LOGIN FORM -->
+        <div id="loginPanel">
+
+          <div class="auth-form-header">
+            <div class="auth-form-tag"><i class="fa-solid fa-right-to-bracket"></i> Sign In</div>
+            <h1 class="auth-form-title">Welcome Back</h1>
+            <p class="auth-form-sub">Don't have an account? <a href="{% url 'Authentication:signup' %}">Create one free</a></p>
+          </div>
+
+          <!-- Error box -->
+          <div class="af-error" id="loginError">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="loginErrorText"></span>
+          </div>
+
+          <form id="loginForm" method="post" action="{% url 'Authentication:login' %}" novalidate>
+            {% csrf_token %}
+            <div class="af-field">
+              <label class="af-label" for="loginEmail">Email Address or Username</label>
+              <div class="af-wrap">
+                <i class="fa-regular fa-envelope af-icon"></i>
+                <input type="text" id="loginEmail" name="email" class="af-input" placeholder="you@example.com or username" autocomplete="username" required />
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="loginPassword">Password</label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-lock af-icon"></i>
+                <input type="password" id="loginPassword" name="password" class="af-input" placeholder="Your password" autocomplete="current-password" required />
+                <button type="button" class="af-eye" id="toggleLoginPwd" aria-label="Toggle password">
+                  <i class="fa-regular fa-eye" id="loginEyeIcon"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="login-remember-row">
+              <label class="login-remember">
+                <input type="checkbox" id="rememberMe" name="remember" />
+                Remember me for 30 days
+              </label>
+              <a href="#" class="login-forgot" id="forgotLink">Forgot password?</a>
+            </div>
+
+            {% if request.GET.next %}
+              <input type="hidden" name="next" value="{{ request.GET.next }}" />
+            {% endif %}
+
+            <button type="submit" class="af-submit" id="loginBtn">
+              <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </button>
+          </form>
+
+          {% if messages %}
+            <div class="af-error" style="display:flex;">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span>{% for message in messages %}{{ message }}{% endfor %}</span>
+            </div>
+          {% endif %}
+
+          <div class="login-signup-row">
+            New to SelectRoyalMaids? <a href="{% url 'Authentication:signup' %}">Create a free account</a>
+          </div>
+
+          <div class="af-trust-row">
+            <div class="af-trust-item"><i class="fa-solid fa-lock"></i> SSL Encrypted</div>
+            <div class="af-trust-item"><i class="fa-solid fa-shield-halved"></i> 100% Secure</div>
+            <div class="af-trust-item"><i class="fa-solid fa-eye-slash"></i> Privacy Protected</div>
+          </div>
+
+        </div><!-- /#loginPanel -->
+
+        <!-- FORGOT PASSWORD PANEL -->
+        <div id="forgotPanel" class="forgot-panel">
+          <button class="forgot-back" id="backToLogin">
+            <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+          </button>
+
+          <div class="auth-form-header">
+            <div class="auth-form-tag"><i class="fa-solid fa-key"></i> Reset Password</div>
+            <h1 class="auth-form-title">Forgot Password?</h1>
+            <p class="auth-form-sub">Enter your email and we'll send a reset link within 2 minutes.</p>
+          </div>
+
+          <div class="af-error" id="forgotError">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="forgotErrorText"></span>
+          </div>
+
+          <div id="forgotForm">
+            <div class="af-field">
+              <label class="af-label" for="forgotEmail">Email Address</label>
+              <div class="af-wrap">
+                <i class="fa-regular fa-envelope af-icon"></i>
+                <input type="email" id="forgotEmail" class="af-input" placeholder="you@example.com" />
+              </div>
+            </div>
+            <button type="button" class="af-submit" id="forgotSubmit">
+              <i class="fa-regular fa-paper-plane"></i> Send Reset Link
+            </button>
+          </div>
+
+          <div id="forgotSuccess" style="display:none;text-align:center;padding:16px 0">
+            <div style="font-size:48px;color:#16a34a;margin-bottom:12px"><i class="fa-regular fa-envelope-open"></i></div>
+            <h3 style="font-size:18px;font-weight:800;color:#1e293b;margin-bottom:8px">Check Your Email</h3>
+            <p style="font-size:14px;color:#64748b;line-height:1.65">We've sent a password reset link to your email. Check your inbox (and spam folder just in case).</p>
+          </div>
+        </div><!-- /#forgotPanel -->
+
+        <!-- SUCCESS PANEL -->
+        <div id="loginSuccess" style="display:none;text-align:center;padding:20px 0">
+          <div style="font-size:60px;color:#16a34a;margin-bottom:16px"><i class="fa-solid fa-circle-check"></i></div>
+          <h2 style="font-size:22px;font-weight:800;color:#1e293b;margin-bottom:8px">Welcome Back!</h2>
+          <p style="font-size:14px;color:#64748b;line-height:1.65;margin-bottom:24px">You're signed in. Redirecting you to your dashboard…</p>
+          <div style="width:48px;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;margin:0 auto">
+            <div id="redirectBar" style="height:100%;width:0%;background:#2563eb;border-radius:2px;transition:width 1.8s linear"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  (function () {
+
+    /* ---- Toggle password ---- */
+    document.getElementById('toggleLoginPwd').addEventListener('click', function () {
+      var inp = document.getElementById('loginPassword');
+      var ico = document.getElementById('loginEyeIcon');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      ico.className = inp.type === 'password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+    });
+
+    /* ---- Error helper ---- */
+    function showErr(boxId, txtId, msg) {
+      document.getElementById(txtId).textContent = msg;
+      var box = document.getElementById(boxId);
+      box.style.display = 'flex';
+      setTimeout(function () { box.style.display = 'none'; }, 5000);
+    }
+
+    /* ---- Login form ---- */
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      var em = document.getElementById('loginEmail').value.trim();
+      var pw = document.getElementById('loginPassword').value;
+      if (!em) {
+        showErr('loginError','loginErrorText','Please enter your email address or username.'); e.preventDefault(); return;
+      }
+      if (pw.length < 6) {
+        showErr('loginError','loginErrorText','Please enter your password.'); e.preventDefault(); return;
+      }
+      var btn = document.getElementById('loginBtn');
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Signing in…';
+      btn.disabled = true;
+    });
+
+    /* ---- Forgot password ---- */
+    document.getElementById('forgotLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('forgotPanel').style.display = 'block';
+    });
+    document.getElementById('backToLogin').addEventListener('click', function () {
+      document.getElementById('forgotPanel').style.display = 'none';
+      document.getElementById('loginPanel').style.display = 'block';
+    });
+    document.getElementById('forgotSubmit').addEventListener('click', function () {
+      var em = document.getElementById('forgotEmail').value.trim();
+      if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+        showErr('forgotError','forgotErrorText','Please enter a valid email address.'); return;
+      }
+      var btn = this;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending…';
+      btn.disabled = true;
+      setTimeout(function () {
+        document.getElementById('forgotForm').style.display = 'none';
+        document.getElementById('forgotSuccess').style.display = 'block';
+      }, 1400);
+    });
+
+  })();
+  </script>
+
+</body>
+</html>

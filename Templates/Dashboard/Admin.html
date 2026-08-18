@@ -1,0 +1,825 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — SelectRoyalMaids</title>
+  <link rel="icon" href="{% static 'image/logo.png' %}" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #f1f5f9;
+      --card:      #ffffff;
+      --border:    #e2e8f0;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --accent:    #2563eb;
+      --accent-lt: #eff6ff;
+      --accent-dk: #1d4ed8;
+      --green:     #16a34a;
+      --green-lt:  #dcfce7;
+      --amber:     #b45309;
+      --amber-lt:  #fef3c7;
+      --red:       #dc2626;
+      --red-lt:    #fee2e2;
+      --sidebar-bg:#0f172a;
+      --sidebar-w: 260px;
+      --radius:    12px;
+      --shadow:    0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+    }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+    /* Sidebar */
+    .sidebar { width:var(--sidebar-w); min-height:100vh; background:var(--sidebar-bg); display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:200; transition:transform .25s ease; }
+    .sidebar-brand { display:flex; align-items:center; gap:10px; padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.07); }
+    .sidebar-brand img { height:34px; width:auto; }
+    .sidebar-brand-text { line-height:1.2; }
+    .sidebar-brand-text strong { color:#fff; font-size:.95rem; font-weight:800; }
+    .sidebar-brand-text span { color:#94a3b8; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; display:block; }
+    .sidebar-nav { flex:1; padding:12px; overflow-y:auto; }
+    .sidebar-label { font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#475569; padding:16px 10px 6px; }
+    .sidebar-nav a { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:#94a3b8; font-size:.875rem; font-weight:500; text-decoration:none; transition:background .15s,color .15s; cursor:pointer; }
+    .sidebar-nav a .icon { width:18px; text-align:center; flex-shrink:0; }
+    .sidebar-nav a:hover,.sidebar-nav a.active { background:rgba(37,99,235,.25); color:#fff; }
+    .sidebar-nav a.active { background:var(--accent); }
+    .sidebar-nav a.danger:hover { background:rgba(220,38,38,.2); color:#fca5a5; }
+    .sidebar-footer { padding:16px; border-top:1px solid rgba(255,255,255,.07); }
+    .sidebar-user { display:flex; align-items:center; gap:10px; }
+    .sidebar-avatar { width:36px; height:36px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:.85rem; flex-shrink:0; }
+    .sidebar-user-info strong { color:#f1f5f9; font-size:.8rem; display:block; }
+    .sidebar-user-info span { color:#64748b; font-size:.72rem; }
+    /* Main */
+    .main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+    /* Topbar */
+    .topbar { background:var(--card); border-bottom:1px solid var(--border); padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .topbar-left { display:flex; align-items:center; gap:14px; }
+    .topbar h1 { font-size:1.1rem; font-weight:700; color:var(--text); }
+    .topbar-right { display:flex; align-items:center; gap:14px; }
+    .topbar-badge { background:var(--accent-lt); color:var(--accent); font-size:.7rem; font-weight:700; padding:4px 10px; border-radius:100px; }
+    .menu-toggle { display:none; background:none; border:none; font-size:1.3rem; color:var(--text); cursor:pointer; }
+    /* Content */
+    .content { padding:28px 32px; }
+    /* Tabs */
+    .tab-nav { display:flex; gap:4px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:6px; margin-bottom:28px; flex-wrap:wrap; }
+    .tab-btn { display:flex; align-items:center; gap:7px; padding:9px 18px; border:none; background:transparent; border-radius:8px; font-size:.85rem; font-weight:600; color:var(--muted); cursor:pointer; transition:background .15s,color .15s; font-family:'Inter',sans-serif; }
+    .tab-btn:hover { background:var(--bg); color:var(--text); }
+    .tab-btn.active { background:var(--accent); color:#fff; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+    /* Stat cards */
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px; margin-bottom:28px; }
+    .stat-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px 24px; box-shadow:var(--shadow); display:flex; align-items:center; gap:16px; }
+    .stat-icon { width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .stat-icon.blue  { background:var(--accent-lt); color:var(--accent); }
+    .stat-icon.green { background:var(--green-lt);  color:var(--green); }
+    .stat-icon.amber { background:var(--amber-lt);  color:var(--amber); }
+    .stat-icon.red   { background:var(--red-lt);    color:var(--red); }
+    .stat-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+    .stat-value { font-size:1.9rem; font-weight:800; color:var(--text); line-height:1.1; margin-top:2px; }
+    .stat-sub   { font-size:.77rem; color:var(--muted); margin-top:3px; }
+    /* Card */
+    .card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:24px; overflow:hidden; }
+    .card-head { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .card-head h2 { font-size:1rem; font-weight:700; }
+    .card-body { padding:24px; }
+    /* Form grid */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .form-grid .full { grid-column:1/-1; }
+    .form-field label { display:block; font-size:.8rem; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.05em; }
+    .form-field input,.form-field select,.form-field textarea { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:.9rem; font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); transition:border-color .15s,box-shadow .15s; }
+    .form-field input:focus,.form-field select:focus,.form-field textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.1); background:#fff; }
+    .form-field textarea { resize:vertical; min-height:100px; }
+    /* Buttons */
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 22px; border-radius:8px; font-size:.875rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; border:1px solid transparent; text-decoration:none; transition:background .15s,transform .1s; }
+    .btn:active { transform:scale(.98); }
+    .btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .btn-primary:hover { background:var(--accent-dk); }
+    .btn-ghost { background:transparent; color:var(--muted); border-color:var(--border); }
+    .btn-ghost:hover { background:var(--bg); color:var(--text); }
+    .btn-danger { background:var(--red-lt); color:var(--red); border-color:#fecaca; }
+    .btn-danger:hover { background:#fecaca; }
+    /* Table */
+    .data-table { width:100%; border-collapse:collapse; }
+    .data-table th,.data-table td { text-align:left; padding:13px 16px; border-bottom:1px solid var(--border); font-size:.875rem; }
+    .data-table th { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); background:var(--bg); }
+    .data-table td { color:var(--text); }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tbody tr:hover { background:#f8faff; }
+    /* Badge */
+    .badge { display:inline-block; padding:3px 10px; border-radius:100px; font-size:.72rem; font-weight:700; }
+    .badge-green  { background:var(--green-lt);  color:var(--green); }
+    .badge-amber  { background:var(--amber-lt);  color:var(--amber); }
+    .badge-blue   { background:var(--accent-lt); color:var(--accent); }
+    .badge-red    { background:var(--red-lt);    color:var(--red); }
+    /* Toggle */
+    .toggle { position:relative; display:inline-block; width:44px; height:24px; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle-track { position:absolute; inset:0; background:#cbd5e1; border-radius:100px; cursor:pointer; transition:background .2s; }
+    .toggle-track::after { content:''; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:3px; left:3px; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .toggle input:checked + .toggle-track { background:var(--accent); }
+    .toggle input:checked + .toggle-track::after { transform:translateX(20px); }
+    /* Status pill */
+    .status-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:100px; font-size:.7rem; font-weight:700; }
+    .status-pill.active   { background:var(--green-lt); color:var(--green); }
+    .status-pill.inactive { background:var(--amber-lt); color:var(--amber); }
+    /* FAQ rows */
+    .faq-row { border:1px solid var(--border); border-radius:10px; background:var(--card); margin-bottom:12px; overflow:hidden; }
+    .faq-row:hover { box-shadow:0 2px 8px rgba(0,0,0,.07); }
+    .faq-row-head { display:flex; align-items:center; gap:12px; padding:14px 18px; }
+    .faq-order-badge { width:28px; height:28px; background:var(--accent-lt); color:var(--accent); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:800; flex-shrink:0; }
+    .faq-q { flex:1; font-size:.9rem; font-weight:600; color:var(--text); }
+    .faq-a { font-size:.82rem; color:var(--muted); padding:0 18px 14px 58px; line-height:1.6; }
+    .faq-actions { display:flex; gap:6px; flex-shrink:0; }
+    /* Service cards */
+    .service-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px; margin-bottom:24px; }
+    .service-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); display:flex; flex-direction:column; transition:box-shadow .15s,transform .15s; }
+    .service-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.09); transform:translateY(-2px); }
+    .service-card-img { width:100%; height:140px; object-fit:cover; background:var(--bg); }
+    .service-card-img-placeholder { width:100%; height:140px; background:linear-gradient(135deg,#1e3a8a,#2563eb); display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:rgba(255,255,255,.4); }
+    .service-card-body { padding:16px; flex:1; display:flex; flex-direction:column; gap:8px; }
+    .service-card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .service-card-title { font-size:.95rem; font-weight:700; flex:1; }
+    .service-badge { display:inline-block; padding:3px 9px; border-radius:100px; font-size:.68rem; font-weight:700; white-space:nowrap; }
+    .service-badge-blue   { background:var(--accent-lt); color:var(--accent); }
+    .service-badge-orange { background:#fff7ed; color:#c2410c; }
+    .service-badge-green  { background:var(--green-lt);  color:var(--green); }
+    .service-badge-purple { background:#f3e8ff; color:#7c3aed; }
+    .service-badge-teal   { background:#f0fdfa; color:#0f766e; }
+    .service-card-desc { font-size:.8rem; color:var(--muted); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .service-card-stats { display:flex; gap:8px; flex-wrap:wrap; margin-top:2px; }
+    .service-stat-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; background:var(--bg); border:1px solid var(--border); border-radius:100px; font-size:.72rem; font-weight:600; color:var(--muted); }
+    .service-card-footer { padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:8px; align-items:center; justify-content:space-between; }
+    /* Modal */
+    .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:500; align-items:center; justify-content:center; padding:16px; }
+    .modal-backdrop.open { display:flex; }
+    .modal { background:var(--card); border-radius:16px; width:100%; max-width:560px; box-shadow:0 20px 60px rgba(0,0,0,.2); animation:modalIn .2s ease; }
+    @keyframes modalIn { from{opacity:0;transform:translateY(12px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .modal-head { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .modal-head h3 { font-size:1rem; font-weight:700; }
+    .modal-close { width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--muted); cursor:pointer; font-size:.85rem; display:flex; align-items:center; justify-content:center; transition:background .15s,color .15s; }
+    .modal-close:hover { background:var(--red-lt); color:var(--red); border-color:#fecaca; }
+    .modal-body { padding:24px; }
+    .modal-foot { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+    /* Sidebar overlay */
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:199; }
+    /* Responsive */
+    @media(max-width:900px){
+      .sidebar{transform:translateX(-100%);}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.show{display:block;}
+      .main{margin-left:0;}
+      .menu-toggle{display:flex;}
+      .content{padding:20px 16px;}
+      .topbar{padding:0 16px;}
+      .form-grid{grid-template-columns:1fr;}
+    }
+    @media(max-width:640px){
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .tab-btn{padding:8px 12px;font-size:.8rem;}
+      .tab-btn span{display:none;}
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="{% static 'image/logo.png' %}" alt="Logo" />
+    <div class="sidebar-brand-text">
+      <strong>SelectRoyal</strong>
+      <span>Admin Console</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-label">Workspace</div>
+    <a href="#" class="active" data-tab="overview"><i class="fa-solid fa-chart-pie icon"></i> Overview</a>
+    <a href="#" data-tab="maids"><i class="fa-solid fa-users icon"></i> Maid Applications</a>
+    <a href="#" data-tab="employers"><i class="fa-solid fa-building icon"></i> Employers &amp; Payments</a>
+    <div class="sidebar-label">Content</div>
+    <a href="#" data-tab="blog"><i class="fa-solid fa-newspaper icon"></i> Blog Posts</a>
+    <a href="#" data-tab="faq"><i class="fa-solid fa-circle-question icon"></i> FAQs</a>
+    <a href="#" data-tab="services"><i class="fa-solid fa-sliders icon"></i> Services</a>
+    <div class="sidebar-label">Support</div>
+    <a href="{% url 'MaidApp:support-chat' %}"><i class="fa-solid fa-comments icon"></i> Support Chat</a>
+    <a href="{% url 'MaidApp:index' %}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square icon"></i> View Website</a>
+    <a href="{% url 'Authentication:logout' %}" class="danger"><i class="fa-solid fa-right-from-bracket icon"></i> Log Out</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+      <div class="sidebar-user-info">
+        <strong>{{ user.get_full_name|default:user.username }}</strong>
+        <span>Super Admin</span>
+      </div>
+    </div>
+  </div>
+</aside>
+<!-- MAIN -->
+<div class="main">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
+      <h1 id="topbarTitle">Overview</h1>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-badge"><i class="fa-solid fa-circle" style="font-size:.5rem;color:#22c55e;"></i> &nbsp;Live</span>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Tab nav -->
+    <div class="tab-nav" role="tablist">
+      <button class="tab-btn active" data-tab="overview" role="tab"><i class="fa-solid fa-chart-pie"></i> <span>Overview</span></button>
+      <button class="tab-btn" data-tab="maids" role="tab"><i class="fa-solid fa-users"></i> <span>Maids</span></button>
+      <button class="tab-btn" data-tab="employers" role="tab"><i class="fa-solid fa-building"></i> <span>Employers</span></button>
+      <button class="tab-btn" data-tab="blog" role="tab"><i class="fa-solid fa-newspaper"></i> <span>Blog</span></button>
+      <button class="tab-btn" data-tab="faq" role="tab"><i class="fa-solid fa-circle-question"></i> <span>FAQs</span></button>
+      <button class="tab-btn" data-tab="services" role="tab"><i class="fa-solid fa-sliders"></i> <span>Services</span></button>
+    </div>
+
+    <!-- ── TAB: Overview ── -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fa-solid fa-id-card-clip"></i></div>
+          <div>
+            <div class="stat-label">Maid Applications</div>
+            <div class="stat-value">{{ maid_count|default:"0" }}</div>
+            <div class="stat-sub">Total submitted</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fa-solid fa-briefcase"></i></div>
+          <div>
+            <div class="stat-label">Employers</div>
+            <div class="stat-value">{{ employer_count|default:"0" }}</div>
+            <div class="stat-sub">Registered accounts</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber"><i class="fa-solid fa-naira-sign"></i></div>
+          <div>
+            <div class="stat-label">Revenue</div>
+            <div class="stat-value">₦0</div>
+            <div class="stat-sub">Paystack transactions</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fa-solid fa-headset"></i></div>
+          <div>
+            <div class="stat-label">Support Messages</div>
+            <div class="stat-value">{{ support_count|default:"0" }}</div>
+            <div class="stat-sub">All time</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h2>Recent Maid Applications</h2>
+          <a href="#" class="btn btn-ghost" data-tab="maids" style="font-size:.8rem;">View all <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Role</th><th>Location</th><th>Experience</th><th>Applied</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for maid in recent_maids %}
+              <tr>
+                <td><strong>{{ maid.first_name }} {{ maid.last_name }}</strong></td>
+                <td>{{ maid.get_role_display }}</td>
+                <td>{{ maid.city }}, {{ maid.state }}</td>
+                <td>{{ maid.years_experience }} yr{{ maid.years_experience|pluralize }}</td>
+                <td>{{ maid.created_at|date:"M d, Y" }}</td>
+                <td><span class="badge badge-amber">Pending</span></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No applications yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- ── TAB: Maids ── -->
+    <div class="tab-panel" id="tab-maids">
+      <div class="card">
+        <div class="card-head"><h2><i class="fa-solid fa-plus" style="color:var(--accent);"></i> &nbsp;Add Maid Profile</h2></div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data" action="#">
+            {% csrf_token %}
+            <div class="form-grid">
+              <div class="form-field"><label>First name</label><input type="text" name="first_name" placeholder="Ada" /></div>
+              <div class="form-field"><label>Last name</label><input type="text" name="last_name" placeholder="Johnson" /></div>
+              <div class="form-field"><label>Role</label><select name="role"><option value="maid">Maid / House Help</option><option value="cook">Cook / Chef</option><option value="nanny">Nanny / Babysitter</option><option value="caregiver">Caregiver</option><option value="driver">Driver</option></select></div>
+              <div class="form-field"><label>Work type</label><select name="work_type"><option value="both">Live-in or Live-out</option><option value="live_in">Live-in only</option><option value="live_out">Live-out only</option></select></div>
+              <div class="form-field"><label>State</label><input type="text" name="state" placeholder="Lagos" /></div>
+              <div class="form-field"><label>City</label><input type="text" name="city" placeholder="Victoria Island" /></div>
+              <div class="form-field"><label>Years experience</label><input type="number" name="years_experience" min="0" placeholder="3" /></div>
+              <div class="form-field"><label>Expected salary</label><input type="text" name="expected_salary" placeholder="₦30,000 / month" /></div>
+              <div class="form-field"><label>Profile photo</label><input type="file" name="profile_photo" accept="image/*" /></div>
+              <div class="form-field"><label>Languages</label><input type="text" name="languages" placeholder="English, Yoruba" /></div>
+              <div class="form-field full"><label>Skills</label><input type="text" name="skills" placeholder="Cooking, Laundry, Ironing…" /></div>
+              <div class="form-field full"><label>Bio &amp; work history</label><textarea name="bio" placeholder="Brief background…"></textarea></div>
+            </div>
+            <div style="margin-top:8px;"><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button></div>
+          </form>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>All Applications</h2></div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Role</th><th>Location</th><th>Exp.</th><th>Applied</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for maid in all_maids %}
+              <tr>
+                <td><strong>{{ maid.first_name }} {{ maid.last_name }}</strong><br><small style="color:var(--muted);">{{ maid.email }}</small></td>
+                <td>{{ maid.get_role_display }}</td>
+                <td>{{ maid.city }}, {{ maid.state }}</td>
+                <td>{{ maid.years_experience }} yr{{ maid.years_experience|pluralize }}</td>
+                <td>{{ maid.created_at|date:"M d, Y" }}</td>
+                <td><a href="#" class="btn btn-ghost" style="padding:6px 12px;font-size:.78rem;"><i class="fa-solid fa-eye"></i> View</a></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No applications on record.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: Employers ── -->
+    <div class="tab-panel" id="tab-employers">
+      <div class="card">
+        <div class="card-head"><h2>Employers &amp; Paystack Payments</h2></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:14px;padding:24px;background:var(--accent-lt);border-radius:10px;border:1px solid #bfdbfe;margin-bottom:24px;">
+            <i class="fa-solid fa-circle-info" style="color:var(--accent);font-size:1.3rem;"></i>
+            <p style="font-size:.9rem;color:#1e40af;">Paystack live transaction webhooks will populate this table automatically once payment integration is active.</p>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Employer</th><th>Email</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No payment records yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- ── TAB: Blog ── -->
+    <div class="tab-panel" id="tab-blog">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.05rem;font-weight:800;">Blog Posts</h2>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">{{ blog_posts|length }} post{{ blog_posts|length|pluralize }} total</p>
+        </div>
+        <button class="btn btn-primary" id="openAddBlog"><i class="fa-solid fa-plus"></i> New Post</button>
+      </div>
+      {% if messages %}{% for msg in messages %}
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:16px;{% if msg.tags == 'success' %}background:var(--green-lt);border:1px solid #bbf7d0;color:var(--green);{% else %}background:var(--red-lt);border:1px solid #fecaca;color:var(--red);{% endif %}">
+          <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+          <span style="font-size:.875rem;font-weight:600;">{{ msg }}</span>
+        </div>
+      {% endfor %}{% endif %}
+      <div class="card">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th style="min-width:240px;">Title</th><th>Category</th><th>Author</th><th>Read</th><th>Views</th><th>Published</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for post in blog_posts %}
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    {% if post.cover_image %}<img src="{{ post.cover_image }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;" />
+                    {% else %}<div style="width:40px;height:40px;background:var(--accent-lt);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent);"><i class="fa-solid fa-newspaper"></i></div>{% endif %}
+                    <div>
+                      <strong style="font-size:.85rem;display:block;">{{ post.title|truncatechars:55 }}</strong>
+                      <span style="font-size:.72rem;color:var(--muted);">/blog/{{ post.slug|truncatechars:40 }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge {% if post.category == 'hiring' %}badge-amber{% elif post.category == 'safety' %}badge-red{% elif post.category == 'career' %}badge-green{% else %}badge-blue{% endif %}">{{ post.get_category_display }}</span></td>
+                <td style="font-size:.82rem;">{{ post.author_name }}</td>
+                <td style="font-size:.82rem;">{{ post.read_time }} min</td>
+                <td style="font-size:.82rem;">{{ post.views }}</td>
+                <td style="font-size:.78rem;color:var(--muted);">{% if post.published_at %}{{ post.published_at|date:"M d, Y" }}{% else %}—{% endif %}</td>
+                <td>
+                  {% if post.is_featured %}<span class="badge badge-amber" style="margin-bottom:3px;display:inline-flex;">Featured</span><br>{% endif %}
+                  <span class="status-pill {% if post.is_published %}active{% else %}inactive{% endif %}">{% if post.is_published %}Live{% else %}Draft{% endif %}</span>
+                </td>
+                <td style="white-space:nowrap;">
+                  <button class="btn btn-ghost" style="padding:6px 10px;font-size:.78rem;"
+                    onclick="openBlogEdit({{ post.pk }},'{{ post.slug|escapejs }}','{{ post.title|escapejs }}','{{ post.excerpt|escapejs }}','{{ post.category|escapejs }}','{{ post.author_name|escapejs }}','{{ post.author_avatar|escapejs }}','{{ post.author_bio|escapejs }}','{{ post.cover_image|escapejs }}','{{ post.tags|escapejs }}',{{ post.read_time }},{{ post.is_featured|yesno:'true,false' }},{{ post.is_published|yesno:'true,false' }},`{{ post.content|escapejs }}`)">
+                    <i class="fa-solid fa-pen"></i> Edit
+                  </button>
+                  <button class="btn btn-danger" style="padding:6px 10px;font-size:.78rem;" onclick="openBlogDelete({{ post.pk }},'{{ post.title|escapejs }}')">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted);"><i class="fa-solid fa-newspaper" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>No posts yet. Click <strong>New Post</strong>.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- ── TAB: FAQ ── -->
+    <div class="tab-panel" id="tab-faq">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.05rem;font-weight:800;">Frequently Asked Questions</h2>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">{{ faqs|length }} FAQ{{ faqs|length|pluralize }} — shown on the How It Works page</p>
+        </div>
+        <button class="btn btn-primary" id="openAddFaq"><i class="fa-solid fa-plus"></i> Add FAQ</button>
+      </div>
+      {% if messages %}{% for msg in messages %}
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:16px;{% if msg.tags == 'success' %}background:var(--green-lt);border:1px solid #bbf7d0;color:var(--green);{% else %}background:var(--red-lt);border:1px solid #fecaca;color:var(--red);{% endif %}">
+          <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+          <span style="font-size:.875rem;font-weight:600;">{{ msg }}</span>
+        </div>
+      {% endfor %}{% endif %}
+      {% for faq in faqs %}
+      <div class="faq-row">
+        <div class="faq-row-head">
+          <div class="faq-order-badge">{{ faq.order }}</div>
+          <span class="faq-q">{{ faq.question }}</span>
+          <span class="status-pill {% if faq.is_active %}active{% else %}inactive{% endif %}">{% if faq.is_active %}Visible{% else %}Hidden{% endif %}</span>
+          <div class="faq-actions">
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:.78rem;"
+              onclick="openFaqEdit({{ faq.pk }},{{ faq.order }},{{ faq.is_active|yesno:'true,false' }},this.closest('.faq-row').querySelector('.faq-q').textContent.trim(),this.closest('.faq-row').querySelector('.faq-a').textContent.trim())">
+              <i class="fa-solid fa-pen"></i> Edit
+            </button>
+            <button class="btn btn-danger" style="padding:6px 12px;font-size:.78rem;" onclick="openFaqDelete({{ faq.pk }},'{{ faq.question|escapejs }}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <p class="faq-a">{{ faq.answer }}</p>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:48px 24px;color:var(--muted);"><i class="fa-solid fa-circle-question" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>No FAQs yet.</div>
+      {% endfor %}
+    </div>
+    <!-- ── TAB: Services ── -->
+    <div class="tab-panel" id="tab-services">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.05rem;font-weight:800;">Services</h2>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">{{ services|length }} service{{ services|length|pluralize }} — shown on the public Services page</p>
+        </div>
+        <button class="btn btn-primary" id="openAddService"><i class="fa-solid fa-plus"></i> Add Service</button>
+      </div>
+      {% if messages %}{% for msg in messages %}
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:16px;{% if msg.tags == 'success' %}background:var(--green-lt);border:1px solid #bbf7d0;color:var(--green);{% else %}background:var(--red-lt);border:1px solid #fecaca;color:var(--red);{% endif %}">
+          <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+          <span style="font-size:.875rem;font-weight:600;">{{ msg }}</span>
+        </div>
+      {% endfor %}{% endif %}
+      <div class="service-grid">
+        {% for svc in services %}
+        <div class="service-card">
+          {% if svc.image_url %}<img src="{{ svc.image_url }}" alt="{{ svc.title }}" class="service-card-img" loading="lazy" />
+          {% else %}<div class="service-card-img-placeholder"><i class="fa-solid {{ svc.icon }}"></i></div>{% endif %}
+          <div class="service-card-body">
+            <div class="service-card-top">
+              <span class="service-card-title"><i class="fa-solid {{ svc.icon }}" style="color:var(--accent);margin-right:6px;"></i>{{ svc.title }}</span>
+              {% if svc.badge_label %}<span class="service-badge service-badge-{{ svc.badge_color }}">{{ svc.badge_label }}</span>{% endif %}
+            </div>
+            <p class="service-card-desc">{{ svc.description }}</p>
+            <div class="service-card-stats">
+              <span class="service-stat-pill"><i class="fa-solid fa-users"></i> {{ svc.available_count }}</span>
+              <span class="service-stat-pill"><i class="fa-solid fa-star"></i> {{ svc.avg_rating }}</span>
+              <span class="service-stat-pill"><i class="fa-solid fa-shield-halved"></i> {{ svc.guarantee_days }}d</span>
+              <span class="status-pill {% if svc.is_active %}active{% else %}inactive{% endif %}">{% if svc.is_active %}Visible{% else %}Hidden{% endif %}</span>
+            </div>
+          </div>
+          <div class="service-card-footer">
+            <span style="font-size:.75rem;color:var(--muted);">Order: {{ svc.order }} · /{{ svc.slug }}</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:.78rem;"
+                onclick="openServiceEdit({{ svc.pk }},'{{ svc.slug|escapejs }}','{{ svc.title|escapejs }}','{{ svc.badge_label|escapejs }}','{{ svc.badge_color|escapejs }}','{{ svc.icon|escapejs }}','{{ svc.description|escapejs }}','{{ svc.features|escapejs }}','{{ svc.image_url|escapejs }}','{{ svc.available_count|escapejs }}','{{ svc.avg_rating|escapejs }}',{{ svc.guarantee_days }},{{ svc.order }},{{ svc.is_active|yesno:'true,false' }})">
+                <i class="fa-solid fa-pen"></i> Edit
+              </button>
+              <button class="btn btn-danger" style="padding:6px 12px;font-size:.78rem;" onclick="openServiceDelete({{ svc.pk }},'{{ svc.title|escapejs }}')">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div style="grid-column:1/-1;text-align:center;padding:48px 24px;color:var(--muted);"><i class="fa-solid fa-sliders" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>No services yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+<!-- ══ FAQ: ADD MODAL ══ -->
+<div class="modal-backdrop" id="addFaqModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-plus" style="color:var(--accent);"></i> &nbsp;Add FAQ</h3><button class="modal-close" onclick="closeModal('addFaqModal')">&times;</button></div>
+    <form method="post" action="{% url 'Authentication:faq_create' %}">{% csrf_token %}
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-field full"><label>Question</label><input type="text" name="question" required /></div>
+          <div class="form-field full"><label>Answer</label><textarea name="answer" required></textarea></div>
+          <div class="form-field"><label>Display order</label><input type="number" name="order" value="0" min="0" /></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('addFaqModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save FAQ</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ FAQ: EDIT MODAL ══ -->
+<div class="modal-backdrop" id="editFaqModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-pen" style="color:var(--accent);"></i> &nbsp;Edit FAQ</h3><button class="modal-close" onclick="closeModal('editFaqModal')">&times;</button></div>
+    <form method="post" id="editFaqForm" action="">{% csrf_token %}
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-field full"><label>Question</label><input type="text" name="question" id="efQuestion" required /></div>
+          <div class="form-field full"><label>Answer</label><textarea name="answer" id="efAnswer" required></textarea></div>
+          <div class="form-field"><label>Display order</label><input type="number" name="order" id="efOrder" min="0" /></div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:24px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_active" id="efActive" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Visible on public site</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('editFaqModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ FAQ: DELETE MODAL ══ -->
+<div class="modal-backdrop" id="deleteFaqModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-trash" style="color:var(--red);"></i> &nbsp;Delete FAQ</h3><button class="modal-close" onclick="closeModal('deleteFaqModal')">&times;</button></div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;">Are you sure you want to delete this FAQ?</p>
+      <p id="deleteFaqPreview" style="margin-top:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-weight:600;color:var(--muted);"></p>
+      <p style="font-size:.8rem;color:var(--red);margin-top:10px;"><i class="fa-solid fa-triangle-exclamation"></i> This cannot be undone.</p>
+    </div>
+    <form method="post" id="deleteFaqForm" action="">{% csrf_token %}
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('deleteFaqModal')">Cancel</button><button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Yes, Delete</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ SERVICE: ADD MODAL ══ -->
+<div class="modal-backdrop" id="addServiceModal">
+  <div class="modal" style="max-width:680px;" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-plus" style="color:var(--accent);"></i> &nbsp;Add Service</h3><button class="modal-close" onclick="closeModal('addServiceModal')">&times;</button></div>
+    <form method="post" action="{% url 'Authentication:service_create' %}">{% csrf_token %}
+      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
+        <div class="form-grid">
+          <div class="form-field"><label>Title</label><input type="text" name="title" required /></div>
+          <div class="form-field"><label>Slug</label><input type="text" name="slug" placeholder="maid" required /></div>
+          <div class="form-field"><label>Badge label</label><input type="text" name="badge_label" /></div>
+          <div class="form-field"><label>Badge colour</label><select name="badge_color">{% for val,label in service_badge_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+          <div class="form-field"><label>Icon</label><select name="icon">{% for val,label in service_icon_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+          <div class="form-field"><label>Image URL</label><input type="url" name="image_url" /></div>
+          <div class="form-field full"><label>Description</label><textarea name="description" required></textarea></div>
+          <div class="form-field full"><label>Features (one per line)</label><textarea name="features" style="min-height:110px;" required></textarea></div>
+          <div class="form-field"><label>Available count</label><input type="text" name="available_count" placeholder="820+" /></div>
+          <div class="form-field"><label>Avg rating</label><input type="text" name="avg_rating" placeholder="4.9★" /></div>
+          <div class="form-field"><label>Guarantee (days)</label><input type="number" name="guarantee_days" value="30" min="0" /></div>
+          <div class="form-field"><label>Display order</label><input type="number" name="order" value="0" min="0" /></div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_active" checked /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Visible on public site</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('addServiceModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Service</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ SERVICE: EDIT MODAL ══ -->
+<div class="modal-backdrop" id="editServiceModal">
+  <div class="modal" style="max-width:680px;" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-pen" style="color:var(--accent);"></i> &nbsp;Edit Service</h3><button class="modal-close" onclick="closeModal('editServiceModal')">&times;</button></div>
+    <form method="post" id="editServiceForm" action="">{% csrf_token %}
+      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
+        <div class="form-grid">
+          <div class="form-field"><label>Title</label><input type="text" name="title" id="esTitle" required /></div>
+          <div class="form-field"><label>Slug</label><input type="text" name="slug" id="esSlug" required /></div>
+          <div class="form-field"><label>Badge label</label><input type="text" name="badge_label" id="esBadgeLabel" /></div>
+          <div class="form-field"><label>Badge colour</label><select name="badge_color" id="esBadgeColor">{% for val,label in service_badge_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+          <div class="form-field"><label>Icon</label><select name="icon" id="esIcon">{% for val,label in service_icon_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+          <div class="form-field"><label>Image URL</label><input type="url" name="image_url" id="esImageUrl" /></div>
+          <div class="form-field full"><label>Description</label><textarea name="description" id="esDescription" required></textarea></div>
+          <div class="form-field full"><label>Features (one per line)</label><textarea name="features" id="esFeatures" style="min-height:110px;" required></textarea></div>
+          <div class="form-field"><label>Available count</label><input type="text" name="available_count" id="esAvailable" /></div>
+          <div class="form-field"><label>Avg rating</label><input type="text" name="avg_rating" id="esRating" /></div>
+          <div class="form-field"><label>Guarantee (days)</label><input type="number" name="guarantee_days" id="esGuarantee" min="0" /></div>
+          <div class="form-field"><label>Display order</label><input type="number" name="order" id="esOrder" min="0" /></div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_active" id="esActive" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Visible on public site</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('editServiceModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ SERVICE: DELETE MODAL ══ -->
+<div class="modal-backdrop" id="deleteServiceModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-trash" style="color:var(--red);"></i> &nbsp;Delete Service</h3><button class="modal-close" onclick="closeModal('deleteServiceModal')">&times;</button></div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;">Permanently delete this service?</p>
+      <p id="deleteServicePreview" style="margin-top:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.875rem;font-weight:700;"></p>
+      <p style="font-size:.8rem;color:var(--red);margin-top:10px;"><i class="fa-solid fa-triangle-exclamation"></i> This cannot be undone.</p>
+    </div>
+    <form method="post" id="deleteServiceForm" action="">{% csrf_token %}
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('deleteServiceModal')">Cancel</button><button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Yes, Delete</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ BLOG: ADD MODAL ══ -->
+<div class="modal-backdrop" id="addBlogModal">
+  <div class="modal" style="max-width:720px;" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-plus" style="color:var(--accent);"></i> &nbsp;New Blog Post</h3><button class="modal-close" onclick="closeModal('addBlogModal')">&times;</button></div>
+    <form method="post" action="{% url 'Authentication:blog_create' %}">{% csrf_token %}
+      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
+        <div class="form-grid">
+          <div class="form-field full"><label>Title</label><input type="text" name="title" required /></div>
+          <div class="form-field"><label>Slug (URL)</label><input type="text" name="slug" required /></div>
+          <div class="form-field"><label>Category</label><select name="category">{% for val,label in blog_categories %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+          <div class="form-field"><label>Author name</label><input type="text" name="author_name" value="{{ user.get_full_name }}" /></div>
+          <div class="form-field"><label>Author avatar URL</label><input type="url" name="author_avatar" /></div>
+          <div class="form-field"><label>Cover image URL</label><input type="url" name="cover_image" /></div>
+          <div class="form-field"><label>Read time (mins)</label><input type="number" name="read_time" value="5" min="1" /></div>
+          <div class="form-field"><label>Tags (comma-separated)</label><input type="text" name="tags" /></div>
+          <div class="form-field full"><label>Excerpt</label><textarea name="excerpt" style="min-height:70px;" required></textarea></div>
+          <div class="form-field full"><label>Author bio</label><textarea name="author_bio" style="min-height:60px;"></textarea></div>
+          <div class="form-field full"><label>Full article content (HTML supported)</label><textarea name="content" style="min-height:220px;" required></textarea></div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:16px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_featured" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Mark as Featured</span>
+          </div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:16px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_published" checked /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Publish immediately</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('addBlogModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Publish Post</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ BLOG: EDIT MODAL ══ -->
+<div class="modal-backdrop" id="editBlogModal">
+  <div class="modal" style="max-width:720px;" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-pen" style="color:var(--accent);"></i> &nbsp;Edit Blog Post</h3><button class="modal-close" onclick="closeModal('editBlogModal')">&times;</button></div>
+    <form method="post" id="editBlogForm" action="">{% csrf_token %}
+      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
+        <div class="form-grid">
+          <div class="form-field full"><label>Title</label><input type="text" name="title" id="ebTitle" required /></div>
+          <div class="form-field"><label>Slug</label><input type="text" name="slug" id="ebSlug" required /></div>
+          <div class="form-field"><label>Category</label><select name="category" id="ebCategory">{% for val,label in blog_categories %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+          <div class="form-field"><label>Author name</label><input type="text" name="author_name" id="ebAuthorName" /></div>
+          <div class="form-field"><label>Author avatar URL</label><input type="url" name="author_avatar" id="ebAuthorAvatar" /></div>
+          <div class="form-field"><label>Cover image URL</label><input type="url" name="cover_image" id="ebCoverImage" /></div>
+          <div class="form-field"><label>Read time (mins)</label><input type="number" name="read_time" id="ebReadTime" min="1" /></div>
+          <div class="form-field"><label>Tags</label><input type="text" name="tags" id="ebTags" /></div>
+          <div class="form-field full"><label>Excerpt</label><textarea name="excerpt" id="ebExcerpt" style="min-height:70px;" required></textarea></div>
+          <div class="form-field full"><label>Author bio</label><textarea name="author_bio" id="ebAuthorBio" style="min-height:60px;"></textarea></div>
+          <div class="form-field full"><label>Full article content</label><textarea name="content" id="ebContent" style="min-height:220px;" required></textarea></div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:16px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_featured" id="ebFeatured" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Featured post</span>
+          </div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:16px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_published" id="ebPublished" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Published (live)</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('editBlogModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ BLOG: DELETE MODAL ══ -->
+<div class="modal-backdrop" id="deleteBlogModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-trash" style="color:var(--red);"></i> &nbsp;Delete Post</h3><button class="modal-close" onclick="closeModal('deleteBlogModal')">&times;</button></div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;">Permanently delete this blog post?</p>
+      <p id="deleteBlogPreview" style="margin-top:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.875rem;font-weight:700;"></p>
+      <p style="font-size:.8rem;color:var(--red);margin-top:10px;"><i class="fa-solid fa-triangle-exclamation"></i> This cannot be undone.</p>
+    </div>
+    <form method="post" id="deleteBlogForm" action="">{% csrf_token %}
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('deleteBlogModal')">Cancel</button><button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Yes, Delete</button></div>
+    </form>
+  </div>
+</div>
+<script>
+  /* ── Sidebar toggle ── */
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const menuBtn = document.getElementById('menuToggle');
+  menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+
+  /* ── Tab system ── */
+  const titleMap = { overview:'Overview', maids:'Maid Applications', employers:'Employers & Payments', blog:'Blog Posts', faq:'FAQs', services:'Services' };
+  function activateTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    document.querySelectorAll('.sidebar-nav a[data-tab]').forEach(a => a.classList.toggle('active', a.dataset.tab === name));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+    document.getElementById('topbarTitle').textContent = titleMap[name] || name;
+  }
+  document.querySelectorAll('[data-tab]').forEach(el => {
+    el.addEventListener('click', e => { e.preventDefault(); activateTab(el.dataset.tab); sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+  });
+  /* Activate from ?tab= or hash */
+  const urlTab  = new URLSearchParams(location.search).get('tab');
+  const hashTab = location.hash.replace('#','');
+  activateTab((urlTab && titleMap[urlTab]) ? urlTab : (titleMap[hashTab] ? hashTab : 'overview'));
+
+  /* ── Modal helpers ── */
+  function openModal(id)  { document.getElementById(id).classList.add('open');    document.body.style.overflow='hidden'; }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+  document.querySelectorAll('.modal-backdrop').forEach(bd => bd.addEventListener('click', e => { if(e.target===bd) closeModal(bd.id); }));
+  document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-backdrop.open').forEach(bd => closeModal(bd.id)); });
+
+  /* ── FAQ modals ── */
+  document.getElementById('openAddFaq').addEventListener('click', () => { activateTab('faq'); openModal('addFaqModal'); });
+  function openFaqEdit(pk, order, isActive, question, answer) {
+    document.getElementById('editFaqForm').action = `/admin/faq/${pk}/edit/`;
+    document.getElementById('efQuestion').value = question;
+    document.getElementById('efAnswer').value   = answer;
+    document.getElementById('efOrder').value    = order;
+    document.getElementById('efActive').checked = isActive;
+    openModal('editFaqModal');
+  }
+  function openFaqDelete(pk, question) {
+    document.getElementById('deleteFaqForm').action = `/admin/faq/${pk}/delete/`;
+    document.getElementById('deleteFaqPreview').textContent = question;
+    openModal('deleteFaqModal');
+  }
+
+  /* ── Service modals ── */
+  document.getElementById('openAddService').addEventListener('click', () => { activateTab('services'); openModal('addServiceModal'); });
+  function openServiceEdit(pk,slug,title,badgeLabel,badgeColor,icon,description,features,imageUrl,available,rating,guaranteeDays,order,isActive) {
+    document.getElementById('editServiceForm').action = `/admin/service/${pk}/edit/`;
+    document.getElementById('esTitle').value       = title;
+    document.getElementById('esSlug').value        = slug;
+    document.getElementById('esBadgeLabel').value  = badgeLabel;
+    document.getElementById('esImageUrl').value    = imageUrl;
+    document.getElementById('esDescription').value = description;
+    document.getElementById('esFeatures').value    = features;
+    document.getElementById('esAvailable').value   = available;
+    document.getElementById('esRating').value      = rating;
+    document.getElementById('esGuarantee').value   = guaranteeDays;
+    document.getElementById('esOrder').value       = order;
+    document.getElementById('esActive').checked    = isActive;
+    const bc = document.getElementById('esBadgeColor');
+    for(let i=0;i<bc.options.length;i++) bc.options[i].selected = bc.options[i].value === badgeColor;
+    const ic = document.getElementById('esIcon');
+    for(let i=0;i<ic.options.length;i++) ic.options[i].selected = ic.options[i].value === icon;
+    openModal('editServiceModal');
+  }
+  function openServiceDelete(pk,title) {
+    document.getElementById('deleteServiceForm').action = `/admin/service/${pk}/delete/`;
+    document.getElementById('deleteServicePreview').textContent = title;
+    openModal('deleteServiceModal');
+  }
+
+  /* ── Blog modals ── */
+  document.getElementById('openAddBlog').addEventListener('click', () => { activateTab('blog'); openModal('addBlogModal'); });
+  function openBlogEdit(pk,slug,title,excerpt,category,authorName,authorAvatar,authorBio,coverImage,tags,readTime,isFeatured,isPublished,content) {
+    document.getElementById('editBlogForm').action        = `/admin/blog/${pk}/edit/`;
+    document.getElementById('ebTitle').value              = title;
+    document.getElementById('ebSlug').value               = slug;
+    document.getElementById('ebExcerpt').value            = excerpt;
+    document.getElementById('ebAuthorName').value         = authorName;
+    document.getElementById('ebAuthorAvatar').value       = authorAvatar;
+    document.getElementById('ebAuthorBio').value          = authorBio;
+    document.getElementById('ebCoverImage').value         = coverImage;
+    document.getElementById('ebTags').value               = tags;
+    document.getElementById('ebReadTime').value           = readTime;
+    document.getElementById('ebContent').value            = content;
+    document.getElementById('ebFeatured').checked         = isFeatured;
+    document.getElementById('ebPublished').checked        = isPublished;
+    const cat = document.getElementById('ebCategory');
+    for(let i=0;i<cat.options.length;i++) cat.options[i].selected = cat.options[i].value === category;
+    openModal('editBlogModal');
+  }
+  function openBlogDelete(pk,title) {
+    document.getElementById('deleteBlogForm').action = `/admin/blog/${pk}/delete/`;
+    document.getElementById('deleteBlogPreview').textContent = title;
+    openModal('deleteBlogModal');
+  }
+</script>
+</body>
+</html>

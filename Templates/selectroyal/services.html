@@ -1,0 +1,330 @@
+{% extends 'selectroyal/base.html' %}
+{% load static %}
+{% block title %}Our Services – SelectRoyal Maids{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}" />
+{% endblock %}
+
+{% block content %}
+<!-- ===== HERO ===== -->
+  <section class="srv-hero">
+    <div class="srv-hero-bg"></div>
+    <div class="container srv-hero-inner">
+      <div class="srv-hero-content">
+        <div class="srv-hero-pill"><i class="fa-solid fa-star"></i> TRUSTED DOMESTIC STAFFING</div>
+        <h1 class="srv-hero-title">Premium Domestic <span class="accent-light">Services</span><br />for Every Nigerian Home</h1>
+        <p class="srv-hero-sub">From live-in maids to professional drivers, we provide fully verified, background-checked domestic staff — matched perfectly to your household needs.</p>
+        <div class="srv-hero-actions">
+          <a href="{% url 'MaidApp:find-a-maid' %}" class="btn btn-primary btn-lg"><i class="fa-solid fa-magnifying-glass"></i> Find Staff Now</a>
+          <a href="{% url 'MaidApp:how-it-works' %}" class="btn btn-outline-white btn-lg"><i class="fa-regular fa-circle-play"></i> How It Works</a>
+        </div>
+        <div class="srv-hero-trust">
+          <div class="srv-trust-item"><i class="fa-solid fa-circle-check"></i> 2,500+ Verified Staff</div>
+          <div class="srv-trust-item"><i class="fa-solid fa-circle-check"></i> 10,000+ Families Served</div>
+          <div class="srv-trust-item"><i class="fa-solid fa-circle-check"></i> Replacement Guarantee</div>
+        </div>
+      </div>
+      <div class="srv-hero-visual">
+        <div class="srv-hero-cards">
+          <div class="srv-float-card srv-float-card--1">
+            <div class="srv-float-icon" style="background:#dbeafe;color:#2563eb"><i class="fa-solid fa-broom"></i></div>
+            <div>
+              <p class="srv-float-name">Maid / House Help</p>
+              <p class="srv-float-count">820+ available</p>
+            </div>
+          </div>
+          <div class="srv-float-card srv-float-card--2">
+            <div class="srv-float-icon" style="background:#dcfce7;color:#16a34a"><i class="fa-solid fa-baby"></i></div>
+            <div>
+              <p class="srv-float-name">Nanny / Babysitter</p>
+              <p class="srv-float-count">430+ available</p>
+            </div>
+          </div>
+          <div class="srv-float-card srv-float-card--3">
+            <div class="srv-float-icon" style="background:#fff7ed;color:#f97316"><i class="fa-solid fa-utensils"></i></div>
+            <div>
+              <p class="srv-float-name">Cook / Chef</p>
+              <p class="srv-float-count">310+ available</p>
+            </div>
+          </div>
+          <div class="srv-rating-badge">
+            <div class="srv-rating-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+            </div>
+            <p class="srv-rating-val">4.9 / 5.0</p>
+            <p class="srv-rating-sub">3,200+ reviews</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SERVICE CATEGORIES TABS ===== -->
+  <section class="srv-tabs-section">
+    <div class="container">
+      <div class="srv-tabs" id="srvTabs">
+        {% for svc in service_list %}
+        <button class="srv-tab {% if forloop.first %}active{% endif %}" data-target="{{ svc.slug }}">
+          {{ svc.title }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SERVICE DETAIL PANELS ===== -->
+  <section class="srv-detail-section">
+    <div class="container">
+
+      {% for svc in service_list %}
+      <div class="srv-panel {% if forloop.first %}active{% endif %}" id="panel-{{ svc.slug }}">
+        <div class="srv-panel-inner">
+          <div class="srv-panel-content">
+            {% if svc.badge_label %}
+            <div class="srv-panel-badge srv-badge--{{ svc.badge_color }}">{{ svc.badge_label }}</div>
+            {% endif %}
+            <h2 class="srv-panel-title">{{ svc.title }}</h2>
+            <p class="srv-panel-desc">{{ svc.description }}</p>
+            <div class="srv-panel-features">
+              {% for feature in svc.features_list %}
+              <div class="srv-pf"><i class="fa-solid fa-check"></i> {{ feature }}</div>
+              {% endfor %}
+            </div>
+            <div class="srv-panel-actions">
+              <a href="{% url 'MaidApp:find-a-maid' %}" class="btn btn-primary">
+                <i class="fa-solid fa-magnifying-glass"></i> Browse {{ svc.title }}
+              </a>
+              <a href="{% url 'MaidApp:how-it-works' %}" class="btn btn-ghost">Learn the Process</a>
+            </div>
+          </div>
+          <div class="srv-panel-visual">
+            {% if svc.image_url %}
+            <img src="{{ svc.image_url }}" alt="{{ svc.title }}" class="srv-panel-img" />
+            {% endif %}
+            <div class="srv-panel-stat-cards">
+              <div class="srv-mini-stat">
+                <strong>{{ svc.available_count }}</strong><span>Available Now</span>
+              </div>
+              <div class="srv-mini-stat">
+                <strong>{{ svc.avg_rating }}</strong><span>Avg Rating</span>
+              </div>
+              <div class="srv-mini-stat">
+                <strong>{{ svc.guarantee_days }} days</strong><span>Guarantee</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:60px 24px;color:#64748b;">
+        <p>No services are currently available. Please check back soon.</p>
+      </div>
+      {% endfor %}
+
+    </div>
+  </section>
+
+  <!-- ===== WHY CHOOSE US ===== -->
+  <section class="srv-why-section">
+    <div class="container">
+      <div class="srv-why-header" data-reveal="up">
+        <p class="srv-why-eyebrow">WHY SELECTROYAL MAIDS</p>
+        <h2 class="section-title center">The SelectRoyal <span class="accent">Difference</span></h2>
+        <p class="section-subtitle center">Every service we offer is backed by the most thorough vetting process in Nigeria</p>
+      </div>
+      <div class="srv-why-grid" data-stagger="100">
+
+        <div class="srv-why-card">
+          <div class="srv-why-icon srv-why-icon--blue"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3>7-Point Verification</h3>
+          <p>NIN, criminal records, references, address, skills, ID match, and health declaration — all checked before listing.</p>
+        </div>
+
+        <div class="srv-why-card">
+          <div class="srv-why-icon srv-why-icon--green"><i class="fa-solid fa-bolt"></i></div>
+          <h3>Fast Placement</h3>
+          <p>Most families are matched with shortlisted candidates within 48 hours of submitting their requirements.</p>
+        </div>
+
+        <div class="srv-why-card">
+          <div class="srv-why-icon srv-why-icon--orange"><i class="fa-solid fa-arrows-rotate"></i></div>
+          <h3>Replacement Guarantee</h3>
+          <p>Not happy? We replace your hire within the guarantee period at zero extra cost — no questions asked.</p>
+        </div>
+
+        <div class="srv-why-card">
+          <div class="srv-why-icon srv-why-icon--purple"><i class="fa-regular fa-message"></i></div>
+          <h3>Dedicated Advisor</h3>
+          <p>A personal placement advisor guides you from requirements to hire, available by phone, chat, and email.</p>
+        </div>
+
+        <div class="srv-why-card">
+          <div class="srv-why-icon srv-why-icon--teal"><i class="fa-solid fa-video"></i></div>
+          <h3>Video Interviews</h3>
+          <p>Interview your shortlisted candidates via our built-in video platform before committing to any hire.</p>
+        </div>
+
+        <div class="srv-why-card">
+          <div class="srv-why-icon srv-why-icon--navy"><i class="fa-solid fa-award"></i></div>
+          <h3>15+ Years Experience</h3>
+          <p>Over a decade of trusted domestic staffing across Lagos, Abuja, Port Harcourt and 15+ Nigerian cities.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROCESS STRIP ===== -->
+  <section class="srv-process-section">
+    <div class="container">
+      <div class="srv-process-header">
+        <p class="srv-process-eyebrow">HOW IT WORKS</p>
+        <h2 class="section-title center">Hire in <span class="accent">4 Simple Steps</span></h2>
+      </div>
+      <div class="srv-process-strip" data-stagger="120">
+        <div class="srv-step">
+          <div class="srv-step-num">01</div>
+          <div class="srv-step-connector"></div>
+          <div class="srv-step-icon"><i class="fa-regular fa-clipboard"></i></div>
+          <h4>Tell Us Your Needs</h4>
+          <p>Fill out a quick form with your location, service type, and schedule.</p>
+        </div>
+        <div class="srv-step">
+          <div class="srv-step-num">02</div>
+          <div class="srv-step-connector"></div>
+          <div class="srv-step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+          <h4>Browse Candidates</h4>
+          <p>Explore matched, verified profiles with ratings and reviews.</p>
+        </div>
+        <div class="srv-step">
+          <div class="srv-step-num">03</div>
+          <div class="srv-step-connector"></div>
+          <div class="srv-step-icon"><i class="fa-solid fa-video"></i></div>
+          <h4>Interview & Choose</h4>
+          <p>Schedule video or in-person interviews with your top picks.</p>
+        </div>
+        <div class="srv-step">
+          <div class="srv-step-num">04</div>
+          <div class="srv-step-connector srv-step-connector--hidden"></div>
+          <div class="srv-step-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <h4>Hire with Confidence</h4>
+          <p>Complete your hire with full support and a replacement guarantee.</p>
+        </div>
+      </div>
+      <div class="srv-process-cta">
+        <a href="{% url 'MaidApp:how-it-works' %}" class="btn btn-outline btn-lg">See Full Process</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIAL STRIP ===== -->
+  <section class="srv-testi-section">
+    <div class="container">
+      <div class="srv-testi-header">
+        <p class="srv-testi-eyebrow">WHAT FAMILIES SAY</p>
+        <h2 class="section-title center">Trusted by Thousands<br /><span class="accent">Across Nigeria</span></h2>
+      </div>
+      <div class="srv-testi-grid" data-stagger="120">
+
+        <div class="srv-testi-card">
+          <div class="srv-testi-stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="srv-testi-text">"We found our live-in housekeeper within 3 days. The verification process gave us complete peace of mind. She's been with us for 2 years and we couldn't be happier."</p>
+          <div class="srv-testi-author">
+            <img src="{% static 'image/Testimonia4.jpg' %}" alt="Chioma Adeyemi" />
+            <div>
+              <p class="srv-testi-name">Chioma Adeyemi</p>
+              <p class="srv-testi-role">Lagos · Maid / House Help</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="srv-testi-card srv-testi-card--featured">
+          <div class="srv-testi-stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="srv-testi-text">"The elderly care specialist they found for my mother has been exceptional. She's patient, professional, and genuinely caring. SelectRoyal Maids changed our family's life."</p>
+          <div class="srv-testi-author">
+            <img src="{% static 'image/Testimonia3.jpg' %}" alt="Emeka Nwachukwu" />
+            <div>
+              <p class="srv-testi-name">Emeka Nwachukwu</p>
+              <p class="srv-testi-role">Abuja · Elderly Care</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="srv-testi-card">
+          <div class="srv-testi-stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+          </div>
+          <p class="srv-testi-text">"Our chef has completely transformed family dinners. The platform matched us with someone who understands our dietary preferences and cooks absolutely amazing Nigerian food."</p>
+          <div class="srv-testi-author">
+            <img src="{% static 'image/Testimonia4.jpg' %}" alt="Bola Adekunle" />
+            <div>
+              <p class="srv-testi-name">Bola Adekunle</p>
+              <p class="srv-testi-role">Port Harcourt · Cook / Chef</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="srv-cta-section">
+    <div class="srv-cta-bg"></div>
+    <div class="container srv-cta-inner">
+      <div class="srv-cta-left" data-reveal="left">
+        <p class="srv-cta-eyebrow"><i class="fa-solid fa-rocket"></i> GET STARTED TODAY</p>
+        <h2 class="srv-cta-title">Ready to Find Your Perfect<br />Domestic Professional?</h2>
+        <p class="srv-cta-sub">Join over 10,000 Nigerian families who trust SelectRoyal Maids for safe, reliable, and professional domestic staffing.</p>
+        <div class="srv-cta-actions">
+          <a href="{% url 'MaidApp:find-a-maid' %}" class="btn btn-white btn-lg"><i class="fa-solid fa-magnifying-glass"></i> Find Staff Now</a>
+          <a href="{% url 'MaidApp:about' %}#contact" class="btn btn-outline-white btn-lg"><i class="fa-solid fa-phone"></i> Talk to Us</a>
+        </div>
+      </div>
+      <div class="srv-cta-right" data-reveal="right" data-delay="150">
+        <div class="srv-cta-stats">
+          <div class="srv-cta-stat">
+            <strong>10,000+</strong>
+            <span>Families Served</span>
+          </div>
+          <div class="srv-cta-stat">
+            <strong>2,500+</strong>
+            <span>Verified Staff</span>
+          </div>
+          <div class="srv-cta-stat">
+            <strong>15+</strong>
+            <span>Years in Business</span>
+          </div>
+          <div class="srv-cta-stat">
+            <strong>4.9★</strong>
+            <span>Average Rating</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/nav.js' %}"></script>
+<script>
+/* Service tabs */
+    var tabs   = document.querySelectorAll('.srv-tab');
+    var panels = document.querySelectorAll('.srv-panel');
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        panels.forEach(function (p) { p.classList.remove('active'); });
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.target).classList.add('active');
+      });
+    });
+</script>
+{% endblock %}

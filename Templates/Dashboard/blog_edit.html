@@ -1,0 +1,317 @@
+{% load static %}
+{% load summernote_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit — {{ post.title }} — SelectRoyalMaids Admin</title>
+  <link rel="icon" href="{% static 'image/logo.png' %}" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  {% summernote_head %}
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #f1f5f9;
+      --card:      #ffffff;
+      --border:    #e2e8f0;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --accent:    #2563eb;
+      --accent-lt: #eff6ff;
+      --accent-dk: #1d4ed8;
+      --green:     #16a34a;
+      --green-lt:  #dcfce7;
+      --red:       #dc2626;
+      --red-lt:    #fee2e2;
+      --radius:    12px;
+      --shadow:    0 1px 3px rgba(0,0,0,.07);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-left a {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: .875rem; font-weight: 600; color: var(--muted);
+      text-decoration: none;
+      padding: 7px 14px; border: 1px solid var(--border);
+      border-radius: 8px; transition: background .15s, color .15s;
+    }
+    .topbar-left a:hover { background: var(--bg); color: var(--text); }
+    .topbar h1 {
+      font-size: 1.05rem; font-weight: 800; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 460px;
+    }
+
+    /* ── Page ── */
+    .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 64px; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-head h2 { font-size: .95rem; font-weight: 700; }
+    .card-body { padding: 24px; }
+
+    /* ── Form ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-field label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: .9rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+      background: #fff;
+    }
+    .form-field textarea { resize: vertical; min-height: 90px; }
+
+    /* ── Toggle ── */
+    .toggle-row {
+      display: flex; align-items: center; gap: 10px;
+      padding-top: 6px;
+    }
+    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #cbd5e1; border-radius: 100px; cursor: pointer;
+      transition: background .2s;
+    }
+    .toggle-track::after {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; background: #fff; border-radius: 50%;
+      top: 3px; left: 3px; transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle input:checked + .toggle-track { background: var(--accent); }
+    .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+    .toggle-label { font-size: .875rem; font-weight: 600; }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 24px; border-radius: 8px;
+      font-size: .875rem; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; border: 1px solid transparent; text-decoration: none;
+      transition: background .15s, transform .1s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { background: var(--accent-dk); }
+    .btn-ghost { background: transparent; color: var(--muted); border-color: var(--border); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text); }
+
+    /* ── Alert ── */
+    .alert {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-radius: 10px; margin-bottom: 20px;
+      font-size: .875rem; font-weight: 600;
+    }
+    .alert-error   { background: var(--red-lt);  border: 1px solid #fecaca; color: var(--red); }
+    .alert-success { background: var(--green-lt); border: 1px solid #bbf7d0; color: var(--green); }
+
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .page { padding: 20px 14px 48px; }
+      .topbar { padding: 0 16px; }
+      .topbar h1 { max-width: 180px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="/admin/dashboard/?tab=blog">
+      <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+    <h1>Edit: {{ post.title|truncatechars:60 }}</h1>
+  </div>
+</header>
+
+<div class="page">
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert {% if msg.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+        <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+        {{ msg }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" action="{% url 'Authentication:blog_edit' post.pk %}">
+    {% csrf_token %}
+
+    <!-- Meta -->
+    <div class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-circle-info" style="color:var(--accent);"></i>
+        <h2>Post Details</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-field full">
+            <label>Title <span style="color:var(--red);">*</span></label>
+            <input type="text" name="title" value="{{ post.title }}" required />
+          </div>
+          <div class="form-field">
+            <label>Slug <span style="color:var(--muted);font-weight:400;">(URL)</span> <span style="color:var(--red);">*</span></label>
+            <input type="text" name="slug" value="{{ post.slug }}" required />
+          </div>
+          <div class="form-field">
+            <label>Category</label>
+            <select name="category">
+              {% for val, label in blog_categories %}
+                <option value="{{ val }}" {% if post.category == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Author name</label>
+            <input type="text" name="author_name" value="{{ post.author_name }}" />
+          </div>
+          <div class="form-field">
+            <label>Author avatar URL</label>
+            <input type="url" name="author_avatar" value="{{ post.author_avatar }}" />
+          </div>
+          <div class="form-field">
+            <label>Cover image URL</label>
+            <input type="url" name="cover_image" value="{{ post.cover_image }}" />
+          </div>
+          <div class="form-field">
+            <label>Read time (mins)</label>
+            <input type="number" name="read_time" value="{{ post.read_time }}" min="1" />
+          </div>
+          <div class="form-field">
+            <label>Tags <span style="color:var(--muted);font-weight:400;">(comma-separated)</span></label>
+            <input type="text" name="tags" value="{{ post.tags }}" />
+          </div>
+          <div class="form-field full">
+            <label>Excerpt <span style="color:var(--red);">*</span></label>
+            <textarea name="excerpt" required>{{ post.excerpt }}</textarea>
+          </div>
+          <div class="form-field full">
+            <label>Author bio</label>
+            <textarea name="author_bio" style="min-height:60px;">{{ post.author_bio }}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content editor -->
+    <div class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-pen-nib" style="color:var(--accent);"></i>
+        <h2>Full Article Content</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-field">
+          <label>Content <span style="color:var(--red);">*</span></label>
+          {% summernote 'content' post.content %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Publish options -->
+    <div class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-sliders" style="color:var(--accent);"></i>
+        <h2>Publish Options</h2>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;gap:32px;flex-wrap:wrap;">
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" name="is_featured" {% if post.is_featured %}checked{% endif %} />
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Featured post</span>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" name="is_published" {% if post.is_published %}checked{% endif %} />
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Published (live)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="btn-row">
+      <button type="submit" class="btn btn-primary">
+        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+      </button>
+      <a href="/admin/dashboard/?tab=blog" class="btn btn-ghost">
+        <i class="fa-solid fa-xmark"></i> Cancel
+      </a>
+    </div>
+
+  </form>
+</div>
+
+{% summernote_body %}
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Employer Account – SelectRoyalMaids</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/signup.css' %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Mobile logo bar (visible only on small screens) -->
+  <a href="{% url 'MaidApp:index' %}" class="auth-page-mobile-logo">
+    <img src="{% static 'image/logo.png' %}" alt="SelectRoyalMaids" class="auth-mobile-logo-img" />
+    <div class="logo-text-wrap">
+      <span class="logo-text"><span class="logo-accent">SelectRoyal</span></span>
+      <span class="logo-sub">MAIDS</span>
+    </div>
+  </a>
+
+  <div class="auth-page">
+
+    <!-- ===== LEFT PANEL ===== -->
+    <div class="auth-left">
+      <div class="auth-circle auth-circle--1"></div>
+      <div class="auth-circle auth-circle--2"></div>
+
+      <!-- Logo -->
+      <a href="{% url 'MaidApp:index' %}" class="auth-left-logo">
+        <img src="{% static 'image/logo.png' %}" alt="SelectRoyalMaids" class="auth-left-logo-img" />
+        <div class="auth-logo-text">
+          <strong>SelectRoyalMaids</strong>
+          <span>Nigeria's Trusted Platform</span>
+        </div>
+      </a>
+
+      <!-- Body -->
+      <div class="auth-left-body">
+        <div class="auth-left-tag"><i class="fa-solid fa-user-tie"></i> Employer Account</div>
+        <h2 class="auth-left-title">Find Your Perfect<br /><span>Domestic Staff</span><br />in Days, Not Weeks</h2>
+        <p class="auth-left-desc">Join over 10,000 Nigerian families who use SelectRoyalMaids to find verified, background-checked domestic professionals quickly and safely.</p>
+
+        <div class="auth-benefits">
+          <div class="auth-benefit">
+            <div class="auth-benefit-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="auth-benefit-text">
+              <strong>100% Verified Candidates</strong>
+              <span>Every maid passes our 7-point NIN background check</span>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <div class="auth-benefit-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="auth-benefit-text">
+              <strong>Matched Within 24 Hours</strong>
+              <span>Our advisors shortlist candidates for you fast</span>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <div class="auth-benefit-icon"><i class="fa-solid fa-rotate"></i></div>
+            <div class="auth-benefit-text">
+              <strong>Free Replacement Guarantee</strong>
+              <span>Not happy? We replace at zero cost, no questions asked</span>
+            </div>
+          </div>
+          <div class="auth-benefit">
+            <div class="auth-benefit-icon"><i class="fa-solid fa-headset"></i></div>
+            <div class="auth-benefit-text">
+              <strong>Dedicated Support Advisor</strong>
+              <span>A real person guides you from search to placement</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonial -->
+      <div class="auth-left-footer">
+        <div class="auth-testimonial">
+          <p class="auth-testimonial-text">"I found an amazing housekeeper within 3 days. The whole process was seamless — from profile browsing to the interview. Highly recommend SelectRoyalMaids!"</p>
+          <div class="auth-testimonial-author">
+            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Chioma Adeyemi" />
+            <div>
+              <p class="auth-testimonial-name">Chioma Adeyemi</p>
+              <p class="auth-testimonial-loc"><i class="fa-solid fa-location-dot" style="font-size:10px;color:#93c5fd;margin-right:3px"></i> Lagos, Nigeria</p>
+            </div>
+            <div class="auth-testimonial-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RIGHT PANEL — FORM ===== -->
+    <div class="auth-right">
+      <div class="auth-right-inner">
+
+        <!-- Header -->
+        <div class="auth-form-header">
+          <div class="auth-form-tag"><i class="fa-solid fa-user-plus"></i> Create Account</div>
+          <h1 class="auth-form-title">Sign Up as an Employer</h1>
+          <p class="auth-form-sub">Already have an account? <a href="{% url 'Authentication:login' %}">Sign in here</a></p>
+        </div>
+
+        <!-- Step dots -->
+        <div class="af-steps" id="afSteps">
+          <div class="af-step-dot active" id="dot1"></div>
+          <div class="af-step-dot" id="dot2"></div>
+          <div class="af-step-dot" id="dot3"></div>
+          <div class="af-step-dot" id="dot4"></div>
+          <span class="af-steps-label" id="stepsLabel">Step 1 of 4 — Personal Info</span>
+        </div>
+
+        <!-- Error box -->
+        <div class="af-error" id="afError">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span id="afErrorText"></span>
+        </div>
+
+        {% if messages %}
+          <div class="af-error" style="display:flex;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{% for message in messages %}{{ message }}{% endfor %}</span>
+          </div>
+        {% endif %}
+
+        <!-- STEP 1 -->
+        <div id="step1">
+          <form id="step1Form" novalidate>
+            <div class="af-row">
+              <div class="af-field">
+                <label class="af-label" for="firstName">First Name <span class="af-req">*</span></label>
+                <div class="af-wrap">
+                  <i class="fa-regular fa-user af-icon"></i>
+                  <input type="text" id="firstName" class="af-input" placeholder="e.g. Chioma" autocomplete="given-name" required />
+                </div>
+              </div>
+              <div class="af-field">
+                <label class="af-label" for="lastName">Last Name <span class="af-req">*</span></label>
+                <div class="af-wrap">
+                  <i class="fa-regular fa-user af-icon"></i>
+                  <input type="text" id="lastName" class="af-input" placeholder="e.g. Adeyemi" autocomplete="family-name" required />
+                </div>
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="email">Email Address <span class="af-req">*</span></label>
+              <div class="af-wrap">
+                <i class="fa-regular fa-envelope af-icon"></i>
+                <input type="email" id="email" class="af-input" placeholder="you@example.com" autocomplete="email" required />
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="phone">Phone Number <span class="af-req">*</span></label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-phone af-icon"></i>
+                <input type="tel" id="phone" class="af-input" placeholder="e.g. 08012345678" autocomplete="tel" required />
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="city">City <span class="af-req">*</span></label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-location-dot af-icon"></i>
+                <select id="city" class="af-select" required>
+                  <option value="" disabled selected>Select your city</option>
+                  <option>Lagos</option><option>Abuja</option><option>Port Harcourt</option>
+                  <option>Ibadan</option><option>Kano</option><option>Enugu</option>
+                  <option>Benin City</option><option>Kaduna</option><option>Warri</option>
+                  <option>Owerri</option><option>Other</option>
+                </select>
+                <i class="fa-solid fa-chevron-down af-select-arr"></i>
+              </div>
+            </div>
+
+            <button type="submit" class="af-submit">
+              Continue <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="step2" style="display:none">
+          <form id="step2Form" novalidate>
+            <div class="af-field">
+              <label class="af-label" for="password">Create Password <span class="af-req">*</span></label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-lock af-icon"></i>
+                <input type="password" id="password" class="af-input" placeholder="At least 8 characters" autocomplete="new-password" required />
+                <button type="button" class="af-eye" id="togglePwd" aria-label="Toggle password">
+                  <i class="fa-regular fa-eye" id="eyeIcon1"></i>
+                </button>
+              </div>
+              <div class="af-strength">
+                <div class="af-strength-bar"><div class="af-strength-fill" id="strengthFill"></div></div>
+                <span class="af-strength-label" id="strengthLabel">Enter a password</span>
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="confirmPassword">Confirm Password <span class="af-req">*</span></label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-lock af-icon"></i>
+                <input type="password" id="confirmPassword" class="af-input" placeholder="Repeat your password" autocomplete="new-password" required />
+                <button type="button" class="af-eye" id="toggleConfirm" aria-label="Toggle password">
+                  <i class="fa-regular fa-eye" id="eyeIcon2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="service">Type of Help Needed</label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-briefcase af-icon"></i>
+                <select id="service" class="af-select">
+                  <option value="" disabled selected>Select service type</option>
+                  <option>Maid / House Help</option>
+                  <option>Cook / Chef</option>
+                  <option>Baby Sitter</option>
+                  <option>Elderly Care</option>
+                  <option>Multiple Services</option>
+                </select>
+                <i class="fa-solid fa-chevron-down af-select-arr"></i>
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="howHeard">How did you hear about us?</label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-magnifying-glass af-icon"></i>
+                <select id="howHeard" class="af-select">
+                  <option value="" disabled selected>Select source</option>
+                  <option>Google Search</option>
+                  <option>Instagram</option>
+                  <option>Facebook</option>
+                  <option>WhatsApp</option>
+                  <option>Friend / Referral</option>
+                  <option>TV / Radio</option>
+                  <option>Other</option>
+                </select>
+                <i class="fa-solid fa-chevron-down af-select-arr"></i>
+              </div>
+            </div>
+
+            <button type="submit" class="af-submit">
+              Continue <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+            <div style="text-align:center;margin-top:10px">
+              <button type="button" id="backToStep1" style="background:none;border:none;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+                <i class="fa-solid fa-arrow-left" style="margin-right:5px"></i> Back
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- STEP 3 — Choose Plan -->
+        <div id="step3" style="display:none">
+          <p style="font-size:13px;color:#64748b;margin-bottom:18px;line-height:1.6;">
+            Choose the plan that fits your hiring needs. You will be redirected to a secure payment page to complete your subscription.
+          </p>
+
+          <style>
+            .plan-cards { display:flex; flex-direction:column; gap:14px; margin-bottom:20px; }
+            .plan-card {
+              border: 2px solid #e2e8f0;
+              border-radius: 14px;
+              padding: 18px 20px;
+              cursor: pointer;
+              transition: border-color .2s, box-shadow .2s, background .2s;
+              position: relative;
+              background: #fff;
+            }
+            .plan-card:hover { border-color: #93c5fd; box-shadow: 0 4px 16px rgba(37,99,235,.08); }
+            .plan-card.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 4px 18px rgba(37,99,235,.13); }
+            .plan-card.selected.plan-premium { border-color: #7c3aed; background: #f5f3ff; box-shadow: 0 4px 18px rgba(124,58,237,.13); }
+            .plan-badge {
+              display: inline-flex; align-items: center; gap: 5px;
+              font-size: .68rem; font-weight: 800; letter-spacing: .06em;
+              text-transform: uppercase; padding: 3px 10px; border-radius: 100px;
+              margin-bottom: 8px;
+            }
+            .plan-badge-std     { background: #dbeafe; color: #1d4ed8; }
+            .plan-badge-premium { background: #ede9fe; color: #6d28d9; }
+            .plan-best-value {
+              position: absolute; top: -11px; right: 18px;
+              background: #7c3aed; color: #fff;
+              font-size: .65rem; font-weight: 800; letter-spacing: .08em;
+              text-transform: uppercase; padding: 3px 12px; border-radius: 100px;
+            }
+            .plan-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+            .plan-title { font-size: 1rem; font-weight: 800; color: #1e293b; }
+            .plan-price { font-size: 1.35rem; font-weight: 800; color: #2563eb; }
+            .plan-card.plan-premium .plan-price { color: #7c3aed; }
+            .plan-price span { font-size: .75rem; font-weight: 500; color: #64748b; }
+            .plan-desc { font-size: .8rem; color: #64748b; margin-top: 6px; line-height: 1.55; }
+            .plan-features { list-style: none; margin-top: 12px; display: flex; flex-direction: column; gap: 7px; }
+            .plan-features li { font-size: .82rem; color: #475569; display: flex; align-items: center; gap: 8px; }
+            .plan-features li i { color: #16a34a; font-size: .75rem; flex-shrink: 0; }
+            .plan-card.plan-premium .plan-features li i { color: #7c3aed; }
+            .plan-radio { display: none; }
+          </style>
+
+          <div class="plan-cards" role="radiogroup" aria-label="Select a plan">
+
+            <!-- Standard -->
+            <label class="plan-card" id="cardStandard" for="planStandard">
+              <input class="plan-radio" type="radio" name="planChoice" id="planStandard" value="standard" checked />
+              <div class="plan-badge plan-badge-std"><i class="fa-solid fa-user"></i> Standard</div>
+              <div class="plan-head">
+                <span class="plan-title">Standard Plan</span>
+                <span class="plan-price">₦10,000 <span>/ once</span></span>
+              </div>
+              <p class="plan-desc">Great for households hiring one domestic professional.</p>
+              <ul class="plan-features">
+                <li><i class="fa-solid fa-circle-check"></i> Access to verified candidates</li>
+                <li><i class="fa-solid fa-circle-check"></i> 1 active hire request</li>
+                <li><i class="fa-solid fa-circle-check"></i> Standard support (Mon–Fri)</li>
+                <li><i class="fa-solid fa-circle-check"></i> 30-day replacement guarantee</li>
+              </ul>
+            </label>
+
+            <!-- Premium -->
+            <label class="plan-card plan-premium" id="cardPremium" for="planPremium">
+              <span class="plan-best-value"><i class="fa-solid fa-crown" style="margin-right:4px"></i> Best Value</span>
+              <input class="plan-radio" type="radio" name="planChoice" id="planPremium" value="premium" />
+              <div class="plan-badge plan-badge-premium"><i class="fa-solid fa-crown"></i> Premium</div>
+              <div class="plan-head">
+                <span class="plan-title">Premium Plan</span>
+                <span class="plan-price">₦20,000 <span>/ once</span></span>
+              </div>
+              <p class="plan-desc">Ideal for families needing multiple staff or faster placements.</p>
+              <ul class="plan-features">
+                <li><i class="fa-solid fa-circle-check"></i> Everything in Standard</li>
+                <li><i class="fa-solid fa-circle-check"></i> Up to 5 active hire requests</li>
+                <li><i class="fa-solid fa-circle-check"></i> Priority 24/7 support</li>
+                <li><i class="fa-solid fa-circle-check"></i> Dedicated placement advisor</li>
+                <li><i class="fa-solid fa-circle-check"></i> 60-day replacement guarantee</li>
+                <li><i class="fa-solid fa-circle-check"></i> Profile boosted in search results</li>
+              </ul>
+            </label>
+
+          </div>
+
+          <button type="button" id="step3Next" class="af-submit">
+            Continue to Review <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <div style="text-align:center;margin-top:10px">
+            <button type="button" id="backToStep2" style="background:none;border:none;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+              <i class="fa-solid fa-arrow-left" style="margin-right:5px"></i> Back
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 4 — Review & Submit -->
+        <div id="step4" style="display:none">
+          <form id="step3Form" method="post" action="{% url 'Authentication:signup' %}" novalidate>
+            {% csrf_token %}
+
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:18px;">
+              <p style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;">Review your details</p>
+              <div id="reviewDetails" style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#475569;"></div>
+            </div>
+
+            <input type="hidden" name="firstName" id="hiddenFirstName" />
+            <input type="hidden" name="lastName" id="hiddenLastName" />
+            <input type="hidden" name="email" id="hiddenEmail" />
+            <input type="hidden" name="phone" id="hiddenPhone" />
+            <input type="hidden" name="city" id="hiddenCity" />
+            <input type="hidden" name="password" id="hiddenPassword" />
+            <input type="hidden" name="confirmPassword" id="hiddenConfirmPassword" />
+            <input type="hidden" name="service" id="hiddenService" />
+            <input type="hidden" name="howHeard" id="hiddenHowHeard" />
+            <input type="hidden" name="plan" id="hiddenPlan" />
+
+            <div class="af-check-row">
+              <input type="checkbox" id="termsCheck" name="terms" required />
+              <label for="termsCheck">
+                I agree to the <a href="{% url 'MaidApp:terms-of-service' %}" target="_blank">Terms of Service</a> and <a href="{% url 'MaidApp:privacy-policy' %}" target="_blank">Privacy Policy</a>. I confirm I am at least 18 years old.
+              </label>
+            </div>
+
+            <div class="af-check-row">
+              <input type="checkbox" id="marketingCheck" name="marketing" />
+              <label for="marketingCheck">
+                Send me updates about new maids, tips, and platform news via email and WhatsApp.
+              </label>
+            </div>
+
+            <button type="submit" class="af-submit" id="createAccBtn">
+              <i class="fa-solid fa-credit-card"></i> Pay &amp; Create Account
+            </button>
+
+            <div style="text-align:center;margin-top:10px">
+              <button type="button" id="backToStep3" style="background:none;border:none;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+                <i class="fa-solid fa-arrow-left" style="margin-right:5px"></i> Back
+              </button>
+            </div>
+          </form>
+        </div><!-- /step4 -->
+
+        <!-- SUCCESS -->
+        <div id="signupSuccess" style="display:none;text-align:center;padding:20px 0">
+          <div style="font-size:60px;color:#16a34a;margin-bottom:16px"><i class="fa-solid fa-circle-check"></i></div>
+          <h2 style="font-size:22px;font-weight:800;color:#1e293b;margin-bottom:8px">Account Created!</h2>
+          <p style="font-size:14px;color:#64748b;line-height:1.65;margin-bottom:24px">Welcome to SelectRoyalMaids! Your employer account is ready. Start browsing verified domestic staff right away.</p>
+          <a href="{% url 'MaidApp:find-a-maid' %}" class="af-submit" style="text-decoration:none;display:inline-flex;width:auto;padding:13px 32px">
+            <i class="fa-solid fa-magnifying-glass"></i> Browse Maids Now
+          </a>
+        </div>
+
+        <!-- Login link -->
+        <div class="af-login-link" id="loginLinkRow" style="margin-top:16px">
+          Already have an account? <a href="{% url 'Authentication:login' %}">Sign in</a>
+        </div>
+
+        <!-- Trust row -->
+        <div class="af-trust-row">
+          <div class="af-trust-item"><i class="fa-solid fa-lock"></i> SSL Encrypted</div>
+          <div class="af-trust-item"><i class="fa-solid fa-shield-halved"></i> 100% Secure</div>
+          <div class="af-trust-item"><i class="fa-solid fa-eye-slash"></i> Privacy Protected</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  (function () {
+    var currentStep = 1;
+    var formData = {};
+
+    function showError(msg) {
+      var box = document.getElementById('afError');
+      document.getElementById('afErrorText').textContent = msg;
+      box.style.display = 'flex';
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(function () { box.style.display = 'none'; }, 5000);
+    }
+
+    function clearError() { document.getElementById('afError').style.display = 'none'; }
+
+    function setStep(n) {
+      /* Show only the active step div (step1..step4) */
+      [1, 2, 3, 4].forEach(function (i) {
+        var el = document.getElementById('step' + i);
+        if (el) el.style.display = i === n ? 'block' : 'none';
+        var dot = document.getElementById('dot' + i);
+        if (dot) {
+          dot.classList.remove('active', 'done');
+          if (i < n)  dot.classList.add('done');
+          if (i === n) dot.classList.add('active');
+        }
+      });
+      var labels = ['Personal Info', 'Security & Preferences', 'Choose Plan', 'Review & Pay'];
+      document.getElementById('stepsLabel').textContent =
+        'Step ' + n + ' of 4 \u2014 ' + labels[n - 1];
+      document.getElementById('signupSuccess').style.display = 'none';
+      clearError();
+      currentStep = n;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── Step 1 ── */
+    document.getElementById('step1Form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fn = document.getElementById('firstName').value.trim();
+      var ln = document.getElementById('lastName').value.trim();
+      var em = document.getElementById('email').value.trim();
+      var ph = document.getElementById('phone').value.trim();
+      var ct = document.getElementById('city').value;
+      if (!fn) { showError('Please enter your first name.'); return; }
+      if (!ln) { showError('Please enter your last name.'); return; }
+      if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showError('Please enter a valid email address.'); return; }
+      if (!ph) { showError('Please enter your phone number.'); return; }
+      if (!ct) { showError('Please select your city.'); return; }
+      formData = { firstName: fn, lastName: ln, email: em, phone: ph, city: ct };
+      setStep(2);
+    });
+
+    /* ── Password strength ── */
+    document.getElementById('password').addEventListener('input', function () {
+      var v = this.value;
+      var score = 0;
+      if (v.length >= 8) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      var fill   = document.getElementById('strengthFill');
+      var lbl    = document.getElementById('strengthLabel');
+      var colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+      var labels = ['Weak', 'Fair', 'Good', 'Strong'];
+      var pct    = [25, 50, 75, 100];
+      if (v.length === 0) {
+        fill.style.width = '0%';
+        lbl.textContent  = 'Enter a password';
+        lbl.style.color  = '#94a3b8';
+        return;
+      }
+      var i = Math.max(0, score - 1);
+      fill.style.width       = pct[i] + '%';
+      fill.style.background  = colors[i];
+      lbl.textContent        = labels[i];
+      lbl.style.color        = colors[i];
+    });
+
+    /* ── Toggle passwords ── */
+    function togglePwd(inputId, iconId) {
+      var inp = document.getElementById(inputId);
+      var ico = document.getElementById(iconId);
+      inp.type    = inp.type === 'password' ? 'text' : 'password';
+      ico.className = inp.type === 'password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+    }
+    document.getElementById('togglePwd').addEventListener('click',     function () { togglePwd('password', 'eyeIcon1'); });
+    document.getElementById('toggleConfirm').addEventListener('click', function () { togglePwd('confirmPassword', 'eyeIcon2'); });
+
+    /* ── Step 2 ── */
+    document.getElementById('step2Form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var pw  = document.getElementById('password').value;
+      var cpw = document.getElementById('confirmPassword').value;
+      if (pw.length < 8) { showError('Password must be at least 8 characters.'); return; }
+      if (pw !== cpw)    { showError('Passwords do not match.'); return; }
+      formData.password = pw;
+      formData.service  = document.getElementById('service').value  || 'Not specified';
+      formData.source   = document.getElementById('howHeard').value || 'Not specified';
+      setStep(3);
+    });
+
+    /* ── Plan card selection highlight ── */
+    function updatePlanCards() {
+      var std  = document.getElementById('planStandard');
+      var prem = document.getElementById('planPremium');
+      document.getElementById('cardStandard').classList.toggle('selected', std.checked);
+      document.getElementById('cardPremium').classList.toggle('selected',  prem.checked);
+    }
+    document.getElementById('planStandard').addEventListener('change', updatePlanCards);
+    document.getElementById('planPremium').addEventListener('change',  updatePlanCards);
+    updatePlanCards(); /* initial highlight */
+
+    /* ── Step 3 → Step 4 ── */
+    document.getElementById('step3Next').addEventListener('click', function () {
+      var planVal   = document.querySelector('input[name="planChoice"]:checked').value;
+      var planLabel = planVal === 'premium' ? 'Premium — ₦20,000' : 'Standard — ₦10,000';
+      formData.plan      = planVal;
+      formData.planLabel = planLabel;
+
+      /* Populate review */
+      var rev = document.getElementById('reviewDetails');
+      rev.innerHTML = [
+        ['Name',    formData.firstName + ' ' + formData.lastName],
+        ['Email',   formData.email],
+        ['Phone',   formData.phone],
+        ['City',    formData.city],
+        ['Service', formData.service],
+        ['Plan',    formData.planLabel],
+      ].map(function (r) {
+        var isplan = r[0] === 'Plan';
+        return '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #e2e8f0">'
+          + '<span style="color:#94a3b8;font-weight:600">' + r[0] + '</span>'
+          + '<span style="font-weight:700;color:' + (isplan ? '#2563eb' : '#1e293b') + '">' + r[1] + '</span>'
+          + '</div>';
+      }).join('');
+
+      setStep(4);
+    });
+
+    /* ── Back buttons ── */
+    document.getElementById('backToStep1').addEventListener('click', function () { setStep(1); });
+    document.getElementById('backToStep2').addEventListener('click', function () { setStep(2); });
+    document.getElementById('backToStep3').addEventListener('click', function () { setStep(3); });
+
+    /* ── Step 4 submit ── */
+    document.getElementById('step3Form').addEventListener('submit', function (e) {
+      if (!document.getElementById('termsCheck').checked) {
+        showError('Please agree to the Terms of Service and Privacy Policy.');
+        e.preventDefault();
+        return;
+      }
+      document.getElementById('hiddenFirstName').value      = formData.firstName  || '';
+      document.getElementById('hiddenLastName').value       = formData.lastName   || '';
+      document.getElementById('hiddenEmail').value          = formData.email      || '';
+      document.getElementById('hiddenPhone').value          = formData.phone      || '';
+      document.getElementById('hiddenCity').value           = formData.city       || '';
+      document.getElementById('hiddenPassword').value       = formData.password   || '';
+      document.getElementById('hiddenConfirmPassword').value= formData.password   || '';
+      document.getElementById('hiddenService').value        = formData.service    || '';
+      document.getElementById('hiddenHowHeard').value       = formData.source     || '';
+      document.getElementById('hiddenPlan').value           = formData.plan       || 'standard';
+      var btn = document.getElementById('createAccBtn');
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecting to payment…';
+      btn.disabled  = true;
+    });
+
+    setStep(1);
+  })();
+  </script>
+
+</body>
+</html>

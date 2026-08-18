@@ -1,0 +1,804 @@
+{% extends 'selectroyal/base.html' %}
+{% load static %}
+{% block title %}Find a Maid – SelectRoyal Maids{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/find-a-maid.css' %}" />
+{% endblock %}
+
+{% block content %}
+<!-- ===== PAGE HERO ===== -->
+  <section class="page-hero fam-hero">
+    <div class="page-hero-bg"></div>
+    <div class="container page-hero-inner">
+      <div class="page-hero-pill"><i class="fa-solid fa-magnifying-glass"></i> BROWSE VERIFIED STAFF</div>
+      <h1 class="page-hero-title">Find Your Perfect <span class="accent-light">Maid</span></h1>
+      <p class="page-hero-sub">Browse hundreds of background-verified maids, house helps, cooks, nannies and caregivers across Lagos, Abuja, Port Harcourt and 15+ Nigerian cities.</p>
+
+      <!-- trust pills -->
+      <div class="fam-hero-trust">
+        <span><i class="fa-solid fa-circle-check"></i> 2,500+ Verified Profiles</span>
+        <span><i class="fa-solid fa-shield-halved"></i> Background Checked</span>
+        <span><i class="fa-regular fa-id-card"></i> NIN Verified</span>
+        <span><i class="fa-solid fa-rotate-left"></i> Replacement Guarantee</span>
+      </div>
+    </div>
+
+    <!-- Quick search bar -->
+    <div class="fam-hero-search">
+      <div class="container">
+        <div class="fam-hs-field">
+          <i class="fa-solid fa-location-dot"></i>
+          <select id="heroCity" aria-label="Select city">
+            <option value="">All Cities</option>
+            <option value="Lagos">Lagos</option>
+            <option value="Abuja">Abuja</option>
+            <option value="Port Harcourt">Port Harcourt</option>
+            <option value="Ibadan">Ibadan</option>
+            <option value="Kano">Kano</option>
+            <option value="Enugu">Enugu</option>
+            <option value="Benin City">Benin City</option>
+            <option value="Kaduna">Kaduna</option>
+            <option value="Warri">Warri</option>
+            <option value="Owerri">Owerri</option>
+          </select>
+        </div>
+        <div class="fam-hs-divider"></div>
+        <div class="fam-hs-field">
+          <i class="fa-solid fa-briefcase"></i>
+          <select id="heroRole" aria-label="Select role">
+            <option value="">All Roles</option>
+            <option value="Maid / House Help">Maid / House Help</option>
+            <option value="Cook / Chef">Cook / Chef</option>
+            <option value="Baby Sitter">Baby Sitter</option>
+            <option value="Elderly Care">Elderly Care</option>
+            <option value="Nanny">Nanny</option>
+            <option value="Driver">Driver</option>
+          </select>
+        </div>
+        <div class="fam-hs-divider"></div>
+        <div class="fam-hs-field">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="heroSearch" placeholder="Search by name or skill…" aria-label="Search by name or skill" />
+        </div>
+        <button class="btn btn-primary fam-hs-btn" id="heroSearchBtn">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MAIN CONTENT: SIDEBAR + LISTINGS ===== -->
+  <section class="fam-main-section">
+    <div class="container fam-layout">
+
+      <!-- ===== SIDEBAR FILTERS ===== -->
+      <aside class="fam-sidebar" id="filterSidebar" aria-label="Filter results">
+
+        <div class="fam-sidebar-header">
+          <h2><i class="fa-solid fa-sliders"></i> Filter Results</h2>
+          <button class="fam-clear-btn" id="clearAllFilters" aria-label="Clear all filters">Clear All</button>
+        </div>
+
+        <!-- Active filter tags -->
+        <div class="fam-active-tags" id="activeFilterTags" aria-live="polite"></div>
+
+        <!-- --- Location --- -->
+        <div class="fam-filter-group">
+          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-location">
+            <span><i class="fa-solid fa-location-dot"></i> Location</span>
+            <i class="fa-solid fa-chevron-down fam-chevron"></i>
+          </button>
+          <div class="fam-filter-group-body" id="fg-location">
+            <div class="fam-checkbox-list">
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Lagos" /> Lagos</label>
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Abuja" /> Abuja</label>
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Port Harcourt" /> Port Harcourt</label>
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Ibadan" /> Ibadan</label>
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Kano" /> Kano</label>
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Enugu" /> Enugu</label>
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Benin City" /> Benin City</label>
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Warri" /> Warri</label>
+              <label class="fam-checkbox"><input type="checkbox" name="city" value="Owerri" /> Owerri</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- --- Service Type --- -->
+        <div class="fam-filter-group">
+          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-service">
+            <span><i class="fa-solid fa-briefcase"></i> Service Type</span>
+            <i class="fa-solid fa-chevron-down fam-chevron"></i>
+          </button>
+          <div class="fam-filter-group-body" id="fg-service">
+            <div class="fam-checkbox-list">
+              <label class="fam-checkbox"><input type="checkbox" name="role" value="Maid / House Help" /> Maid / House Help</label>
+              <label class="fam-checkbox"><input type="checkbox" name="role" value="Cook / Chef" /> Cook / Chef</label>
+              <label class="fam-checkbox"><input type="checkbox" name="role" value="Baby Sitter" /> Baby Sitter</label>
+              <label class="fam-checkbox"><input type="checkbox" name="role" value="Elderly Care" /> Elderly Care</label>
+              <label class="fam-checkbox"><input type="checkbox" name="role" value="Nanny" /> Nanny</label>
+              <label class="fam-checkbox"><input type="checkbox" name="role" value="Driver" /> Driver</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- --- Availability --- -->
+        <div class="fam-filter-group">
+          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-avail">
+            <span><i class="fa-regular fa-clock"></i> Availability</span>
+            <i class="fa-solid fa-chevron-down fam-chevron"></i>
+          </button>
+          <div class="fam-filter-group-body" id="fg-avail">
+            <div class="fam-checkbox-list">
+              <label class="fam-checkbox"><input type="checkbox" name="availability" value="available-now" /> Available Now</label>
+              <label class="fam-checkbox"><input type="checkbox" name="availability" value="available-soon" /> Available Soon</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- --- Work Arrangement --- -->
+        <div class="fam-filter-group">
+          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-work">
+            <span><i class="fa-solid fa-house-user"></i> Work Arrangement</span>
+            <i class="fa-solid fa-chevron-down fam-chevron"></i>
+          </button>
+          <div class="fam-filter-group-body" id="fg-work">
+            <div class="fam-checkbox-list">
+              <label class="fam-checkbox"><input type="checkbox" name="workType" value="Live-in" /> Live-in</label>
+              <label class="fam-checkbox"><input type="checkbox" name="workType" value="Live-out" /> Live-out</label>
+              <label class="fam-checkbox"><input type="checkbox" name="workType" value="Part-time" /> Part-time</label>
+              <label class="fam-checkbox"><input type="checkbox" name="workType" value="Full-time" /> Full-time</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- --- Experience --- -->
+        <div class="fam-filter-group">
+          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-exp">
+            <span><i class="fa-solid fa-award"></i> Experience</span>
+            <i class="fa-solid fa-chevron-down fam-chevron"></i>
+          </button>
+          <div class="fam-filter-group-body" id="fg-exp">
+            <div class="fam-checkbox-list">
+              <label class="fam-checkbox"><input type="checkbox" name="experience" value="0-2" /> 0 – 2 Years</label>
+              <label class="fam-checkbox"><input type="checkbox" name="experience" value="3-5" /> 3 – 5 Years</label>
+              <label class="fam-checkbox"><input type="checkbox" name="experience" value="6-10" /> 6 – 10 Years</label>
+              <label class="fam-checkbox"><input type="checkbox" name="experience" value="10+" /> 10+ Years</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- --- Minimum Rating --- -->
+        <div class="fam-filter-group">
+          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-rating">
+            <span><i class="fa-solid fa-star"></i> Minimum Rating</span>
+            <i class="fa-solid fa-chevron-down fam-chevron"></i>
+          </button>
+          <div class="fam-filter-group-body" id="fg-rating">
+            <div class="fam-radio-list">
+              <label class="fam-radio"><input type="radio" name="minRating" value="0" checked /> Any Rating</label>
+              <label class="fam-radio"><input type="radio" name="minRating" value="4" />
+                <span class="fam-star-row"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i></span> 4.0+
+              </label>
+              <label class="fam-radio"><input type="radio" name="minRating" value="4.5" />
+                <span class="fam-star-row"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span> 4.5+
+              </label>
+              <label class="fam-radio"><input type="radio" name="minRating" value="4.8" />
+                <span class="fam-star-row"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span> 4.8+
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- --- Skills --- -->
+        <div class="fam-filter-group">
+          <button class="fam-filter-group-toggle" aria-expanded="false" aria-controls="fg-skills">
+            <span><i class="fa-solid fa-hands"></i> Skills</span>
+            <i class="fa-solid fa-chevron-down fam-chevron"></i>
+          </button>
+          <div class="fam-filter-group-body fam-filter-group-body--collapsed" id="fg-skills">
+            <div class="fam-skill-tags">
+              <button class="fam-skill-tag" data-skill="Housekeeping">Housekeeping</button>
+              <button class="fam-skill-tag" data-skill="Cooking">Cooking</button>
+              <button class="fam-skill-tag" data-skill="Childcare">Childcare</button>
+              <button class="fam-skill-tag" data-skill="Laundry">Laundry</button>
+              <button class="fam-skill-tag" data-skill="Ironing">Ironing</button>
+              <button class="fam-skill-tag" data-skill="Deep Cleaning">Deep Cleaning</button>
+              <button class="fam-skill-tag" data-skill="Infant Care">Infant Care</button>
+              <button class="fam-skill-tag" data-skill="Elderly Care">Elderly Care</button>
+              <button class="fam-skill-tag" data-skill="Organising">Organising</button>
+              <button class="fam-skill-tag" data-skill="Driving">Driving</button>
+              <button class="fam-skill-tag" data-skill="First Aid">First Aid</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Apply button (mobile) -->
+        <button class="btn btn-primary fam-apply-btn" id="applyFiltersBtn">
+          <i class="fa-solid fa-sliders"></i> Apply Filters
+        </button>
+
+      </aside>
+      <!-- /fam-sidebar -->
+
+      <!-- ===== LISTINGS PANEL ===== -->
+      <div class="fam-listings">
+
+        <!-- Top bar: results count + sort + mobile filter toggle -->
+        <div class="fam-listings-topbar" data-reveal="up">
+          <p class="fam-results-count" id="resultsCount">Showing <strong>12</strong> verified maids</p>
+
+          <div class="fam-topbar-right">
+            <!-- Sort -->
+            <div class="fam-sort-wrap">
+              <label for="sortSelect" class="fam-sort-label"><i class="fa-solid fa-arrow-up-wide-short"></i> Sort:</label>
+              <select id="sortSelect" class="fam-sort-select" aria-label="Sort results">
+                <option value="rating">Highest Rated</option>
+                <option value="experience">Most Experienced</option>
+                <option value="reviews">Most Reviews</option>
+                <option value="name">Name A–Z</option>
+              </select>
+            </div>
+
+            <!-- View toggle -->
+            <div class="fam-view-toggle" role="group" aria-label="View mode">
+              <button class="fam-view-btn active" id="viewGrid" aria-label="Grid view" title="Grid view">
+                <i class="fa-solid fa-grip"></i>
+              </button>
+              <button class="fam-view-btn" id="viewList" aria-label="List view" title="List view">
+                <i class="fa-solid fa-list"></i>
+              </button>
+            </div>
+
+            <!-- Mobile filter toggle -->
+            <button class="fam-mobile-filter-btn" id="mobileFilterToggle" aria-label="Open filters" aria-expanded="false" aria-controls="filterSidebar">
+              <i class="fa-solid fa-sliders"></i> Filters
+              <span class="fam-filter-badge" id="filterBadge" aria-label="Active filters count" hidden>0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Maid cards grid -->
+        <div class="fam-grid" id="maidGrid" role="list" data-stagger="80">
+
+          <!-- CARD 1 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Lagos"
+            data-role="Maid / House Help"
+            data-availability="available-now"
+            data-work-type="Live-in / Live-out"
+            data-experience="6-10"
+            data-rating="4.9"
+            data-reviews="142"
+            data-skills="Housekeeping,Childcare,Cooking,Laundry">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=80&fit=crop&crop=faces" alt="Ngozi Okafor" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+              <span class="mc-top-rated"><i class="fa-solid fa-star"></i> Top Rated</span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Ngozi Okafor</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Lagos, NG</span>
+                <span class="mc-years">8 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                <span class="mc-rating-val">4.9</span>
+                <span class="mc-reviews">(142 reviews)</span>
+              </div>
+              <p class="mc-desc">Dedicated and experienced housekeeper with a warm personality. Specialises in family household management and Nigerian cooking.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Housekeeping</span>
+                <span class="mc-skill">Childcare</span>
+                <span class="mc-skill">Cooking</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Live-in / Live-out</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 2 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Abuja"
+            data-role="Elderly Care"
+            data-availability="available-soon"
+            data-work-type="Live-in"
+            data-experience="10+"
+            data-rating="5"
+            data-reviews="203"
+            data-skills="Elderly Care,Cooking,Driving">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1506634572416-48cdfe530110?w=400&q=80&fit=crop&crop=faces" alt="Chukwuemeka Adeyemi" loading="lazy" />
+              <span class="mc-avail mc-avail--orange"><i class="fa-solid fa-circle"></i> Available in 2 Weeks</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Chukwuemeka Adeyemi</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Abuja, NG</span>
+                <span class="mc-years">12 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
+                <span class="mc-rating-val">5.0</span>
+                <span class="mc-reviews">(203 reviews)</span>
+              </div>
+              <p class="mc-desc">Highly experienced caregiver with a specialisation in elderly care and personal assistance for families across Abuja.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Elderly Care</span>
+                <span class="mc-skill">Cooking</span>
+                <span class="mc-skill">Driving</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Live-in</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 3 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Port Harcourt"
+            data-role="Baby Sitter"
+            data-availability="available-now"
+            data-work-type="Live-out"
+            data-experience="3-5"
+            data-rating="4.8"
+            data-reviews="87"
+            data-skills="Baby Sitting,Infant Care,Housekeeping,First Aid">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=80&fit=crop&crop=faces" alt="Adaeze Okonkwo" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Adaeze Okonkwo</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Port Harcourt, NG</span>
+                <span class="mc-years">5 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
+                <span class="mc-rating-val">4.8</span>
+                <span class="mc-reviews">(87 reviews)</span>
+              </div>
+              <p class="mc-desc">Warm and attentive babysitter with experience caring for infants and toddlers across Port Harcourt. First aid certified.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Baby Sitting</span>
+                <span class="mc-skill">Infant Care</span>
+                <span class="mc-skill">First Aid</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Live-out</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 4 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Ibadan"
+            data-role="Maid / House Help"
+            data-availability="available-now"
+            data-work-type="Part-time"
+            data-experience="6-10"
+            data-rating="4.9"
+            data-reviews="118"
+            data-skills="Deep Cleaning,Laundry,Organising,Ironing">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&fit=crop&crop=faces" alt="Babatunde Fashola" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Babatunde Fashola</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Ibadan, NG</span>
+                <span class="mc-years">9 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                <span class="mc-rating-val">4.9</span>
+                <span class="mc-reviews">(118 reviews)</span>
+              </div>
+              <p class="mc-desc">Meticulous and reliable housekeeper known for exceptional attention to detail. Reference checks available from previous employers in Lagos and Ibadan.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Deep Cleaning</span>
+                <span class="mc-skill">Laundry</span>
+                <span class="mc-skill">Organising</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Part-time</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 5 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Lagos"
+            data-role="Cook / Chef"
+            data-availability="available-now"
+            data-work-type="Full-time"
+            data-experience="10+"
+            data-rating="4.9"
+            data-reviews="176"
+            data-skills="Cooking,Housekeeping,Organising">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80&fit=crop&crop=faces" alt="Kemi Adebayo" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+              <span class="mc-top-rated"><i class="fa-solid fa-star"></i> Top Rated</span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Kemi Adebayo</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Lagos, NG</span>
+                <span class="mc-years">11 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                <span class="mc-rating-val">4.9</span>
+                <span class="mc-reviews">(176 reviews)</span>
+              </div>
+              <p class="mc-desc">Expert Nigerian and continental cook with over a decade of experience preparing delicious meals for families across Lagos.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Cooking</span>
+                <span class="mc-skill">Housekeeping</span>
+                <span class="mc-skill">Organising</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Full-time</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 6 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Abuja"
+            data-role="Nanny"
+            data-availability="available-now"
+            data-work-type="Live-in"
+            data-experience="3-5"
+            data-rating="4.7"
+            data-reviews="64"
+            data-skills="Childcare,Infant Care,Cooking,Housekeeping">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&q=80&fit=crop&crop=faces" alt="Blessing Nwosu" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Blessing Nwosu</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Abuja, NG</span>
+                <span class="mc-years">4 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                <span class="mc-rating-val">4.7</span>
+                <span class="mc-reviews">(64 reviews)</span>
+              </div>
+              <p class="mc-desc">Caring and patient nanny with a talent for creating a safe, stimulating environment for children aged 0–7 years.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Childcare</span>
+                <span class="mc-skill">Infant Care</span>
+                <span class="mc-skill">Cooking</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Live-in</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 7 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Enugu"
+            data-role="Maid / House Help"
+            data-availability="available-now"
+            data-work-type="Live-in"
+            data-experience="6-10"
+            data-rating="4.8"
+            data-reviews="95"
+            data-skills="Housekeeping,Laundry,Cooking,Ironing,Deep Cleaning">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=400&q=80&fit=crop&crop=faces" alt="Chioma Eze" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Chioma Eze</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Enugu, NG</span>
+                <span class="mc-years">7 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
+                <span class="mc-rating-val">4.8</span>
+                <span class="mc-reviews">(95 reviews)</span>
+              </div>
+              <p class="mc-desc">Experienced live-in house help from Enugu with strong domestic management skills and excellent references from past employers.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Housekeeping</span>
+                <span class="mc-skill">Laundry</span>
+                <span class="mc-skill">Ironing</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Live-in</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 8 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Lagos"
+            data-role="Maid / House Help"
+            data-availability="available-soon"
+            data-work-type="Live-out"
+            data-experience="0-2"
+            data-rating="4.5"
+            data-reviews="28"
+            data-skills="Housekeeping,Laundry,Cooking">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80&fit=crop&crop=faces" alt="Titi Balogun" loading="lazy" />
+              <span class="mc-avail mc-avail--orange"><i class="fa-solid fa-circle"></i> Available in 1 Week</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Titi Balogun</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Lagos, NG</span>
+                <span class="mc-years">2 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                <span class="mc-rating-val">4.5</span>
+                <span class="mc-reviews">(28 reviews)</span>
+              </div>
+              <p class="mc-desc">Enthusiastic and hardworking housekeeper looking for a live-out position in Lagos. Fast learner with great communication skills.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Housekeeping</span>
+                <span class="mc-skill">Laundry</span>
+                <span class="mc-skill">Cooking</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Live-out</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 9 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Kano"
+            data-role="Maid / House Help"
+            data-availability="available-now"
+            data-work-type="Live-in"
+            data-experience="3-5"
+            data-rating="4.6"
+            data-reviews="52"
+            data-skills="Housekeeping,Cooking,Organising,Laundry">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80&fit=crop&crop=faces" alt="Hauwa Musa" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Hauwa Musa</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Kano, NG</span>
+                <span class="mc-years">4 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                <span class="mc-rating-val">4.6</span>
+                <span class="mc-reviews">(52 reviews)</span>
+              </div>
+              <p class="mc-desc">Diligent and trustworthy housekeeper from Kano with a strong background in full household management and Northern Nigerian cuisine.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Housekeeping</span>
+                <span class="mc-skill">Cooking</span>
+                <span class="mc-skill">Organising</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Live-in</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 10 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Port Harcourt"
+            data-role="Maid / House Help"
+            data-availability="available-now"
+            data-work-type="Full-time"
+            data-experience="6-10"
+            data-rating="4.8"
+            data-reviews="109"
+            data-skills="Housekeeping,Deep Cleaning,Laundry,Cooking,Organising">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=400&q=80&fit=crop&crop=faces" alt="Sandra Okoro" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Sandra Okoro</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Port Harcourt, NG</span>
+                <span class="mc-years">8 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
+                <span class="mc-rating-val">4.8</span>
+                <span class="mc-reviews">(109 reviews)</span>
+              </div>
+              <p class="mc-desc">Full-time house help with 8 years of experience managing medium to large family homes in Port Harcourt and the surrounding areas.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Housekeeping</span>
+                <span class="mc-skill">Deep Cleaning</span>
+                <span class="mc-skill">Cooking</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Full-time</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 11 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Abuja"
+            data-role="Cook / Chef"
+            data-availability="available-soon"
+            data-work-type="Full-time"
+            data-experience="10+"
+            data-rating="5"
+            data-reviews="221"
+            data-skills="Cooking,Organising,Housekeeping">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?w=400&q=80&fit=crop&crop=faces" alt="Amina Ibrahim" loading="lazy" />
+              <span class="mc-avail mc-avail--orange"><i class="fa-solid fa-circle"></i> Available in 3 Weeks</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+              <span class="mc-top-rated"><i class="fa-solid fa-star"></i> Top Rated</span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Amina Ibrahim</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Abuja, NG</span>
+                <span class="mc-years">13 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span>
+                <span class="mc-rating-val">5.0</span>
+                <span class="mc-reviews">(221 reviews)</span>
+              </div>
+              <p class="mc-desc">Award-winning cook with expertise in Nigerian, continental and Middle Eastern cuisines. Trusted by executive households across Abuja.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Cooking</span>
+                <span class="mc-skill">Organising</span>
+                <span class="mc-skill">Housekeeping</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Full-time</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- CARD 12 -->
+          <article class="maid-card fam-card" role="listitem"
+            data-city="Ibadan"
+            data-role="Elderly Care"
+            data-availability="available-now"
+            data-work-type="Live-in"
+            data-experience="6-10"
+            data-rating="4.9"
+            data-reviews="133"
+            data-skills="Elderly Care,First Aid,Housekeeping,Cooking">
+            <div class="maid-photo-wrap">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80&fit=crop&crop=faces" alt="Grace Afolabi" loading="lazy" />
+              <span class="mc-avail mc-avail--green"><i class="fa-solid fa-circle"></i> Available Now</span>
+              <span class="mc-verified" aria-label="Verified"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div class="maid-body">
+              <h3 class="mc-name">Grace Afolabi</h3>
+              <div class="mc-meta-row">
+                <span class="mc-location"><i class="fa-solid fa-location-dot"></i> Ibadan, NG</span>
+                <span class="mc-years">9 Years</span>
+              </div>
+              <div class="mc-rating-row">
+                <span class="mc-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                <span class="mc-rating-val">4.9</span>
+                <span class="mc-reviews">(133 reviews)</span>
+              </div>
+              <p class="mc-desc">Compassionate elderly care specialist with first aid certification and 9 years of dedicated in-home support for seniors across Ibadan.</p>
+              <div class="mc-skills">
+                <span class="mc-skill">Elderly Care</span>
+                <span class="mc-skill">First Aid</span>
+                <span class="mc-skill">Cooking</span>
+              </div>
+              <div class="mc-work-type"><i class="fa-regular fa-clock"></i> Live-in</div>
+              <div class="mc-actions">
+                <a href="{% url 'MaidApp:view-profile' %}" class="mc-btn mc-btn--ghost">View Profile</a>
+                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request Interview</a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+        <!-- /fam-grid -->
+
+        <!-- No results state -->
+        <div class="fam-no-results" id="noResults" hidden aria-live="polite">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <h3>No maids found</h3>
+          <p>Try adjusting your filters or broadening your search.</p>
+          <button class="btn btn-primary" id="clearFromEmpty">Clear All Filters</button>
+        </div>
+
+        <!-- Pagination -->
+        <div class="fam-pagination" id="famPagination" aria-label="Pagination">
+          <button class="fam-page-btn fam-page-btn--prev" id="prevPage" aria-label="Previous page" disabled>
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <div class="fam-page-numbers" id="pageNumbers"></div>
+          <button class="fam-page-btn fam-page-btn--next" id="nextPage" aria-label="Next page">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+
+      </div>
+      <!-- /fam-listings -->
+
+    </div>
+    <!-- /fam-layout -->
+
+    <!-- Mobile sidebar backdrop -->
+    <div class="fam-sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+  </section>
+
+  <!-- ===== CTA SECTION ===== -->
+  <section class="cta-section">
+    <div class="cta-circle cta-circle--left"></div>
+    <div class="cta-circle cta-circle--right"></div>
+    <div class="container cta-inner">
+      <div class="cta-pill"><i class="fa-solid fa-shield-halved"></i> TRUSTED BY 10,000+ FAMILIES</div>
+      <h2 class="cta-heading">Can't Find Exactly<br />What You're Looking For?</h2>
+      <p class="cta-sub">Tell us your exact requirements and our placement advisors will personally match you with the perfect candidate — fast.</p>
+      <div class="cta-buttons">
+        <a href="{% url 'MaidApp:request-maid' %}" class="cta-btn cta-btn--white"><i class="fa-solid fa-paper-plane"></i> SUBMIT YOUR REQUEST</a>
+        <a href="{% url 'MaidApp:request-maid' %}" class="cta-btn cta-btn--outline"><i class="fa-solid fa-paper-plane"></i> REQUEST A MAID</a>
+      </div>
+      <div class="cta-trust-bar">
+        <div class="cta-trust-item"><i class="fa-solid fa-shield-halved"></i> Background Checked</div>
+        <div class="cta-trust-item"><i class="fa-regular fa-id-card"></i> ID Verified</div>
+        <div class="cta-trust-item"><i class="fa-solid fa-rotate-left"></i> Replacement Guarantee</div>
+        <div class="cta-trust-item"><i class="fa-solid fa-phone"></i> Free Consultation</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/find-a-maid.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,107 @@
+/* ===================================================
+   SIGNUP PAGE  –  page-specific styles
+   =================================================== */
+
+/* Signup-specific overrides */
+.auth-page { min-height: calc(100vh - 68px); }
+.auth-right-inner { max-width: 460px; }
+
+.af-input, .af-select {
+  padding: 11px 12px 11px 36px;
+}
+
+.af-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.af-select-arr {
+  position: absolute;
+  right: 12px;
+  color: #94a3b8;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+/* Row layout for side-by-side fields */
+.af-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Required asterisk */
+.af-req { color: #ef4444; }
+
+/* Password strength meter */
+.af-strength { margin-top: 6px; }
+.af-strength-bar {
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.af-strength-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .3s, background .3s;
+  width: 0%;
+}
+.af-strength-label { font-size: 11px; font-weight: 600; color: #94a3b8; }
+
+/* Checkbox / terms */
+.af-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 20px;
+}
+.af-check-row input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: #2563eb;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.af-check-row label {
+  font-size: 13px;
+  color: #64748b;
+  cursor: pointer;
+  line-height: 1.5;
+}
+.af-check-row a { color: #2563eb; text-decoration: none; font-weight: 600; }
+.af-check-row a:hover { text-decoration: underline; }
+
+/* Login link */
+.af-login-link {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 16px;
+}
+.af-login-link a { color: #2563eb; font-weight: 700; text-decoration: none; }
+.af-login-link a:hover { text-decoration: underline; }
+
+/* Step indicator */
+.af-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.af-step-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  transition: all .25s;
+}
+.af-step-dot.active { background: #2563eb; width: 24px; border-radius: 4px; }
+.af-step-dot.done  { background: #22c55e; }
+.af-steps-label { font-size: 12px; color: #94a3b8; font-weight: 600; margin-left: 6px; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .af-row { grid-template-columns: 1fr; }
+  .auth-social-row { grid-template-columns: 1fr; }
+}
