@@ -59,6 +59,7 @@ class SupportMessage(models.Model):
         blank=True,
     )
     body = models.TextField(max_length=2000)
+    is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
