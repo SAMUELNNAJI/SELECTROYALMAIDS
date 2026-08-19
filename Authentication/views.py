@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.utils import timezone
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, Service, SupportMessage
 
 
@@ -311,6 +312,7 @@ def service_delete(request, service_id):
 # ── Blog CRUD ─────────────────────────────────────────────────────────────────
 
 @login_required
+@login_required
 def blog_create(request):
     if not request.user.is_superuser:
         return redirect('Authentication:employer_dashboard')
@@ -324,6 +326,7 @@ def blog_create(request):
                 category=request.POST.get('category', 'general'),
                 author_name='SelectRoyal Maids Admin',
                 cover_image=request.POST.get('cover_image', '').strip(),
+                cover_image_file=request.FILES.get('cover_image_file'),
                 content=request.POST.get('content', '').strip(),
                 tags=request.POST.get('tags', '').strip(),
                 read_time=int(request.POST.get('read_time', 5) or 5),
@@ -332,9 +335,10 @@ def blog_create(request):
                 published_at=timezone.now(),
             )
             messages.success(request, f'Post "{title}" published.')
+            return redirect('/admin/dashboard/?tab=blog')
         else:
             messages.error(request, 'Slug and title are required.')
-    return redirect('/admin/dashboard/?tab=blog')
+    return render(request, 'Dashboard/blog_create.html')
 
 
 @login_required
@@ -348,7 +352,16 @@ def blog_edit(request, post_id):
         post.excerpt      = request.POST.get('excerpt',      post.excerpt).strip()
         post.category     = request.POST.get('category',     post.category)
         post.author_name  = 'SelectRoyal Maids Admin'
-        post.cover_image  = request.POST.get('cover_image',  post.cover_image).strip()
+        cover_url = request.POST.get('cover_image', '').strip()
+        uploaded_cover = request.FILES.get('cover_image_file')
+        if uploaded_cover:
+            post.cover_image_file = uploaded_cover
+        elif cover_url:
+            # Selecting a URL explicitly replaces any previously uploaded file.
+            if post.cover_image_file:
+                post.cover_image_file.delete(save=False)
+            post.cover_image_file = None
+            post.cover_image = cover_url
         post.content      = request.POST.get('content',      post.content).strip()
         post.tags         = request.POST.get('tags',         post.tags).strip()
         post.read_time    = int(request.POST.get('read_time', post.read_time) or post.read_time)
@@ -356,7 +369,8 @@ def blog_edit(request, post_id):
         post.is_published = request.POST.get('is_published') == 'on'
         post.save()
         messages.success(request, f'Post "{post.title}" updated.')
-    return redirect('/admin/dashboard/?tab=blog')
+        return redirect('/admin/dashboard/?tab=blog')
+    return render(request, 'Dashboard/blog_edit.html', {'post': post})
 
 
 @login_required

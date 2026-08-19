@@ -14,6 +14,7 @@
   const indicator = document.getElementById('rmStepIndicator');
   const card      = document.getElementById('rmCard');
   const success   = document.getElementById('rmSuccess');
+  const submitUrl = card?.dataset.submitUrl;
 
   /* Sync service radio cards with the select dropdown */
   const serviceRadios = document.querySelectorAll('input[name="service"]');
@@ -175,15 +176,68 @@
     return str.charAt(0).toUpperCase() + str.slice(1).replace(/-/g, ' ');
   }
 
+  const selectedValue = selector => document.querySelector(selector)?.value || '';
+  const selectedLabels = selector => [...document.querySelectorAll(selector)]
+    .filter(input => input.checked)
+    .map(input => input.closest('label')?.querySelector('span')?.textContent.trim() || input.value);
+  const csrfToken = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+  async function submitRequest() {
+    const service = selectedValue('input[name="service"]') || serviceSelect.value;
+    const payload = {
+      service: capitalise(service),
+      state: document.getElementById('stateField').value,
+      city: document.getElementById('cityField').value.trim(),
+      address: document.getElementById('addressField').value.trim(),
+      landmark: document.getElementById('landmarkField').value.trim(),
+      worktype: capitalise(selectedValue('input[name="worktype"]')),
+      experience: document.getElementById('experienceField').value,
+      skills: selectedLabels('.rm-step[data-step="3"] .rm-checkbox-group input').join(', '),
+      gender_preference: document.getElementById('genderPref').value,
+      budget: document.getElementById('budgetField').value,
+      notes: document.getElementById('notesField').value.trim(),
+      start_date: document.getElementById('startDateField').value,
+      urgency: document.getElementById('urgencyField').value,
+      interview_method: capitalise(selectedValue('input[name="interview"]')),
+      interview_days: selectedLabels('.rm-step[data-step="4"] .rm-checkbox-group input').join(', '),
+      contact_name: document.getElementById('fullNameField').value.trim(),
+      contact_phone: document.getElementById('phoneField').value.trim(),
+      contact_email: document.getElementById('emailField').value.trim(),
+    };
+    const response = await fetch(submitUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', 'X-CSRFToken': csrfToken(), Accept: 'application/json' },
+      body: new URLSearchParams(payload),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || 'We could not submit your request. Please try again.');
+    }
+    return response.json();
+  }
+
   /* ---- Button events ---- */
-  nextBtn.addEventListener('click', () => {
+  nextBtn.addEventListener('click', async () => {
     if (!validateStep(currentStep)) return;
 
     if (currentStep === TOTAL_STEPS) {
-      // Submit
-      card.hidden = true;
-      success.hidden = false;
-      success.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      nextBtn.disabled = true;
+      nextBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting…';
+      try {
+        const result = await submitRequest();
+        card.hidden = true;
+        success.hidden = false;
+        const chatLink = document.createElement('a');
+        chatLink.href = result.chat_url;
+        chatLink.className = 'btn btn-primary btn-lg';
+        chatLink.innerHTML = '<i class="fa-solid fa-comments"></i> Open Support Chat';
+        success.querySelector('.rm-success-actions')?.prepend(chatLink);
+        success.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (error) {
+        showError(error.message);
+        nextBtn.disabled = false;
+        nextBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Request';
+      }
       return;
     }
     goTo(currentStep + 1);

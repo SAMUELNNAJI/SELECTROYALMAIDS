@@ -18,6 +18,7 @@ urlpatterns = [
     path('safety-guidelines/', views.safety_guidelines, name='safety-guidelines'),
     path('services/', views.services, name='services'),
     path('support-chat/', views.support_chat, name='support-chat'),
+    path('support-chat/messages/', views.support_messages, name='support-messages'),
     path('terms-of-service/', views.terms_of_service, name='terms-of-service'),
     path('view-profile/', views.view_profile, name='view-profile'),
 ]

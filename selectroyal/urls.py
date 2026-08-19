@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
-from django.conf.urls.static import static
+from django.views.static import serve
 
 urlpatterns = [
     path('', include('MaidApp.urls')),
@@ -10,5 +10,9 @@ urlpatterns = [
     path('summernote/', include('django_summernote.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Profile photos are stored in MEDIA_ROOT. Django's ``static()`` helper omits
+# this route when DEBUG=False, so add the media route explicitly for the
+# deployed application as well.
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]

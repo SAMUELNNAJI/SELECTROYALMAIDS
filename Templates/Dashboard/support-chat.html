@@ -191,6 +191,7 @@
       font-size: .875rem;
       position: relative;
       word-break: break-word;
+      white-space: pre-wrap;
     }
     .msg-row.incoming .msg-bubble {
       background: var(--bubble-in);
@@ -336,7 +337,7 @@
     }
   </style>
 </head>
-<body data-chat-user-name="{{ user.get_full_name|default:user.username|escapejs }}" data-chat-user-initials="{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}">
+<body data-chat-user-name="{{ user.get_full_name|default:user.username|escapejs }}" data-chat-user-initials="{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}" data-api-url="{% url 'MaidApp:support-messages' %}" data-employer-id="{{ chat_employer.id|default:'' }}">
 
 <!-- Sidebar overlay -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -368,7 +369,7 @@
       <a href="{% url 'MaidApp:find-a-maid' %}"><i class="fa-solid fa-magnifying-glass icon"></i> Find a Maid</a>
       <a href="{% url 'MaidApp:request-maid' %}"><i class="fa-solid fa-file-circle-plus icon"></i> New Request</a>
       <div class="sidebar-label">Account</div>
-      <a href="{% url 'MaidApp:contact' %}"><i class="fa-solid fa-headset icon"></i> Contact Support</a>
+      <a href="{% url 'MaidApp:support-chat' %}"><i class="fa-solid fa-headset icon"></i> Contact Support</a>
     {% endif %}
     <a href="#" class="active">
       <i class="fa-solid fa-comments icon"></i> Support Chat
@@ -421,6 +422,18 @@
     </div>
   </header>
 
+  {% if user.is_staff %}
+    <div style="padding:12px 24px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+      <label for="employerPicker" style="font-size:.82rem;font-weight:700;">Employer conversation</label>
+      <select id="employerPicker" style="max-width:340px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;color:var(--text);">
+        <option value="">Choose an employer…</option>
+        {% for employer in employers %}
+          <option value="{{ employer.id }}" {% if chat_employer and employer.id == chat_employer.id %}selected{% endif %}>{{ employer.get_full_name|default:employer.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  {% endif %}
+
   <!-- Chat messages -->
   <div class="chat-body" id="messages">
 
@@ -436,7 +449,7 @@
     {% for message in chat_messages %}
       {% if message.sender == request.user %}
         <!-- Outgoing -->
-        <div class="msg-row outgoing" data-sender="{{ message.sender.get_full_name|default:message.sender.username }}">
+        <div class="msg-row outgoing" data-message-id="{{ message.id }}" data-sender="{{ message.sender.get_full_name|default:message.sender.username }}">
           <div>
             <div class="msg-meta">You</div>
             <div class="msg-bubble">{{ message.body }}</div>
@@ -448,7 +461,7 @@
         </div>
       {% else %}
         <!-- Incoming -->
-        <div class="msg-row incoming" data-sender="{{ message.sender.get_full_name|default:message.sender.username }}">
+        <div class="msg-row incoming" data-message-id="{{ message.id }}" data-sender="{{ message.sender.get_full_name|default:message.sender.username }}">
           <div class="msg-avatar in">
             {{ message.sender.first_name|first|upper }}{{ message.sender.last_name|first|upper }}
           </div>
@@ -474,14 +487,19 @@
 
   <!-- Input bar -->
   <div class="chat-input-bar">
+    {% if not chat_employer %}
+      <div class="sys-msg">Choose an employer conversation to read and reply to messages.</div>
+    {% endif %}
     <form id="chatForm" autocomplete="off">
+      {% csrf_token %}
       <div class="chat-input-wrap">
         <textarea
           id="chatInput"
           rows="1"
           maxlength="2000"
-          placeholder="Write a message… (Enter to send, Shift+Enter for new line)"
+          placeholder="{% if chat_employer %}Write a message… (Enter to send, Shift+Enter for new line){% else %}Choose an employer conversation first{% endif %}"
           aria-label="Chat message"
+          {% if not chat_employer %}disabled{% endif %}
         ></textarea>
         <button type="submit" class="send-btn" id="sendBtn" disabled aria-label="Send">
           <i class="fa-solid fa-paper-plane"></i>

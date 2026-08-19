@@ -55,15 +55,21 @@
   <section class="blog-filter-section">
     <div class="container blog-filter-inner">
       <div class="blog-filter-tabs" id="blogTabs">
-        <a href="?cat=all" class="blog-filter-tab {% if active_cat == 'all' %}active{% endif %}">All Posts</a>
+        <a href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}cat=all" class="blog-filter-tab {% if active_cat == 'all' %}active{% endif %}">All Posts</a>
         {% for val, label in categories %}
-        <a href="?cat={{ val }}" class="blog-filter-tab {% if active_cat == val %}active{% endif %}">{{ label }}</a>
+        <a href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}cat={{ val }}" class="blog-filter-tab {% if active_cat == val %}active{% endif %}">{{ label }}</a>
         {% endfor %}
+        {% if search_query %}
+        <a href="?cat=all" class="blog-filter-tab" style="margin-left:auto;color:#ef4444;"><i class="fa-solid fa-xmark"></i> Clear search</a>
+        {% endif %}
       </div>
-      <div class="blog-search-wrap">
+      <form method="get" action="{% url 'MaidApp:blog' %}" class="blog-search-wrap">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" placeholder="Search articles…" class="blog-search-input" id="blogSearch" />
-      </div>
+        <input type="text" placeholder="Search articles…" class="blog-search-input" id="blogSearch" name="q" value="{{ search_query|default:'' }}" />
+        {% if active_cat != 'all' %}
+          <input type="hidden" name="cat" value="{{ active_cat }}" />
+        {% endif %}
+      </form>
     </div>
   </section>
 
@@ -102,7 +108,7 @@
         </article>
         {% empty %}
         <p style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b;">
-          No posts found in this category.
+          {% if search_query %}No posts found matching "{{ search_query }}".{% else %}No posts found in this category.{% endif %}
         </p>
         {% endfor %}
 
@@ -112,15 +118,15 @@
       {% if page_obj.has_other_pages %}
       <div class="blog-pagination" data-reveal="up">
         {% if page_obj.has_previous %}
-          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}page={{ page_obj.previous_page_number }}"
+          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}"
              class="blog-page-btn">‹</a>
         {% endif %}
         {% for num in page_obj.paginator.page_range %}
-          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}page={{ num }}"
+          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ num }}"
              class="blog-page-btn {% if num == page_obj.number %}blog-page-btn--active{% endif %}">{{ num }}</a>
         {% endfor %}
         {% if page_obj.has_next %}
-          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}page={{ page_obj.next_page_number }}"
+          <a href="?{% if active_cat != 'all' %}cat={{ active_cat }}&{% endif %}{% if search_query %}q={{ search_query|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}"
              class="blog-next btn-next">Next <i class="fa-solid fa-arrow-right"></i></a>
         {% endif %}
       </div>

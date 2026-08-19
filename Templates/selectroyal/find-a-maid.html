@@ -249,14 +249,14 @@
           {% endif %}
 
           <div class="fam-page-numbers" id="pageNumbers">
-            {% for num in page_obj.paginator.page_range %}
+            {% for num in page_range %}
               {% if num == page_obj.number %}
                 <span class="fam-page-num fam-page-num--active" aria-current="page">{{ num }}</span>
-              {% elif num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+              {% elif num == page_obj.paginator.ELLIPSIS %}
+                <span class="fam-page-ellipsis">{{ num }}</span>
+              {% else %}
                 <a href="?q={{ query }}&city={{ city }}&avail={{ availability }}&page={{ num }}"
                    class="fam-page-num">{{ num }}</a>
-              {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
-                <span class="fam-page-ellipsis">…</span>
               {% endif %}
             {% endfor %}
           </div>
@@ -309,5 +309,26 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/find-a-maid.js' %}"></script>
+<script>
+  (() => {
+    const sidebar = document.getElementById('filterSidebar');
+    const toggle = document.getElementById('mobileFilterToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const close = () => {
+      sidebar?.classList.remove('open');
+      backdrop?.classList.remove('visible');
+      toggle?.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    };
+    toggle?.addEventListener('click', () => {
+      sidebar?.classList.add('open');
+      backdrop?.classList.add('visible');
+      toggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    });
+    backdrop?.addEventListener('click', close);
+    document.getElementById('viewGrid')?.addEventListener('click', () => document.getElementById('maidGrid')?.classList.remove('list-view'));
+    document.getElementById('viewList')?.addEventListener('click', () => document.getElementById('maidGrid')?.classList.add('list-view'));
+  })();
+</script>
 {% endblock %}

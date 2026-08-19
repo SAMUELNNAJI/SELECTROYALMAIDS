@@ -600,10 +600,12 @@
   transition: var(--transition);
 }
 .fam-page-num:hover { border-color: var(--blue); color: var(--blue); }
-.fam-page-num.active {
+.fam-page-num.active,
+.fam-page-num--active {
   background: var(--blue);
-  border-color: var(--blue);
+  border: 2px solid var(--blue);
   color: #fff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, .18);
 }
 
 /* Mobile backdrop */
@@ -666,4 +668,7 @@
   .fam-topbar-right { gap: 6px; }
   .fam-sort-wrap { padding: 6px 10px; }
   .fam-hero-trust { gap: 12px; }
+  .fam-pagination { gap: 4px; margin-top: 28px; }
+  .fam-page-btn, .fam-page-num { width: 34px; height: 34px; }
+  .fam-page-numbers { gap: 3px; }
 }

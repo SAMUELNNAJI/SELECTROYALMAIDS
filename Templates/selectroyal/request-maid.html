@@ -56,7 +56,8 @@
       </div>
 
       <!-- Form card -->
-      <div class="rm-card" id="rmCard">
+      <div class="rm-card" id="rmCard" data-submit-url="{% url 'MaidApp:request-maid' %}">
+        {% csrf_token %}
 
         <!-- ── STEP 1: Service ── -->
         <div class="rm-step active" data-step="1">

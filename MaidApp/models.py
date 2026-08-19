@@ -49,6 +49,15 @@ class MaidRegistration(models.Model):
 
 class SupportMessage(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # The employer whose support conversation this message belongs to.  Support
+    # staff can reply to a particular employer without exposing it to others.
+    employer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='support_conversations',
+        null=True,
+        blank=True,
+    )
     body = models.TextField(max_length=2000)
     created_at = models.DateTimeField(auto_now_add=True)
 

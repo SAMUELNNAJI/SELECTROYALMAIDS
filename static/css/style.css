@@ -25,7 +25,11 @@
   --font: 'Inter', system-ui, sans-serif;
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  max-width: 100%;
+  overflow-x: hidden;
+}
 
 body {
   font-family: var(--font);
@@ -33,6 +37,7 @@ body {
   background: var(--bg);
   line-height: 1.6;
   overflow-x: hidden;
+  max-width: 100%;
 }
 
 img { display: block; max-width: 100%; }
@@ -41,6 +46,7 @@ ul { list-style: none; }
 
 .container {
   max-width: 1180px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 24px;
 }
