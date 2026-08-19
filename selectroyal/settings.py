@@ -16,11 +16,9 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1 selectroyalmaids.onrender.com').split()
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
 
-# Check if a RENDER external URL environment variable exists
-if 'RENDER_EXTERNAL_HOSTNAME' in os.environ:
-    ALLOWED_HOSTS.append(os.environ['RENDER_EXTERNAL_HOSTNAME'])
+
 
 # ── Applications ──────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -68,9 +66,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'selectroyal.wsgi.application'
 
 # ── Database ──────────────────────────────────────────────────────────────────
-# Render injects DATABASE_URL for Postgres.
-# Falls back to SQLite for local dev if DATABASE_URL is not set.
-DATABASE_URL = os.environ.get('DATABASE_URL', '')
+# Uses Neon PostgreSQL by default. Override with DATABASE_URL env var if needed.
+DATABASE_URL = os.environ.get(
+    'DATABASE_URL',
+    'postgresql://neondb_owner:npg_Y6Dvjkcfi1Tt@ep-late-sky-b1le0p0y-pooler.c-5.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+)
 
 if DATABASE_URL:
     import dj_database_url
