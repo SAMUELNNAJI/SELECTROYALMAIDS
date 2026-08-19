@@ -108,7 +108,9 @@
       display: flex; align-items: center; justify-content: space-between;
       flex-shrink: 0;
       z-index: 100;
+      transition: box-shadow .2s ease;
     }
+    .topbar.is-stuck { box-shadow: 0 4px 24px rgba(0,0,0,.12); }
     .topbar-left { display: flex; align-items: center; gap: 12px; }
     .menu-toggle {
       display: none; background: none; border: none;
@@ -639,6 +641,16 @@
 
   /* ── Initial scroll ──────────────────────────────────── */
   scrollBottom(false);
+</script>
+<script>
+  const topbar = document.querySelector('.topbar');
+  if (topbar) {
+    const updateShadow = () => {
+      topbar.classList.toggle('is-stuck', window.scrollY > 10);
+    };
+    updateShadow();
+    window.addEventListener('scroll', updateShadow, { passive: true });
+  }
 </script>
 <script src="{% static 'js/dashboard-support-chat.js' %}"></script>
 </body>

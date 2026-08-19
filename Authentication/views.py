@@ -106,8 +106,8 @@ def admin_dashboard(request):
         'services':              Service.objects.all(),
         'service_icon_choices':  Service.ICON_CHOICES,
         'service_badge_choices': Service.BADGE_CHOICES,
-        'blog_posts':            BlogPost.objects.all(),
-        'blog_categories':       BlogPost.CATEGORY_CHOICES,
+        'blog_page_obj':           Paginator(BlogPost.objects.all(), 20).get_page(request.GET.get('page', 1)),
+        'blog_categories':         BlogPost.CATEGORY_CHOICES,
     }
     return render(request, 'Dashboard/Admin.html', context)
 

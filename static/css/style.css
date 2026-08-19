@@ -38,6 +38,7 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   max-width: 100%;
+  padding-top: 68px;
 }
 
 img { display: block; max-width: 100%; }
@@ -137,8 +138,10 @@ ul { list-style: none; }
    NAVBAR
    ============================================================ */
 .navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   background: #fff;
   border-bottom: 1px solid var(--border);

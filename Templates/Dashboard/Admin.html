@@ -528,7 +528,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
         <div>
           <h2 style="font-size:1.05rem;font-weight:800;">Blog Posts</h2>
-          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">{{ blog_posts|length }} post{{ blog_posts|length|pluralize }} total</p>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">{{ page_obj.paginator.count }} post{{ page_obj.paginator.count|pluralize }} total</p>
         </div>
         <a href="{% url 'Authentication:blog_create' %}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Post</a>
       </div>
@@ -553,7 +553,7 @@
             </colgroup>
             <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Read</th><th>Views</th><th>Published</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
-              {% for post in blog_posts %}
+              {% for post in page_obj %}
               <tr>
                 <td style="max-width:0;">
                   <div style="display:flex;align-items:center;gap:10px;min-width:0;">
@@ -592,6 +592,29 @@
             </tbody>
           </table>
         </div>
+        {% if page_obj.has_other_pages %}
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;flex-wrap:wrap;">
+          {% if page_obj.has_previous %}
+            <a href="?tab=blog&page={{ page_obj.previous_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">‹ Prev</a>
+          {% else %}
+            <span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">‹ Prev</span>
+          {% endif %}
+          {% for num in page_obj.paginator.get_elided_page_range(page_obj.number, on_each_side=2, on_ends=1) %}
+            {% if num == page_obj.number %}
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;font-size:.82rem;font-weight:700;">{{ num }}</span>
+            {% elif num == page_obj.paginator.ELLIPSIS %}
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;font-size:.82rem;color:var(--muted);">…</span>
+            {% else %}
+              <a href="?tab=blog&page={{ num }}" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.82rem;text-decoration:none;">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <a href="?tab=blog&page={{ page_obj.next_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">Next ›</a>
+          {% else %}
+            <span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">Next ›</span>
+          {% endif %}
+        </div>
+        {% endif %}
       </div>
     </div>
     <!-- ── TAB: FAQ ── -->
