@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import BlogPost, FAQ, MaidRegistration, Service, SupportMessage
+from .models import BlogPost, FAQ, MaidProfile, MaidRegistration, Service, SupportMessage
 
 
 def index(request):
@@ -33,7 +33,6 @@ def blog(request):
 
 def blog_post(request, slug):
     post = get_object_or_404(BlogPost, slug=slug, is_published=True)
-    # increment view count
     BlogPost.objects.filter(pk=post.pk).update(views=post.views + 1)
     post.views += 1
     related = BlogPost.objects.filter(
@@ -50,7 +49,32 @@ def contact(request):
 
 
 def find_a_maid(request):
-    return render(request, 'selectroyal/find-a-maid.html')
+    qs = MaidProfile.objects.filter(is_active=True).order_by('full_name')
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        qs = qs.filter(full_name__icontains=query)
+
+    availability = request.GET.get('avail', '')
+    if availability == 'available':
+        qs = qs.filter(assign_status='unassigned')
+    elif availability == 'assigned':
+        qs = qs.filter(assign_status='assigned')
+
+    city = request.GET.get('city', '').strip()
+    if city:
+        qs = qs.filter(address__icontains=city)
+
+    paginator = Paginator(qs, 24)
+    page_obj  = paginator.get_page(request.GET.get('page', 1))
+
+    return render(request, 'selectroyal/find-a-maid.html', {
+        'page_obj':     page_obj,
+        'total':        qs.count(),
+        'query':        query,
+        'city':         city,
+        'availability': availability,
+    })
 
 
 def how_it_works(request):
@@ -108,4 +132,8 @@ def terms_of_service(request):
 
 
 def view_profile(request):
-    return render(request, 'selectroyal/view-profile.html')
+    slug = request.GET.get('slug', '').strip()
+    maid = None
+    if slug:
+        maid = get_object_or_404(MaidProfile, slug=slug, is_active=True)
+    return render(request, 'selectroyal/view-profile.html', {'maid': maid})

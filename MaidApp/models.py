@@ -73,7 +73,9 @@ class BlogPost(models.Model):
     author_name   = models.CharField(max_length=120)
     author_avatar = models.URLField(blank=True, help_text='URL to author profile photo')
     author_bio    = models.TextField(blank=True)
-    cover_image   = models.URLField(blank=True)
+    cover_image      = models.URLField(blank=True)
+    cover_image_file = models.ImageField(upload_to='blog/covers/', blank=True, null=True,
+                                         help_text='Upload a cover image (used instead of URL if provided)')
     content       = models.TextField(help_text='Full article HTML or plain text')
     tags          = models.CharField(max_length=300, blank=True, help_text='Comma-separated tags')
     read_time     = models.PositiveSmallIntegerField(default=5, help_text='Estimated read time in minutes')
@@ -92,6 +94,13 @@ class BlogPost(models.Model):
 
     def category_display(self):
         return dict(self.CATEGORY_CHOICES).get(self.category, self.category)
+
+    @property
+    def cover_url(self):
+        """Returns the best available cover image URL — uploaded file takes priority over the URL field."""
+        if self.cover_image_file:
+            return self.cover_image_file.url
+        return self.cover_image or ''
 
     def __str__(self):
         return self.title
@@ -138,6 +147,65 @@ class Service(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class MaidProfile(models.Model):
+    """Imported maid profiles from the old selectroyalmaids.com.ng database."""
+
+    ASSIGN_STATUS = [
+        ('assigned',   'Assigned'),
+        ('unassigned', 'Available'),
+    ]
+
+    # Original fields from old DB
+    legacy_id      = models.IntegerField(unique=True, help_text='Original DB id')
+    reg_number     = models.CharField(max_length=20, help_text='e.g. SRM-1658')
+    slug           = models.SlugField(max_length=255, unique=True)
+    full_name      = models.CharField(max_length=200)
+    address        = models.TextField(blank=True)
+    age            = models.CharField(max_length=10, blank=True)
+    phone          = models.CharField(max_length=60, blank=True)
+    email          = models.EmailField(blank=True)
+    description    = models.TextField(blank=True)
+    photo_filename = models.CharField(max_length=300, blank=True,
+                                      help_text='Filename as stored on old server')
+    assign_status  = models.CharField(max_length=20, choices=ASSIGN_STATUS,
+                                      default='unassigned')
+    is_featured    = models.BooleanField(default=False)
+    is_active      = models.BooleanField(default=True)
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['full_name']
+
+    # ── Helpers ────────────────────────────────────────────────────────────────
+
+    def photo_url(self):
+        """
+        Return the best URL for this maid's photo.
+        Photos are hosted on the old site at:
+          https://selectroyalmaids.com.ng/maids_photos/<filename>
+        Some filenames already carry a 'maids/' prefix stored in the DB.
+        """
+        if not self.photo_filename:
+            return ''
+        name = self.photo_filename
+        # Strip any leading 'maids/' prefix already in the stored value
+        if name.startswith('maids/'):
+            name = name[len('maids/'):]
+        return f'https://selectroyalmaids.com.ng/maids_photos/{name}'
+
+    @property
+    def is_available(self):
+        return self.assign_status == 'unassigned'
+
+    @property
+    def first_name(self):
+        parts = self.full_name.strip().split()
+        return parts[0] if parts else self.full_name
+
+    def __str__(self):
+        return f'{self.full_name} ({self.reg_number})'
 
 
 class FAQ(models.Model):

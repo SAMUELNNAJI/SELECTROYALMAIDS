@@ -22,7 +22,7 @@
       {% if featured %}
       <div class="blog-featured-card" data-reveal="up">
         <div class="blog-featured-img-wrap">
-          <img src="{{ featured.cover_image }}" alt="{{ featured.title }}" />
+          <img src="{{ featured.cover_url }}" alt="{{ featured.title }}" />
           <span class="blog-cat-tag">{{ featured.get_category_display }}</span>
         </div>
         <div class="blog-featured-content">
@@ -30,11 +30,11 @@
           <h2 class="blog-featured-title">{{ featured.title }}</h2>
           <p class="blog-featured-excerpt">{{ featured.excerpt }}</p>
           <div class="blog-featured-meta">
-            {% if featured.author_avatar %}
-            <img src="{{ featured.author_avatar }}" alt="{{ featured.author_name }}" class="blog-meta-avatar" />
-            {% endif %}
+            <div class="blog-meta-avatar">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
             <div>
-              <p class="blog-meta-author">{{ featured.author_name }}</p>
+              <p class="blog-meta-author">SelectRoyal Maids Admin</p>
               <p class="blog-meta-date">
                 <i class="fa-regular fa-calendar"></i>
                 {{ featured.published_at|date:"d F Y" }} &nbsp;·&nbsp;
@@ -75,8 +75,8 @@
         {% for post in page_obj %}
         <article class="blog-card">
           <div class="blog-card-img-wrap">
-            {% if post.cover_image %}
-            <img src="{{ post.cover_image }}" alt="{{ post.title }}" loading="lazy" />
+            {% if post.cover_url %}
+            <img src="{{ post.cover_url }}" alt="{{ post.title }}" loading="lazy" />
             {% endif %}
             <span class="blog-card-tag">{{ post.get_category_display }}</span>
           </div>
@@ -84,11 +84,11 @@
             <h3 class="blog-card-title">{{ post.title }}</h3>
             <p class="blog-card-excerpt">{{ post.excerpt }}</p>
             <div class="blog-card-meta">
-              {% if post.author_avatar %}
-              <img src="{{ post.author_avatar }}" alt="{{ post.author_name }}" />
-              {% endif %}
+              <div class="blog-card-meta-avatar">
+                <i class="fa-solid fa-user-tie"></i>
+              </div>
               <div>
-                <p class="blog-card-author">{{ post.author_name }}</p>
+                <p class="blog-card-author">SelectRoyal Maids Admin</p>
                 <p class="blog-card-date">
                   {{ post.published_at|date:"d M Y" }} · {{ post.read_time }} min read
                 </p>

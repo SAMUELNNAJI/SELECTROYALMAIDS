@@ -1,0 +1,13 @@
+asgiref==3.12.1
+bleach==6.4.0
+dj-database-url==2.3.0
+Django==6.1
+django-summernote==0.8.20.0
+gunicorn==26.0.0
+pillow==12.3.0
+psycopg2-binary==2.9.10
+sqlparse==0.6.0
+typing-extensions==4.16.0
+tzdata==2026.3
+webencodings==0.6.1
+whitenoise==6.12.0

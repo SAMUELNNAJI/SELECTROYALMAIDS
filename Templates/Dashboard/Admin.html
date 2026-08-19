@@ -379,7 +379,7 @@
           <h2 style="font-size:1.05rem;font-weight:800;">Blog Posts</h2>
           <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">{{ blog_posts|length }} post{{ blog_posts|length|pluralize }} total</p>
         </div>
-        <button class="btn btn-primary" id="openAddBlog"><i class="fa-solid fa-plus"></i> New Post</button>
+        <a href="{% url 'Authentication:blog_create' %}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Post</a>
       </div>
       {% if messages %}{% for msg in messages %}
         <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:16px;{% if msg.tags == 'success' %}background:var(--green-lt);border:1px solid #bbf7d0;color:var(--green);{% else %}background:var(--red-lt);border:1px solid #fecaca;color:var(--red);{% endif %}">
@@ -389,36 +389,48 @@
       {% endfor %}{% endif %}
       <div class="card">
         <div style="overflow-x:auto;">
-          <table class="data-table">
-            <thead><tr><th style="min-width:240px;">Title</th><th>Category</th><th>Author</th><th>Read</th><th>Views</th><th>Published</th><th>Status</th><th>Actions</th></tr></thead>
+          <table class="data-table" style="table-layout:fixed;min-width:760px;">
+            <colgroup>
+              <col style="width:36%;" />   <!-- Title -->
+              <col style="width:11%;" />   <!-- Category -->
+              <col style="width:11%;" />   <!-- Author -->
+              <col style="width:6%;" />    <!-- Read -->
+              <col style="width:6%;" />    <!-- Views -->
+              <col style="width:10%;" />   <!-- Published -->
+              <col style="width:10%;" />   <!-- Status -->
+              <col style="width:10%;" />   <!-- Actions -->
+            </colgroup>
+            <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Read</th><th>Views</th><th>Published</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {% for post in blog_posts %}
               <tr>
-                <td>
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    {% if post.cover_image %}<img src="{{ post.cover_image }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;" />
-                    {% else %}<div style="width:40px;height:40px;background:var(--accent-lt);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent);"><i class="fa-solid fa-newspaper"></i></div>{% endif %}
-                    <div>
-                      <strong style="font-size:.85rem;display:block;">{{ post.title|truncatechars:55 }}</strong>
-                      <span style="font-size:.72rem;color:var(--muted);">/blog/{{ post.slug|truncatechars:40 }}</span>
+                <td style="max-width:0;">
+                  <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                    {% if post.cover_image %}
+                      <img src="{{ post.cover_image }}" alt="" style="width:38px;height:38px;object-fit:cover;border-radius:6px;flex-shrink:0;" />
+                    {% else %}
+                      <div style="width:38px;height:38px;background:var(--accent-lt);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent);font-size:.85rem;">
+                        <i class="fa-solid fa-newspaper"></i>
+                      </div>
+                    {% endif %}
+                    <div style="min-width:0;overflow:hidden;">
+                      <strong style="font-size:.85rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ post.title }}</strong>
+                      <span style="font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">/blog/{{ post.slug }}</span>
                     </div>
                   </div>
                 </td>
-                <td><span class="badge {% if post.category == 'hiring' %}badge-amber{% elif post.category == 'safety' %}badge-red{% elif post.category == 'career' %}badge-green{% else %}badge-blue{% endif %}">{{ post.get_category_display }}</span></td>
-                <td style="font-size:.82rem;">{{ post.author_name }}</td>
-                <td style="font-size:.82rem;">{{ post.read_time }} min</td>
-                <td style="font-size:.82rem;">{{ post.views }}</td>
-                <td style="font-size:.78rem;color:var(--muted);">{% if post.published_at %}{{ post.published_at|date:"M d, Y" }}{% else %}—{% endif %}</td>
-                <td>
-                  {% if post.is_featured %}<span class="badge badge-amber" style="margin-bottom:3px;display:inline-flex;">Featured</span><br>{% endif %}
+                <td><span class="badge {% if post.category == 'hiring' %}badge-amber{% elif post.category == 'safety' %}badge-red{% elif post.category == 'career' %}badge-green{% else %}badge-blue{% endif %}" style="white-space:nowrap;">{{ post.get_category_display }}</span></td>
+                <td style="font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;">{{ post.author_name }}</td>
+                <td style="font-size:.82rem;white-space:nowrap;">{{ post.read_time }} min</td>
+                <td style="font-size:.82rem;white-space:nowrap;">{{ post.views }}</td>
+                <td style="font-size:.78rem;color:var(--muted);white-space:nowrap;">{% if post.published_at %}{{ post.published_at|date:"M d, Y" }}{% else %}—{% endif %}</td>
+                <td style="white-space:nowrap;">
+                  {% if post.is_featured %}<span class="badge badge-amber" style="margin-bottom:3px;display:inline-flex;">⭐ Featured</span><br>{% endif %}
                   <span class="status-pill {% if post.is_published %}active{% else %}inactive{% endif %}">{% if post.is_published %}Live{% else %}Draft{% endif %}</span>
                 </td>
                 <td style="white-space:nowrap;">
-                  <button class="btn btn-ghost" style="padding:6px 10px;font-size:.78rem;"
-                    onclick="openBlogEdit({{ post.pk }},'{{ post.slug|escapejs }}','{{ post.title|escapejs }}','{{ post.excerpt|escapejs }}','{{ post.category|escapejs }}','{{ post.author_name|escapejs }}','{{ post.author_avatar|escapejs }}','{{ post.author_bio|escapejs }}','{{ post.cover_image|escapejs }}','{{ post.tags|escapejs }}',{{ post.read_time }},{{ post.is_featured|yesno:'true,false' }},{{ post.is_published|yesno:'true,false' }},`{{ post.content|escapejs }}`)">
-                    <i class="fa-solid fa-pen"></i> Edit
-                  </button>
-                  <button class="btn btn-danger" style="padding:6px 10px;font-size:.78rem;" onclick="openBlogDelete({{ post.pk }},'{{ post.title|escapejs }}')">
+                  <a href="{% url 'Authentication:blog_edit' post.pk %}" class="btn btn-ghost" style="padding:5px 9px;font-size:.78rem;"><i class="fa-solid fa-pen"></i></a>
+                  <button class="btn btn-danger" style="padding:5px 9px;font-size:.78rem;" onclick="openBlogDelete({{ post.pk }},'{{ post.title|escapejs }}')">
                     <i class="fa-solid fa-trash"></i>
                   </button>
                 </td>
@@ -644,70 +656,6 @@
     </form>
   </div>
 </div>
-<!-- ══ BLOG: ADD MODAL ══ -->
-<div class="modal-backdrop" id="addBlogModal">
-  <div class="modal" style="max-width:720px;" role="dialog" aria-modal="true">
-    <div class="modal-head"><h3><i class="fa-solid fa-plus" style="color:var(--accent);"></i> &nbsp;New Blog Post</h3><button class="modal-close" onclick="closeModal('addBlogModal')">&times;</button></div>
-    <form method="post" action="{% url 'Authentication:blog_create' %}">{% csrf_token %}
-      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
-        <div class="form-grid">
-          <div class="form-field full"><label>Title</label><input type="text" name="title" required /></div>
-          <div class="form-field"><label>Slug (URL)</label><input type="text" name="slug" required /></div>
-          <div class="form-field"><label>Category</label><select name="category">{% for val,label in blog_categories %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
-          <div class="form-field"><label>Author name</label><input type="text" name="author_name" value="{{ user.get_full_name }}" /></div>
-          <div class="form-field"><label>Author avatar URL</label><input type="url" name="author_avatar" /></div>
-          <div class="form-field"><label>Cover image URL</label><input type="url" name="cover_image" /></div>
-          <div class="form-field"><label>Read time (mins)</label><input type="number" name="read_time" value="5" min="1" /></div>
-          <div class="form-field"><label>Tags (comma-separated)</label><input type="text" name="tags" /></div>
-          <div class="form-field full"><label>Excerpt</label><textarea name="excerpt" style="min-height:70px;" required></textarea></div>
-          <div class="form-field full"><label>Author bio</label><textarea name="author_bio" style="min-height:60px;"></textarea></div>
-          <div class="form-field full"><label>Full article content (HTML supported)</label><textarea name="content" style="min-height:220px;" required></textarea></div>
-          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:16px;">
-            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_featured" /><span class="toggle-track"></span></label>
-            <span style="font-size:.85rem;font-weight:600;">Mark as Featured</span>
-          </div>
-          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:16px;">
-            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_published" checked /><span class="toggle-track"></span></label>
-            <span style="font-size:.85rem;font-weight:600;">Publish immediately</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('addBlogModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Publish Post</button></div>
-    </form>
-  </div>
-</div>
-<!-- ══ BLOG: EDIT MODAL ══ -->
-<div class="modal-backdrop" id="editBlogModal">
-  <div class="modal" style="max-width:720px;" role="dialog" aria-modal="true">
-    <div class="modal-head"><h3><i class="fa-solid fa-pen" style="color:var(--accent);"></i> &nbsp;Edit Blog Post</h3><button class="modal-close" onclick="closeModal('editBlogModal')">&times;</button></div>
-    <form method="post" id="editBlogForm" action="">{% csrf_token %}
-      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
-        <div class="form-grid">
-          <div class="form-field full"><label>Title</label><input type="text" name="title" id="ebTitle" required /></div>
-          <div class="form-field"><label>Slug</label><input type="text" name="slug" id="ebSlug" required /></div>
-          <div class="form-field"><label>Category</label><select name="category" id="ebCategory">{% for val,label in blog_categories %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
-          <div class="form-field"><label>Author name</label><input type="text" name="author_name" id="ebAuthorName" /></div>
-          <div class="form-field"><label>Author avatar URL</label><input type="url" name="author_avatar" id="ebAuthorAvatar" /></div>
-          <div class="form-field"><label>Cover image URL</label><input type="url" name="cover_image" id="ebCoverImage" /></div>
-          <div class="form-field"><label>Read time (mins)</label><input type="number" name="read_time" id="ebReadTime" min="1" /></div>
-          <div class="form-field"><label>Tags</label><input type="text" name="tags" id="ebTags" /></div>
-          <div class="form-field full"><label>Excerpt</label><textarea name="excerpt" id="ebExcerpt" style="min-height:70px;" required></textarea></div>
-          <div class="form-field full"><label>Author bio</label><textarea name="author_bio" id="ebAuthorBio" style="min-height:60px;"></textarea></div>
-          <div class="form-field full"><label>Full article content</label><textarea name="content" id="ebContent" style="min-height:220px;" required></textarea></div>
-          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:16px;">
-            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_featured" id="ebFeatured" /><span class="toggle-track"></span></label>
-            <span style="font-size:.85rem;font-weight:600;">Featured post</span>
-          </div>
-          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:16px;">
-            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_published" id="ebPublished" /><span class="toggle-track"></span></label>
-            <span style="font-size:.85rem;font-weight:600;">Published (live)</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('editBlogModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
-    </form>
-  </div>
-</div>
 <!-- ══ BLOG: DELETE MODAL ══ -->
 <div class="modal-backdrop" id="deleteBlogModal">
   <div class="modal" role="dialog" aria-modal="true">
@@ -795,26 +743,6 @@
     openModal('deleteServiceModal');
   }
 
-  /* ── Blog modals ── */
-  document.getElementById('openAddBlog').addEventListener('click', () => { activateTab('blog'); openModal('addBlogModal'); });
-  function openBlogEdit(pk,slug,title,excerpt,category,authorName,authorAvatar,authorBio,coverImage,tags,readTime,isFeatured,isPublished,content) {
-    document.getElementById('editBlogForm').action        = `/admin/blog/${pk}/edit/`;
-    document.getElementById('ebTitle').value              = title;
-    document.getElementById('ebSlug').value               = slug;
-    document.getElementById('ebExcerpt').value            = excerpt;
-    document.getElementById('ebAuthorName').value         = authorName;
-    document.getElementById('ebAuthorAvatar').value       = authorAvatar;
-    document.getElementById('ebAuthorBio').value          = authorBio;
-    document.getElementById('ebCoverImage').value         = coverImage;
-    document.getElementById('ebTags').value               = tags;
-    document.getElementById('ebReadTime').value           = readTime;
-    document.getElementById('ebContent').value            = content;
-    document.getElementById('ebFeatured').checked         = isFeatured;
-    document.getElementById('ebPublished').checked        = isPublished;
-    const cat = document.getElementById('ebCategory');
-    for(let i=0;i<cat.options.length;i++) cat.options[i].selected = cat.options[i].value === category;
-    openModal('editBlogModal');
-  }
   function openBlogDelete(pk,title) {
     document.getElementById('deleteBlogForm').action = `/admin/blog/${pk}/delete/`;
     document.getElementById('deleteBlogPreview').textContent = title;

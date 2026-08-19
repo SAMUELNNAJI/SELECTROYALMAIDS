@@ -1,17 +1,17 @@
 {% load static %}
-{% load summernote_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>New Blog Post — SelectRoyalMaids Admin</title>
+  <title>New Blog Post — SelectRoyalMaids</title>
   <link rel="icon" href="{% static 'image/logo.png' %}" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  {% summernote_head %}
+  <!-- Summernote -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -28,164 +28,100 @@
       --red:       #dc2626;
       --red-lt:    #fee2e2;
       --radius:    12px;
-      --shadow:    0 1px 3px rgba(0,0,0,.07);
+      --shadow:    0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
     }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* ── Topbar ── */
     .topbar {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 0 32px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: sticky; top: 0; z-index: 100;
+      background: var(--card); border-bottom: 1px solid var(--border);
+      height: 64px; padding: 0 32px;
+      display: flex; align-items: center; gap: 16px;
     }
-    .topbar-left { display: flex; align-items: center; gap: 14px; }
-    .topbar-left a {
+    .back-link {
       display: inline-flex; align-items: center; gap: 7px;
-      font-size: .875rem; font-weight: 600; color: var(--muted);
-      text-decoration: none;
-      padding: 7px 14px; border: 1px solid var(--border);
-      border-radius: 8px; transition: background .15s, color .15s;
+      padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: .85rem; font-weight: 600; color: var(--muted);
+      text-decoration: none; transition: background .15s, color .15s; white-space: nowrap;
     }
-    .topbar-left a:hover { background: var(--bg); color: var(--text); }
-    .topbar h1 { font-size: 1.05rem; font-weight: 800; color: var(--text); }
+    .back-link:hover { background: var(--bg); color: var(--text); }
+    .topbar-title { font-size: 1rem; font-weight: 800; color: var(--text); }
 
-    /* ── Page ── */
-    .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 64px; }
+    .page { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; }
 
-    /* ── Card ── */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-      overflow: hidden;
-    }
-    .card-head {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-    }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; overflow: hidden; }
+    .card-head { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
     .card-head h2 { font-size: .95rem; font-weight: 700; }
     .card-body { padding: 24px; }
 
-    /* ── Form ── */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     .form-grid .full { grid-column: 1 / -1; }
-    .form-field label {
-      display: block;
-      font-size: .78rem;
-      font-weight: 700;
-      color: var(--muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-    }
+    .form-field label { display: block; margin-bottom: 6px; font-size: .75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
     .form-field input,
     .form-field select,
     .form-field textarea {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: .9rem;
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
-      background: var(--bg);
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: .9rem; font-family: 'Inter', sans-serif; color: var(--text); background: var(--bg);
       transition: border-color .15s, box-shadow .15s;
     }
-    .form-field input:focus,
-    .form-field select:focus,
-    .form-field textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
-      background: #fff;
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.1); background: #fff;
     }
     .form-field textarea { resize: vertical; min-height: 90px; }
 
-    /* Summernote wrapper — make it match the card style */
-    .form-field .note-editor { border-radius: 8px; border-color: var(--border); }
-
-    /* ── Toggle ── */
-    .toggle-row {
-      display: flex; align-items: center; gap: 10px;
-      padding-top: 6px;
-    }
+    .toggle-row { display: flex; align-items: center; gap: 10px; padding-top: 8px; }
     .toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle-track {
-      position: absolute; inset: 0;
-      background: #cbd5e1; border-radius: 100px; cursor: pointer;
-      transition: background .2s;
-    }
-    .toggle-track::after {
-      content: ''; position: absolute;
-      width: 18px; height: 18px; background: #fff; border-radius: 50%;
-      top: 3px; left: 3px; transition: transform .2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.2);
-    }
+    .toggle-track { position: absolute; inset: 0; background: #cbd5e1; border-radius: 100px; cursor: pointer; transition: background .2s; }
+    .toggle-track::after { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
     .toggle input:checked + .toggle-track { background: var(--accent); }
     .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
-    .toggle-label { font-size: .875rem; font-weight: 600; }
+    .toggle-label { font-size: .875rem; font-weight: 600; color: var(--text); }
 
-    /* ── Buttons ── */
     .btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 24px; border-radius: 8px;
-      font-size: .875rem; font-weight: 600; font-family: 'Inter', sans-serif;
-      cursor: pointer; border: 1px solid transparent; text-decoration: none;
-      transition: background .15s, transform .1s;
-    }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px; border-radius: 8px; font-size: .875rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; border: 1px solid transparent; text-decoration: none; transition: background .15s, transform .1s; }
     .btn:active { transform: scale(.98); }
     .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     .btn-primary:hover { background: var(--accent-dk); }
     .btn-ghost { background: transparent; color: var(--muted); border-color: var(--border); }
     .btn-ghost:hover { background: var(--bg); color: var(--text); }
 
-    /* ── Alert ── */
-    .alert {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 16px; border-radius: 10px; margin-bottom: 20px;
-      font-size: .875rem; font-weight: 600;
-    }
+    .alert { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-radius: 10px; margin-bottom: 22px; font-size: .875rem; font-weight: 600; }
+    .alert-success { background: var(--green-lt); border: 1px solid #bbf7d0; color: var(--green); }
     .alert-error   { background: var(--red-lt);   border: 1px solid #fecaca; color: var(--red); }
-    .alert-success { background: var(--green-lt);  border: 1px solid #bbf7d0; color: var(--green); }
+
+    /* Summernote fit */
+    .note-editor { border-radius: 8px !important; border-color: var(--border) !important; font-family: 'Inter', sans-serif !important; }
+
+    /* ── Cover image tab widget ── */
+    .cover-tabs { display: flex; gap: 0; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; width: fit-content; }
+    .cover-tab { padding: 7px 20px; border: none; background: var(--bg); font-size: .8rem; font-weight: 600; font-family: 'Inter', sans-serif; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; }
+    .cover-tab.active { background: var(--accent); color: #fff; }
+    .file-drop {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 28px 20px;
+      border: 2px dashed var(--border); border-radius: 8px;
+      background: var(--bg); cursor: pointer; transition: border-color .15s, background .15s;
+      font-size: .85rem; color: var(--muted); font-weight: 600; text-align: center;
+    }
+    .file-drop:hover { border-color: var(--accent); background: var(--accent-lt); color: var(--accent); }
+    .file-drop i { font-size: 1.6rem; }
+    .file-drop.has-file { border-color: var(--green); background: var(--green-lt); color: var(--green); }
 
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
-      .page { padding: 20px 14px 48px; }
+      .page { padding: 20px 14px 60px; }
       .topbar { padding: 0 16px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Topbar -->
 <header class="topbar">
-  <div class="topbar-left">
-    <a href="/admin/dashboard/?tab=blog">
-      <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-    </a>
-    <h1>New Blog Post</h1>
-  </div>
+  <a href="/admin/dashboard/?tab=blog" class="back-link">
+    <i class="fa-solid fa-arrow-left"></i> Dashboard
+  </a>
+  <span class="topbar-title">New Blog Post</span>
 </header>
 
 <div class="page">
@@ -199,10 +135,10 @@
     {% endfor %}
   {% endif %}
 
-  <form method="post" action="{% url 'Authentication:blog_create' %}">
+  <form method="post" action="{% url 'Authentication:blog_create' %}" id="blogForm" enctype="multipart/form-data">
     {% csrf_token %}
 
-    <!-- Meta -->
+    <!-- Post details -->
     <div class="card">
       <div class="card-head">
         <i class="fa-solid fa-circle-info" style="color:var(--accent);"></i>
@@ -210,14 +146,17 @@
       </div>
       <div class="card-body">
         <div class="form-grid">
+
           <div class="form-field full">
             <label>Title <span style="color:var(--red);">*</span></label>
-            <input type="text" name="title" placeholder="10 Things to Check Before Hiring a Maid" required autofocus />
+            <input type="text" name="title" id="titleInput" placeholder="e.g. 10 Things to Check Before Hiring a Maid" required autofocus />
           </div>
+
           <div class="form-field">
-            <label>Slug <span style="color:var(--muted);font-weight:400;">(URL, no spaces)</span> <span style="color:var(--red);">*</span></label>
-            <input type="text" name="slug" placeholder="10-things-check-before-hiring-maid" required />
+            <label>Slug <span style="color:var(--muted);font-weight:500;">(URL key — no spaces)</span> <span style="color:var(--red);">*</span></label>
+            <input type="text" name="slug" id="slugInput" placeholder="10-things-before-hiring-maid" required />
           </div>
+
           <div class="form-field">
             <label>Category</label>
             <select name="category">
@@ -226,34 +165,43 @@
               {% endfor %}
             </select>
           </div>
+
           <div class="form-field">
-            <label>Author name</label>
-            <input type="text" name="author_name" value="{{ author_name }}" />
+            <label>Cover Image</label>
+            <!-- Tab toggle -->
+            <div class="cover-tabs">
+              <button type="button" class="cover-tab active" data-tab="url">URL</button>
+              <button type="button" class="cover-tab" data-tab="upload">Upload</button>
+            </div>
+            <div class="cover-panel" id="coverPanelUrl">
+              <input type="url" name="cover_image" id="coverUrl"
+                     placeholder="https://images.unsplash.com/…" />
+            </div>
+            <div class="cover-panel" id="coverPanelUpload" style="display:none;">
+              <label class="file-drop" id="fileDrop" for="coverFile">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span id="fileLabel">Click or drag an image here</span>
+              </label>
+              <input type="file" name="cover_image_file" id="coverFile"
+                     accept="image/*" style="display:none;" />
+            </div>
           </div>
+
           <div class="form-field">
-            <label>Author avatar URL</label>
-            <input type="url" name="author_avatar" placeholder="https://…" />
-          </div>
-          <div class="form-field">
-            <label>Cover image URL</label>
-            <input type="url" name="cover_image" placeholder="https://images.unsplash.com/…" />
-          </div>
-          <div class="form-field">
-            <label>Read time (mins)</label>
+            <label>Read Time (mins)</label>
             <input type="number" name="read_time" value="5" min="1" />
           </div>
+
           <div class="form-field">
-            <label>Tags <span style="color:var(--muted);font-weight:400;">(comma-separated)</span></label>
-            <input type="text" name="tags" placeholder="Hiring Tips, Nigeria, Safety" />
+            <label>Tags <span style="color:var(--muted);font-weight:500;">(comma-separated)</span></label>
+            <input type="text" name="tags" placeholder="Hiring Tips, Safety, Nigeria" />
           </div>
+
           <div class="form-field full">
             <label>Excerpt <span style="color:var(--red);">*</span></label>
-            <textarea name="excerpt" placeholder="Short teaser shown on the blog listing page…" required></textarea>
+            <textarea name="excerpt" style="min-height:80px;" placeholder="Short summary shown on the blog listing page…" required></textarea>
           </div>
-          <div class="form-field full">
-            <label>Author bio</label>
-            <textarea name="author_bio" placeholder="Brief author biography…" style="min-height:60px;"></textarea>
-          </div>
+
         </div>
       </div>
     </div>
@@ -267,7 +215,8 @@
       <div class="card-body">
         <div class="form-field">
           <label>Content <span style="color:var(--red);">*</span></label>
-          {% summernote 'content' %}
+          <!-- Summernote will replace this textarea -->
+          <textarea id="contentEditor" name="content"></textarea>
         </div>
       </div>
     </div>
@@ -278,27 +227,24 @@
         <i class="fa-solid fa-sliders" style="color:var(--accent);"></i>
         <h2>Publish Options</h2>
       </div>
-      <div class="card-body">
-        <div style="display:flex;gap:32px;flex-wrap:wrap;">
-          <div class="toggle-row">
-            <label class="toggle">
-              <input type="checkbox" name="is_featured" />
-              <span class="toggle-track"></span>
-            </label>
-            <span class="toggle-label">Mark as Featured post</span>
-          </div>
-          <div class="toggle-row">
-            <label class="toggle">
-              <input type="checkbox" name="is_published" checked />
-              <span class="toggle-track"></span>
-            </label>
-            <span class="toggle-label">Publish immediately</span>
-          </div>
+      <div class="card-body" style="display:flex; gap:36px; flex-wrap:wrap;">
+        <div class="toggle-row">
+          <label class="toggle">
+            <input type="checkbox" name="is_featured" />
+            <span class="toggle-track"></span>
+          </label>
+          <span class="toggle-label">Mark as Featured</span>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle">
+            <input type="checkbox" name="is_published" checked />
+            <span class="toggle-track"></span>
+          </label>
+          <span class="toggle-label">Publish immediately</span>
         </div>
       </div>
     </div>
 
-    <!-- Actions -->
     <div class="btn-row">
       <button type="submit" class="btn btn-primary">
         <i class="fa-solid fa-paper-plane"></i> Publish Post
@@ -311,6 +257,65 @@
   </form>
 </div>
 
-{% summernote_body %}
+<!-- jQuery + Summernote (lite build — no Bootstrap dependency) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
+<script>
+  $(function () {
+    $('#contentEditor').summernote({
+      placeholder: 'Write your full article here…',
+      tabsize: 2,
+      height: 480,
+      toolbar: [
+        ['style',  ['style']],
+        ['font',   ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+        ['fontsize', ['fontsize']],
+        ['color',  ['color']],
+        ['para',   ['ul', 'ol', 'paragraph']],
+        ['table',  ['table']],
+        ['insert', ['link', 'picture', 'hr']],
+        ['view',   ['fullscreen', 'codeview']],
+        ['help',   ['help']],
+      ],
+    });
+
+    // Auto-generate slug from title
+    $('#titleInput').on('input', function () {
+      const slug = $(this).val()
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+      $('#slugInput').val(slug);
+    });
+
+    // ── Cover image tab toggle ──
+    document.querySelectorAll('.cover-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cover-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.getElementById('coverPanelUrl').style.display    = tab === 'url'    ? '' : 'none';
+        document.getElementById('coverPanelUpload').style.display = tab === 'upload' ? '' : 'none';
+        if (tab === 'url')    { document.getElementById('coverFile').value = ''; }
+        if (tab === 'upload') { document.getElementById('coverUrl').value  = ''; }
+      });
+    });
+
+    // Show filename when file is chosen
+    document.getElementById('coverFile').addEventListener('change', function () {
+      const drop = document.getElementById('fileDrop');
+      const lbl  = document.getElementById('fileLabel');
+      if (this.files.length) {
+        lbl.textContent = this.files[0].name;
+        drop.classList.add('has-file');
+      } else {
+        lbl.textContent = 'Click or drag an image here';
+        drop.classList.remove('has-file');
+      }
+    });
+  });
+</script>
 </body>
 </html>

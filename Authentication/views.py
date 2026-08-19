@@ -339,15 +339,14 @@ def blog_create(request):
         slug  = request.POST.get('slug', '').strip()
         title = request.POST.get('title', '').strip()
         if slug and title:
-            BlogPost.objects.create(
+            post = BlogPost(
                 slug=slug,
                 title=title,
                 excerpt=request.POST.get('excerpt', '').strip(),
                 category=request.POST.get('category', 'general'),
-                author_name=request.POST.get('author_name', '').strip(),
-                author_avatar=request.POST.get('author_avatar', '').strip(),
-                author_bio=request.POST.get('author_bio', '').strip(),
-                cover_image=request.POST.get('cover_image', '').strip(),
+                author_name='Admin',
+                author_avatar='',
+                author_bio='This article was written and reviewed by the SelectRoyal Maids admin team.',
                 content=request.POST.get('content', '').strip(),
                 tags=request.POST.get('tags', '').strip(),
                 read_time=int(request.POST.get('read_time', 5) or 5),
@@ -355,10 +354,24 @@ def blog_create(request):
                 is_published=request.POST.get('is_published') == 'on',
                 published_at=timezone.now(),
             )
+            # Cover image: uploaded file takes priority over URL
+            uploaded = request.FILES.get('cover_image_file')
+            if uploaded:
+                post.cover_image_file = uploaded
+                post.cover_image = ''
+            else:
+                post.cover_image = request.POST.get('cover_image', '').strip()
+            post.save()
             messages.success(request, f'Post "{title}" published.')
+            return redirect('/admin/dashboard/?tab=blog')
         else:
             messages.error(request, 'Slug and title are required.')
-    return redirect('/admin/dashboard/?tab=blog')
+    # GET — render the dedicated editor page
+    context = {
+        'blog_categories': BlogPost.CATEGORY_CHOICES,
+        'default_author':  request.user.get_full_name() or request.user.username,
+    }
+    return render(request, 'Dashboard/blog_create.html', context)
 
 
 @login_required
@@ -371,18 +384,32 @@ def blog_edit(request, post_id):
         post.title         = request.POST.get('title',         post.title).strip()
         post.excerpt       = request.POST.get('excerpt',       post.excerpt).strip()
         post.category      = request.POST.get('category',      post.category)
-        post.author_name   = request.POST.get('author_name',   post.author_name).strip()
-        post.author_avatar = request.POST.get('author_avatar', post.author_avatar).strip()
-        post.author_bio    = request.POST.get('author_bio',    post.author_bio).strip()
-        post.cover_image   = request.POST.get('cover_image',   post.cover_image).strip()
+        post.author_name   = 'Admin'
+        post.author_bio    = 'This article was written and reviewed by the SelectRoyal Maids admin team.'
         post.content       = request.POST.get('content',       post.content).strip()
         post.tags          = request.POST.get('tags',          post.tags).strip()
         post.read_time     = int(request.POST.get('read_time', post.read_time) or post.read_time)
         post.is_featured   = request.POST.get('is_featured') == 'on'
         post.is_published  = request.POST.get('is_published') == 'on'
+        # Cover image: uploaded file takes priority over URL
+        uploaded = request.FILES.get('cover_image_file')
+        if uploaded:
+            post.cover_image_file = uploaded
+            post.cover_image = ''
+        else:
+            url = request.POST.get('cover_image', '').strip()
+            if url:
+                post.cover_image = url
+                post.cover_image_file = None
         post.save()
         messages.success(request, f'Post "{post.title}" updated.')
-    return redirect('/admin/dashboard/?tab=blog')
+        return redirect('/admin/dashboard/?tab=blog')
+    # GET — render the dedicated editor page with the post pre-loaded
+    context = {
+        'post':            post,
+        'blog_categories': BlogPost.CATEGORY_CHOICES,
+    }
+    return render(request, 'Dashboard/blog_edit.html', context)
 
 
 @login_required

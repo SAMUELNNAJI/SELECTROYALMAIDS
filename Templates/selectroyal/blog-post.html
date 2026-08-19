@@ -26,11 +26,11 @@
       <p class="post-hero-excerpt">{{ post.excerpt }}</p>
 
       <div class="post-hero-meta">
-        {% if post.author_avatar %}
-        <img src="{{ post.author_avatar }}" alt="{{ post.author_name }}" class="post-hero-avatar" />
-        {% endif %}
+        <div class="post-hero-avatar">
+          <i class="fa-solid fa-user-tie"></i>
+        </div>
         <div class="post-hero-meta-text">
-          <p class="post-hero-author">{{ post.author_name }}</p>
+          <p class="post-hero-author">SelectRoyal Maids Admin</p>
           <p class="post-hero-meta-sub">
             <span><i class="fa-regular fa-calendar"></i> {{ post.published_at|date:"d F Y" }}</span>
             <span class="post-meta-dot">·</span>
@@ -62,9 +62,9 @@
   </section>
 
   <!-- ===== COVER IMAGE ===== -->
-  {% if post.cover_image %}
+  {% if post.cover_url %}
   <div class="post-cover-wrap container">
-    <img src="{{ post.cover_image }}" alt="{{ post.title }}" class="post-cover-img" />
+    <img src="{{ post.cover_url }}" alt="{{ post.title }}" class="post-cover-img" />
   </div>
   {% endif %}
 
@@ -111,20 +111,21 @@
         </div>
 
         <!-- Author bio -->
-        {% if post.author_name %}
         <div class="post-author-bio">
-          {% if post.author_avatar %}
-          <img src="{{ post.author_avatar }}" alt="{{ post.author_name }}" class="post-author-bio-avatar" />
-          {% endif %}
+          <div class="post-author-bio-avatar">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
           <div class="post-author-bio-text">
-            <p class="post-author-bio-name">{{ post.author_name }}</p>
-            <p class="post-author-bio-role">Contributor, SelectRoyal Maids</p>
-            {% if post.author_bio %}
-            <p class="post-author-bio-desc">{{ post.author_bio }}</p>
-            {% endif %}
+            <p class="post-author-bio-name">SelectRoyal Maids Admin</p>
+            <p class="post-author-bio-role">Admin, SelectRoyal Maids</p>
+            <p class="post-author-bio-desc">
+              This article was written and reviewed by the SelectRoyal Maids admin team.
+              We are dedicated to connecting Nigerian families with trusted, verified domestic
+              professionals — and sharing expert guidance to help both employers and domestic
+              workers thrive.
+            </p>
           </div>
         </div>
-        {% endif %}
       </article>
 
       <!-- ── RIGHT: Sidebar ── -->
@@ -159,8 +160,8 @@
           <div class="post-sidebar-related">
             {% for rel in related %}
             <a href="{% url 'MaidApp:blog-post' rel.slug %}" class="post-sidebar-rel-item">
-              {% if rel.cover_image %}
-              <img src="{{ rel.cover_image }}" alt="{{ rel.title }}" />
+              {% if rel.cover_url %}
+              <img src="{{ rel.cover_url }}" alt="{{ rel.title }}" />
               {% endif %}
               <div>
                 <p>{{ rel.title|truncatechars:60 }}</p>
@@ -193,8 +194,8 @@
         {% for rel in related %}
         <article class="blog-card">
           <div class="blog-card-img-wrap">
-            {% if rel.cover_image %}
-            <img src="{{ rel.cover_image }}" alt="{{ rel.title }}" loading="lazy" />
+            {% if rel.cover_url %}
+            <img src="{{ rel.cover_url }}" alt="{{ rel.title }}" loading="lazy" />
             {% endif %}
             <span class="blog-card-tag">{{ rel.get_category_display }}</span>
           </div>
