@@ -18,7 +18,6 @@ env/
 # Django
 *.sqlite3
 staticfiles/
-media/
 local_settings.py
 
 # Environment variables — NEVER commit secrets
