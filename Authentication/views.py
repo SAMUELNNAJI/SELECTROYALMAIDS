@@ -129,6 +129,8 @@ def maid_edit(request, maid_id):
         maid.assign_status  = request.POST.get('assign_status', maid.assign_status)
         maid.is_featured    = request.POST.get('is_featured') == 'on'
         maid.is_active      = request.POST.get('is_active')  == 'on'
+        if request.FILES.get('profile_image'):
+            maid.image = request.FILES['profile_image']
         maid.save()
         messages.success(request, f'Profile "{maid.full_name}" updated.')
     page = request.POST.get('page', 1)
@@ -187,6 +189,7 @@ def maid_create(request):
                 phone=request.POST.get('phone', '').strip(),
                 email=request.POST.get('email', '').strip(),
                 description=request.POST.get('description', '').strip(),
+                image=request.FILES.get('profile_image'),
                 assign_status=request.POST.get('assign_status', 'unassigned'),
                 is_featured=request.POST.get('is_featured') == 'on',
                 is_active=True,
