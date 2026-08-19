@@ -109,6 +109,11 @@
 (function () {
   'use strict';
 
+  // Some inner pages also include nav.js. Initialise this shared control once
+  // so a second click handler cannot immediately close the menu again.
+  if (window.__selectRoyalMobileNavInitialized) return;
+  window.__selectRoyalMobileNavInitialized = true;
+
   const hamburger = document.getElementById('hamburger');
   const navLinks  = document.querySelector('.nav-links');
   const navCta    = document.querySelector('.nav-cta');

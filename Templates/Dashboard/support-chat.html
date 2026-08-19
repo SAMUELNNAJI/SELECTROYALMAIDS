@@ -336,7 +336,7 @@
     }
   </style>
 </head>
-<body>
+<body data-chat-user-name="{{ user.get_full_name|default:user.username|escapejs }}" data-chat-user-initials="{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}">
 
 <!-- Sidebar overlay -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -352,15 +352,23 @@
   </div>
 
   <nav class="sidebar-nav">
-    <div class="sidebar-label">Navigation</div>
     {% if user.is_superuser %}
-      <a href="{% url 'Authentication:admin_dashboard' %}">
-        <i class="fa-solid fa-chart-pie icon"></i> Admin Dashboard
-      </a>
+      <div class="sidebar-label">Workspace</div>
+      <a href="{% url 'Authentication:admin_dashboard' %}"><i class="fa-solid fa-chart-pie icon"></i> Overview</a>
+      <a href="{% url 'Authentication:admin_dashboard' %}?tab=maids"><i class="fa-solid fa-users icon"></i> Maid Applications</a>
+      <a href="{% url 'Authentication:admin_dashboard' %}?tab=employers"><i class="fa-solid fa-building icon"></i> Employers &amp; Payments</a>
+      <div class="sidebar-label">Content</div>
+      <a href="{% url 'Authentication:admin_dashboard' %}?tab=blog"><i class="fa-solid fa-newspaper icon"></i> Blog Posts</a>
+      <a href="{% url 'Authentication:admin_dashboard' %}?tab=faq"><i class="fa-solid fa-circle-question icon"></i> FAQs</a>
+      <a href="{% url 'Authentication:admin_dashboard' %}?tab=services"><i class="fa-solid fa-sliders icon"></i> Services</a>
+      <div class="sidebar-label">Support</div>
     {% else %}
-      <a href="{% url 'Authentication:employer_dashboard' %}">
-        <i class="fa-solid fa-house icon"></i> My Dashboard
-      </a>
+      <div class="sidebar-label">My Dashboard</div>
+      <a href="{% url 'Authentication:employer_dashboard' %}"><i class="fa-solid fa-house icon"></i> Home</a>
+      <a href="{% url 'MaidApp:find-a-maid' %}"><i class="fa-solid fa-magnifying-glass icon"></i> Find a Maid</a>
+      <a href="{% url 'MaidApp:request-maid' %}"><i class="fa-solid fa-file-circle-plus icon"></i> New Request</a>
+      <div class="sidebar-label">Account</div>
+      <a href="{% url 'MaidApp:contact' %}"><i class="fa-solid fa-headset icon"></i> Contact Support</a>
     {% endif %}
     <a href="#" class="active">
       <i class="fa-solid fa-comments icon"></i> Support Chat
@@ -375,7 +383,7 @@
 
   <div class="sidebar-footer">
     <div class="sidebar-user">
-      <div class="sidebar-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+      <div class="sidebar-avatar" aria-label="{% if user.is_superuser %}Admin{% else %}User{% endif %} profile"><i class="fa-solid fa-user"></i></div>
       <div class="sidebar-user-info">
         <strong>{{ user.get_full_name|default:user.username }}</strong>
         <span>{% if user.is_superuser %}Super Admin{% else %}Employer{% endif %}</span>
@@ -485,7 +493,7 @@
 
 </div><!-- /main -->
 
-<script>
+<script type="text/plain" id="legacy-support-script">
   /* ── Sidebar ─────────────────────────────────────────── */
   const sidebar  = document.getElementById('sidebar');
   const overlay  = document.getElementById('sidebarOverlay');
@@ -614,5 +622,6 @@
   /* ── Initial scroll ──────────────────────────────────── */
   scrollBottom(false);
 </script>
+<script src="{% static 'js/dashboard-support-chat.js' %}"></script>
 </body>
 </html>

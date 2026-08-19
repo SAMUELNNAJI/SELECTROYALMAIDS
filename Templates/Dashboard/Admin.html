@@ -93,6 +93,27 @@
     .form-field input,.form-field select,.form-field textarea { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:.9rem; font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); transition:border-color .15s,box-shadow .15s; }
     .form-field input:focus,.form-field select:focus,.form-field textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.1); background:#fff; }
     .form-field textarea { resize:vertical; min-height:100px; }
+    /* Enhanced form field with leading icon */
+    .form-field-i { position:relative; }
+    .form-field-i .field-icon { position:absolute; left:14px; top:auto; bottom:12px; color:var(--muted); font-size:.9rem; pointer-events:none; }
+    .form-field-i input,.form-field-i select,.form-field-i textarea { padding-left:40px; padding-right:14px; }
+    .form-field-i.input-narrow input,.form-field-i.input-narrow textarea { padding-left:14px; }
+    /* Profile photo row */
+    .image-upload-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .image-upload-row .photo-wrap { position:relative; flex-shrink:0; }
+    .photo-preview { width:64px; height:64px; border-radius:50%; object-fit:cover; border:2px solid var(--border); display:none; }
+    .photo-placeholder { width:64px; height:64px; border-radius:50%; background:var(--accent-lt); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+    .photo-placeholder.hidden { display:none; }
+    .photo-preview + .photo-placeholder { display:none; }
+    .file-input-wrapped { display:flex; align-items:center; gap:10px; flex:1; min-width:160px; }
+    .file-input-wrapped input[type=file] { flex:1; min-width:0; font-size:.85rem; cursor:pointer; }
+    .file-hint { font-size:.72rem; color:var(--muted); white-space:nowrap; }
+    /* Toggle row */
+    .toggle-row { display:flex; align-items:center; gap:12px; padding-top:10px; }
+    .toggle-row span { font-size:.85rem; font-weight:600; color:var(--text); }
+    /* Section divider & helpers */
+    .divider { height:1px; background:var(--border); width:100%; margin:18px 0; }
+    .hidden { display:none !important; }
     /* Buttons */
     .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 22px; border-radius:8px; font-size:.875rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; border:1px solid transparent; text-decoration:none; transition:background .15s,transform .1s; }
     .btn:active { transform:scale(.98); }
@@ -164,6 +185,40 @@
     .modal-close:hover { background:var(--red-lt); color:var(--red); border-color:#fecaca; }
     .modal-body { padding:24px; }
     .modal-foot { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+    /* Maid editor — a fuller profile editing experience */
+    .maid-editor { max-width:760px !important; max-height:calc(100vh - 32px); display:flex; flex-direction:column; overflow:hidden; }
+    .maid-editor form { display:flex; flex:1; flex-direction:column; min-height:0; }
+    .maid-editor .modal-head { padding:0; border:0; background:linear-gradient(125deg,#0f234f 0%,#1d4ed8 100%); color:#fff; }
+    .maid-editor-title { display:flex; align-items:center; gap:14px; padding:22px 26px; min-width:0; }
+    .maid-editor-icon { width:42px; height:42px; border-radius:13px; background:rgba(255,255,255,.14); display:grid; place-items:center; color:#dbeafe; flex-shrink:0; }
+    .maid-editor-title h3 { color:#fff; font-size:1.05rem; }
+    .maid-editor-title p { margin-top:3px; color:#bfdbfe; font-size:.76rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .maid-editor .modal-close { margin-right:22px; background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.18); color:#fff; flex-shrink:0; }
+    .maid-editor .modal-close:hover { background:rgba(255,255,255,.22); border-color:transparent; color:#fff; }
+    .maid-editor-scroll { flex:1; min-height:0; padding:24px 26px 26px; overflow-y:auto; }
+    .maid-editor-profile { display:flex; align-items:center; gap:14px; padding:14px; margin-bottom:24px; border:1px solid #dbeafe; background:linear-gradient(100deg,#f8fbff,#eff6ff); border-radius:12px; }
+    .maid-editor .photo-preview,.maid-editor .photo-placeholder { width:68px; height:68px; }
+    .maid-editor .photo-preview { display:block; border:3px solid #fff; box-shadow:0 2px 8px rgba(30,64,175,.16); }
+    .maid-editor-profile-copy { min-width:0; flex:1; }
+    .maid-editor-profile-copy strong { display:block; font-size:.9rem; color:#1e3a8a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .maid-editor-profile-copy span { display:block; margin-top:3px; font-size:.75rem; color:var(--muted); }
+    .maid-editor .file-input-wrapped { justify-content:flex-end; }
+    .maid-editor .file-input-wrapped input[type=file] { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+    .maid-photo-action { display:inline-flex; align-items:center; gap:7px; padding:9px 12px; border:1px solid #bfdbfe; border-radius:8px; background:#fff; color:#1d4ed8; font-size:.76rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:.15s ease; }
+    .maid-photo-action:hover { background:#dbeafe; border-color:#93c5fd; }
+    .maid-editor-section { margin-top:24px; }
+    .maid-editor-section:first-of-type { margin-top:0; }
+    .maid-editor-section-head { display:flex; align-items:center; gap:9px; margin-bottom:14px; font-size:.72rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:#475569; }
+    .maid-editor-section-head i { width:25px; height:25px; border-radius:7px; display:grid; place-items:center; color:var(--accent); background:var(--accent-lt); font-size:.72rem; }
+    .maid-editor .form-field label { color:#475569; }
+    .maid-editor .form-field input,.maid-editor .form-field select,.maid-editor .form-field textarea { background:#fff; }
+    .maid-editor-switches { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .maid-editor-switch { display:flex; align-items:center; gap:11px; min-height:62px; padding:11px 13px; border:1px solid var(--border); border-radius:10px; background:#fff; }
+    .maid-editor-switch .toggle { flex-shrink:0; }
+    .maid-editor-switch strong,.maid-editor-switch small { display:block; }
+    .maid-editor-switch strong { font-size:.81rem; color:var(--text); }
+    .maid-editor-switch small { margin-top:2px; color:var(--muted); font-size:.7rem; line-height:1.3; }
+    .maid-editor .modal-foot { padding:16px 26px; background:#fff; }
     /* Sidebar overlay */
     .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:199; }
     /* Responsive */
@@ -199,6 +254,12 @@
       .faq-row-head{flex-wrap:wrap;gap:8px;}
       .faq-a{padding-left:18px;padding-right:18px;}
       .btn{padding:8px 16px;font-size:.82rem;}
+      .maid-editor-scroll{padding:18px 16px 20px;}
+      .maid-editor-title{padding:18px 16px;}
+      .maid-editor .modal-close{margin-right:16px;}
+      .maid-editor .modal-foot{padding:14px 16px;}
+      .maid-editor-profile{align-items:flex-start;}
+      .maid-editor .file-input-wrapped{justify-content:flex-start;}
     }
     @media(max-width:480px){
       .stats-grid{grid-template-columns:1fr;}
@@ -206,6 +267,7 @@
       .content{padding:16px 12px;}
       .tab-nav{margin-left:-12px;margin-right:-12px;border-radius:0;border-left:none;border-right:none;}
       .card-head,.card-body{padding:14px;}
+      .maid-editor-switches{grid-template-columns:1fr;}
     }
   </style>
 </head>
@@ -236,7 +298,7 @@
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-user">
-      <div class="sidebar-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+      <div class="sidebar-avatar" aria-label="Admin profile"><i class="fa-solid fa-user"></i></div>
       <div class="sidebar-user-info">
         <strong>{{ user.get_full_name|default:user.username }}</strong>
         <span>Super Admin</span>
@@ -655,44 +717,60 @@
 </div>
 <!-- ══ MAID: EDIT MODAL ══ -->
 <div class="modal-backdrop" id="editMaidModal">
-  <div class="modal" style="max-width:680px;" role="dialog" aria-modal="true">
-    <div class="modal-head"><h3><i class="fa-solid fa-pen" style="color:var(--accent);"></i> &nbsp;Edit Maid Profile</h3><button class="modal-close" onclick="closeModal('editMaidModal')">&times;</button></div>
-    <form method="post" id="editMaidForm" action="" enctype="multipart/form-data">{% csrf_token %}
-      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
-        <div class="form-grid">
-          <div class="form-field"><label>Full Name</label><input type="text" name="full_name" id="emFullName" required /></div>
-          <div class="form-field"><label>Reg Number</label><input type="text" name="reg_number" id="emRegNumber" required /></div>
-          <div class="form-field full"><label>Address</label><input type="text" name="address" id="emAddress" /></div>
-          <div class="form-field"><label>Age</label><input type="text" name="age" id="emAge" /></div>
-          <div class="form-field"><label>Phone</label><input type="text" name="phone" id="emPhone" /></div>
-          <div class="form-field"><label>Email</label><input type="email" name="email" id="emEmail" /></div>
-          <div class="form-field full" style="display:flex;align-items:center;gap:14px;padding-top:4px;">
-            <label style="flex-shrink:0;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:0;text-transform:uppercase;letter-spacing:.05em;">Profile Photo</label>
-            <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
-              <img id="emImagePreview" src="" alt=""
-                   style="width:48px;height:48px;border-radius:50%;object-fit:cover;display:none;border:2px solid var(--border);flex-shrink:0;" />
-              <div id="emImagePlaceholder" style="width:48px;height:48px;border-radius:50%;background:var(--accent-lt);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">
-                <i class="fa-solid fa-camera"></i>
-              </div>
-              <div style="min-width:0;flex:1;">
-                <input type="file" name="profile_image" accept="image/*" style="font-size:.85rem;padding:8px 10px;" onchange="previewMaidImage(this)" />
-                <p style="font-size:.72rem;color:var(--muted);margin-top:3px;">Leave empty to keep current photo</p>
-              </div>
-            </div>
-          </div>
-          <div class="form-field"><label>Status</label><select name="assign_status" id="emAssignStatus"><option value="unassigned">Available</option><option value="assigned">Assigned</option></select></div>
-          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
-            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_featured" id="emIsFeatured" /><span class="toggle-track"></span></label>
-            <span style="font-size:.85rem;font-weight:600;">Featured</span>
-          </div>
-          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
-            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_active" id="emIsActive" /><span class="toggle-track"></span></label>
-            <span style="font-size:.85rem;font-weight:600;">Active</span>
-          </div>
-          <div class="form-field full"><label>About / Bio</label><textarea name="description" id="emDescription" style="min-height:110px;"></textarea></div>
-        </div>
+  <div class="modal maid-editor" role="dialog" aria-modal="true" aria-labelledby="editMaidTitle">
+    <div class="modal-head">
+      <div class="maid-editor-title">
+        <span class="maid-editor-icon"><i class="fa-solid fa-user-pen"></i></span>
+        <div><h3 id="editMaidTitle">Edit maid profile</h3><p id="emProfileSubtitle">Update profile details and visibility</p></div>
       </div>
-      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('editMaidModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
+      <button class="modal-close" type="button" onclick="closeModal('editMaidModal')" aria-label="Close edit form"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form method="post" id="editMaidForm" action="" enctype="multipart/form-data">{% csrf_token %}
+      <div class="maid-editor-scroll">
+        <div class="maid-editor-profile">
+          <div class="photo-wrap">
+            <img id="emImagePreview" class="photo-preview hidden" src="" alt="" onerror="this.classList.add('hidden');document.getElementById('emImagePlaceholder').classList.remove('hidden');" />
+            <div id="emImagePlaceholder" class="photo-placeholder"><i class="fa-solid fa-camera"></i></div>
+          </div>
+          <div class="maid-editor-profile-copy"><strong id="emProfileName">Maid profile</strong><span id="emProfileReg">No registration number</span></div>
+          <div class="file-input-wrapped">
+            <input type="file" name="profile_image" id="emProfileImageInput" accept="image/*" onchange="previewMaidImage(this)" />
+            <label class="maid-photo-action" for="emProfileImageInput"><i class="fa-solid fa-arrow-up-from-bracket"></i> Replace photo</label>
+          </div>
+        </div>
+        <section class="maid-editor-section">
+          <div class="maid-editor-section-head"><i class="fa-solid fa-id-card"></i> Profile details</div>
+        <div class="form-grid">
+          <div class="form-field form-field-i"><label>Full Name</label><i class="fa-solid fa-user field-icon"></i><input type="text" name="full_name" id="emFullName" placeholder="Enter full name" required /></div>
+          <div class="form-field form-field-i"><label>Reg Number</label><i class="fa-solid fa-hashtag field-icon"></i><input type="text" name="reg_number" id="emRegNumber" placeholder="e.g. REG-001" required /></div>
+          <div class="form-field full"><label>Address</label><textarea name="address" id="emAddress" placeholder="Enter full address" style="min-height:70px;"></textarea></div>
+        </div>
+        </section>
+        <section class="maid-editor-section">
+          <div class="maid-editor-section-head"><i class="fa-solid fa-address-book"></i> Contact information</div>
+          <div class="form-grid">
+          <div class="form-field form-field-i"><label>Age</label><i class="fa-solid fa-cake-candles field-icon"></i><input type="number" name="age" id="emAge" placeholder="Years" /></div>
+          <div class="form-field form-field-i"><label>Phone</label><i class="fa-solid fa-phone field-icon"></i><input type="tel" name="phone" id="emPhone" placeholder="+1 234 567 890" /></div>
+          <div class="form-field form-field-i"><label>Email</label><i class="fa-solid fa-envelope field-icon"></i><input type="email" name="email" id="emEmail" placeholder="name@example.com" /></div>
+          <div class="form-field"><label>Placement Status</label><select name="assign_status" id="emAssignStatus"><option value="unassigned">Available</option><option value="assigned">Assigned</option></select></div>
+          </div>
+        </section>
+        <section class="maid-editor-section">
+          <div class="maid-editor-section-head"><i class="fa-solid fa-quote-left"></i> About</div>
+          <div class="form-grid">
+          <div class="form-field full"><label>About / Bio</label><textarea name="description" id="emDescription" placeholder="Write a short bio..." style="min-height:110px;"></textarea></div>
+          </div>
+        </section>
+        <section class="maid-editor-section">
+          <div class="maid-editor-section-head"><i class="fa-solid fa-sliders"></i> Profile settings</div>
+          <div class="maid-editor-switches">
+            <label class="maid-editor-switch"><span class="toggle"><input type="checkbox" name="is_featured" id="emIsFeatured" /><span class="toggle-track"></span></span><span><strong>Featured profile</strong><small>Highlight this maid in prominent listings.</small></span></label>
+            <label class="maid-editor-switch"><span class="toggle"><input type="checkbox" name="is_active" id="emIsActive" /><span class="toggle-track"></span></span><span><strong>Profile active</strong><small>Allow this profile to appear on the website.</small></span></label>
+          </div>
+        </section>
+        </div>
+
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('editMaidModal')"><i class="fa-solid fa-xmark"></i> Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
     </form>
   </div>
 </div>
@@ -925,6 +1003,9 @@
     document.getElementById('editMaidForm').action = `/admin/maid/${pk}/edit/`;
     document.getElementById('emFullName').value    = fullName;
     document.getElementById('emRegNumber').value   = regNumber;
+    document.getElementById('emProfileName').textContent = fullName || 'Maid profile';
+    document.getElementById('emProfileReg').textContent = regNumber ? `Registration: ${regNumber}` : 'No registration number';
+    document.getElementById('emProfileSubtitle').textContent = fullName ? `Editing ${fullName}'s profile` : 'Update profile details and visibility';
     document.getElementById('emAddress').value     = address;
     document.getElementById('emAge').value         = age;
     document.getElementById('emPhone').value       = phone;
@@ -938,12 +1019,12 @@
     const placeholder = document.getElementById('emImagePlaceholder');
     if (imageUrl) {
       preview.src = imageUrl;
-      preview.style.display = 'block';
-      placeholder.style.display = 'none';
+      preview.classList.remove('hidden');
+      placeholder.classList.add('hidden');
     } else {
       preview.src = '';
-      preview.style.display = 'none';
-      placeholder.style.display = 'flex';
+      preview.classList.add('hidden');
+      placeholder.classList.remove('hidden');
     }
     const fileInput = document.querySelector('#editMaidForm input[name=profile_image]');
     if (fileInput) fileInput.value = '';
@@ -956,8 +1037,8 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         preview.src = e.target.result;
-        preview.style.display = 'block';
-        placeholder.style.display = 'none';
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
       };
       reader.readAsDataURL(input.files[0]);
     }

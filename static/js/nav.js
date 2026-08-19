@@ -5,6 +5,11 @@
 (function () {
   'use strict';
 
+  // base.html already loads script.js. This guard makes nav.js safe on pages
+  // that include it too, rather than registering a duplicate toggle handler.
+  if (window.__selectRoyalMobileNavInitialized) return;
+  window.__selectRoyalMobileNavInitialized = true;
+
   var hamburger = document.getElementById('hamburger');
   var navLinks  = document.querySelector('.nav-links');
   var navCta    = document.querySelector('.nav-cta');
