@@ -94,12 +94,12 @@ def admin_dashboard(request):
 
     context = {
         # stat cards
-        'maid_count':            MaidProfile.objects.filter(is_active=True).count(),
+        'maid_count':            MaidRegistration.objects.count(),
         'employer_count':        User.objects.filter(is_superuser=False, is_active=True).count(),
         'support_count':         SupportMessage.objects.count(),
         # maids tab
         'maid_query':            maid_query,
-        'recent_maids':          MaidProfile.objects.filter(is_active=True).order_by('full_name')[:5],
+        'recent_maids':          MaidRegistration.objects.order_by('-created_at')[:5],
         'all_maids':             maids_qs,
         # content tabs
         'faqs':                  FAQ.objects.all(),

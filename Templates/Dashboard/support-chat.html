@@ -193,8 +193,12 @@
       font-size: .875rem;
       position: relative;
       word-break: break-word;
-      white-space: pre-wrap;
+      white-space: normal;
     }
+    .msg-bubble table { border-collapse: collapse; width: 100%; font-size: .82rem; }
+    .msg-bubble table th, .msg-bubble table td { padding: 5px 9px; border: 1px solid #e2e8f0; text-align: left; }
+    .msg-bubble table th { background: #1d4ed8; color: #fff; }
+    .msg-bubble table tr:nth-child(even) td { background: #f8fafc; }
     .msg-row.incoming .msg-bubble {
       background: var(--bubble-in);
       color: var(--bubble-in-txt);
@@ -454,7 +458,7 @@
         <div class="msg-row outgoing" data-message-id="{{ message.id }}" data-sender="{{ message.sender.get_full_name|default:message.sender.username }}">
           <div>
             <div class="msg-meta">You</div>
-            <div class="msg-bubble">{{ message.body }}</div>
+            <div class="msg-bubble">{{ message.body|safe }}</div>
           </div>
           <div class="msg-avatar out">
             {{ message.sender.first_name|first|upper }}{{ message.sender.last_name|first|upper }}
@@ -469,7 +473,7 @@
           </div>
           <div>
             <div class="msg-meta">{{ message.sender.get_full_name|default:message.sender.username }}</div>
-            <div class="msg-bubble">{{ message.body }}</div>
+            <div class="msg-bubble">{{ message.body|safe }}</div>
           </div>
           <span class="msg-time">{{ message.created_at|date:"H:i" }}</span>
         </div>
@@ -554,8 +558,8 @@
       row.innerHTML = `${avatarHtml}<div>${metaHtml}${bubbleHtml}</div>${timeHtml}`;
     }
 
-    // Set text safely (avoid XSS)
-    row.querySelector('.msg-bubble').textContent = body;
+    // Render HTML content (tables, etc.) safely — body is generated server-side
+    row.querySelector('.msg-bubble').innerHTML = body;
     msgBox.appendChild(row);
     scrollBottom();
   }

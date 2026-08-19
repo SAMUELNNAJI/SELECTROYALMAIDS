@@ -140,18 +140,27 @@ def request_maid(request):
         ('Contact Name', 'contact_name'), ('Contact Phone', 'contact_phone'),
         ('Contact Email', 'contact_email'),
     ]
-    rows = []
+    from django.utils.html import escape
+    table_rows = ''
     for label, key in request_fields:
         value = ' '.join(request.POST.get(key, '').split()) or '—'
-        # Keep every request to one readable Markdown-style table row.
-        rows.append(f'| {label} | {value.replace("|", "/")} |')
-
-    body = '\n'.join([
-        'New employer placement request',
-        '| Request detail | Information |',
-        '| --- | --- |',
-        *rows,
-    ])
+        table_rows += (
+            f'<tr>'
+            f'<td style="padding:6px 10px;border:1px solid #e2e8f0;font-weight:600;'
+            f'background:#f8fafc;white-space:nowrap;color:#374151;">{escape(label)}</td>'
+            f'<td style="padding:6px 10px;border:1px solid #e2e8f0;color:#1f2937;">{escape(value)}</td>'
+            f'</tr>'
+        )
+    body = (
+        '<p style="margin:0 0 8px;font-weight:700;color:#111827;">📋 New employer placement request</p>'
+        '<table style="border-collapse:collapse;width:100%;font-size:.85rem;font-family:inherit;">'
+        '<thead><tr>'
+        '<th style="padding:7px 10px;border:1px solid #e2e8f0;background:#1d4ed8;color:#fff;text-align:left;">Request Detail</th>'
+        '<th style="padding:7px 10px;border:1px solid #e2e8f0;background:#1d4ed8;color:#fff;text-align:left;">Information</th>'
+        '</tr></thead>'
+        f'<tbody>{table_rows}</tbody>'
+        '</table>'
+    )
     SupportMessage.objects.create(sender=request.user, employer=request.user, body=body)
     return JsonResponse({
         'success': True,

@@ -36,7 +36,7 @@
     const bubble = '<div class="msg-bubble"></div>';
     const stamp = `<span class="msg-time">${time}</span>`;
     row.innerHTML = outgoing ? `<div>${meta}${bubble}</div>${avatar}${stamp}` : `${avatar}<div>${meta}${bubble}</div>${stamp}`;
-    row.querySelector('.msg-bubble').textContent = body;
+    row.querySelector('.msg-bubble').innerHTML = body;
     msgBox.appendChild(row);
     scrollBottom();
   };
