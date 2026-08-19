@@ -6,7 +6,26 @@ from .models import BlogPost, FAQ, MaidProfile, MaidRegistration, Service, Suppo
 
 
 def index(request):
-    return render(request, 'selectroyal/index.html')
+    # Featured maids for hero carousel (first 3 featured, fallback to first 3)
+    hero_maids = list(MaidProfile.objects.filter(is_active=True, is_featured=True)[:3])
+    if len(hero_maids) < 3:
+        hero_maids += list(
+            MaidProfile.objects.filter(is_active=True, is_featured=False)[:3 - len(hero_maids)]
+        )
+
+    # Top maids grid — available first, then 8 total
+    top_maids = list(MaidProfile.objects.filter(is_active=True, assign_status='unassigned')[:4])
+    if len(top_maids) < 4:
+        top_maids += list(
+            MaidProfile.objects.filter(is_active=True).exclude(
+                pk__in=[m.pk for m in top_maids]
+            )[:4 - len(top_maids)]
+        )
+
+    return render(request, 'selectroyal/index.html', {
+        'hero_maids': hero_maids,
+        'top_maids':  top_maids,
+    })
 
 
 def about(request):
@@ -74,6 +93,11 @@ def find_a_maid(request):
         'query':        query,
         'city':         city,
         'availability': availability,
+        'cities': [
+            'Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Kano',
+            'Enugu', 'Benin City', 'Warri', 'Owerri', 'Delta',
+            'Anambra', 'Rivers', 'Ogun',
+        ],
     })
 
 
@@ -134,6 +158,16 @@ def terms_of_service(request):
 def view_profile(request):
     slug = request.GET.get('slug', '').strip()
     maid = None
+    similar_maids = []
     if slug:
         maid = get_object_or_404(MaidProfile, slug=slug, is_active=True)
-    return render(request, 'selectroyal/view-profile.html', {'maid': maid})
+        # 3 other maids excluding the current one
+        similar_maids = list(
+            MaidProfile.objects.filter(is_active=True)
+            .exclude(pk=maid.pk)
+            .order_by('?')[:3]
+        )
+    return render(request, 'selectroyal/view-profile.html', {
+        'maid': maid,
+        'similar_maids': similar_maids,
+    })

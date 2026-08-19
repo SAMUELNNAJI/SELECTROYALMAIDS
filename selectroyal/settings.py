@@ -14,9 +14,13 @@ SECRET_KEY = os.environ.get(
     'django-insecure-#ft)d8hphvo=s84d#$zm%dq3mq$)h-sy4fj$*&g!p)b3xytq(a',
 )
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
+
+# Check if a RENDER external URL environment variable exists
+if 'RENDER_EXTERNAL_HOSTNAME' in os.environ:
+    ALLOWED_HOSTS.append(os.environ['RENDER_EXTERNAL_HOSTNAME'])
 
 # ── Applications ──────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -160,6 +164,32 @@ PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
 PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
 PAYSTACK_VERIFY_URL = 'https://api.paystack.co/transaction/verify/'
 PAYSTACK_INIT_URL   = 'https://api.paystack.co/transaction/initialize'
+
+# ── Logging (suppress noisy HTTPS-on-HTTP 400s in dev) ───────────────────────
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'suppress_https_warnings': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: 'You\'re accessing the development server over HTTPS' not in record.getMessage()
+                                       and 'Bad request' not in record.getMessage(),
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'filters': ['suppress_https_warnings'],
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 # ── Misc ──────────────────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

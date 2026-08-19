@@ -24,47 +24,45 @@
     </div>
 
     <!-- Quick search bar -->
-    <div class="fam-hero-search">
+    <form class="fam-hero-search" method="get" action="{% url 'MaidApp:find-a-maid' %}" id="heroSearchForm">
       <div class="container">
         <div class="fam-hs-field">
           <i class="fa-solid fa-location-dot"></i>
-          <select id="heroCity" aria-label="Select city">
+          <select name="city" id="heroCity" aria-label="Select city">
             <option value="">All Cities</option>
-            <option value="Lagos">Lagos</option>
-            <option value="Abuja">Abuja</option>
-            <option value="Port Harcourt">Port Harcourt</option>
-            <option value="Ibadan">Ibadan</option>
-            <option value="Kano">Kano</option>
-            <option value="Enugu">Enugu</option>
-            <option value="Benin City">Benin City</option>
-            <option value="Kaduna">Kaduna</option>
-            <option value="Warri">Warri</option>
-            <option value="Owerri">Owerri</option>
+            <option value="Lagos" {% if city == 'Lagos' %}selected{% endif %}>Lagos</option>
+            <option value="Abuja" {% if city == 'Abuja' %}selected{% endif %}>Abuja</option>
+            <option value="Port Harcourt" {% if city == 'Port Harcourt' %}selected{% endif %}>Port Harcourt</option>
+            <option value="Ibadan" {% if city == 'Ibadan' %}selected{% endif %}>Ibadan</option>
+            <option value="Kano" {% if city == 'Kano' %}selected{% endif %}>Kano</option>
+            <option value="Enugu" {% if city == 'Enugu' %}selected{% endif %}>Enugu</option>
+            <option value="Benin City" {% if city == 'Benin City' %}selected{% endif %}>Benin City</option>
+            <option value="Kaduna" {% if city == 'Kaduna' %}selected{% endif %}>Kaduna</option>
+            <option value="Warri" {% if city == 'Warri' %}selected{% endif %}>Warri</option>
+            <option value="Owerri" {% if city == 'Owerri' %}selected{% endif %}>Owerri</option>
           </select>
         </div>
         <div class="fam-hs-divider"></div>
         <div class="fam-hs-field">
-          <i class="fa-solid fa-briefcase"></i>
-          <select id="heroRole" aria-label="Select role">
-            <option value="">All Roles</option>
-            <option value="Maid / House Help">Maid / House Help</option>
-            <option value="Cook / Chef">Cook / Chef</option>
-            <option value="Baby Sitter">Baby Sitter</option>
-            <option value="Elderly Care">Elderly Care</option>
-            <option value="Nanny">Nanny</option>
-            <option value="Driver">Driver</option>
+          <i class="fa-solid fa-user-check"></i>
+          <select name="avail" id="heroAvail" aria-label="Select availability">
+            <option value="">All Status</option>
+            <option value="available" {% if availability == 'available' %}selected{% endif %}>Available Now</option>
+            <option value="assigned"  {% if availability == 'assigned'  %}selected{% endif %}>Currently Assigned</option>
           </select>
         </div>
         <div class="fam-hs-divider"></div>
         <div class="fam-hs-field">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="heroSearch" placeholder="Search by name or skill…" aria-label="Search by name or skill" />
+          <input type="text" name="q" id="heroSearch"
+                 value="{{ query }}"
+                 placeholder="Search by name…" aria-label="Search by name" />
         </div>
-        <button class="btn btn-primary fam-hs-btn" id="heroSearchBtn">
+        <button type="submit" class="btn btn-primary fam-hs-btn">
           <i class="fa-solid fa-magnifying-glass"></i> Search
         </button>
       </div>
-    </div>
+    </form>
   </section>
 
   <!-- ===== MAIN CONTENT: SIDEBAR + LISTINGS ===== -->
@@ -90,33 +88,15 @@
           </button>
           <div class="fam-filter-group-body" id="fg-location">
             <div class="fam-checkbox-list">
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Lagos" /> Lagos</label>
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Abuja" /> Abuja</label>
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Port Harcourt" /> Port Harcourt</label>
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Ibadan" /> Ibadan</label>
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Kano" /> Kano</label>
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Enugu" /> Enugu</label>
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Benin City" /> Benin City</label>
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Warri" /> Warri</label>
-              <label class="fam-checkbox"><input type="checkbox" name="city" value="Owerri" /> Owerri</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- --- Service Type --- -->
-        <div class="fam-filter-group">
-          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-service">
-            <span><i class="fa-solid fa-briefcase"></i> Service Type</span>
-            <i class="fa-solid fa-chevron-down fam-chevron"></i>
-          </button>
-          <div class="fam-filter-group-body" id="fg-service">
-            <div class="fam-checkbox-list">
-              <label class="fam-checkbox"><input type="checkbox" name="role" value="Maid / House Help" /> Maid / House Help</label>
-              <label class="fam-checkbox"><input type="checkbox" name="role" value="Cook / Chef" /> Cook / Chef</label>
-              <label class="fam-checkbox"><input type="checkbox" name="role" value="Baby Sitter" /> Baby Sitter</label>
-              <label class="fam-checkbox"><input type="checkbox" name="role" value="Elderly Care" /> Elderly Care</label>
-              <label class="fam-checkbox"><input type="checkbox" name="role" value="Nanny" /> Nanny</label>
-              <label class="fam-checkbox"><input type="checkbox" name="role" value="Driver" /> Driver</label>
+              {% for c in cities %}
+              <a href="?city={{ c }}&q={{ query }}&avail={{ availability }}"
+                 class="fam-checkbox {% if city == c %}fam-checkbox--active{% endif %}">{{ c }}</a>
+              {% endfor %}
+              {% if city %}
+              <a href="?q={{ query }}&avail={{ availability }}" class="fam-checkbox" style="color:#dc2626;">
+                <i class="fa-solid fa-xmark"></i> Clear city
+              </a>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -129,93 +109,21 @@
           </button>
           <div class="fam-filter-group-body" id="fg-avail">
             <div class="fam-checkbox-list">
-              <label class="fam-checkbox"><input type="checkbox" name="availability" value="available-now" /> Available Now</label>
-              <label class="fam-checkbox"><input type="checkbox" name="availability" value="available-soon" /> Available Soon</label>
+              <a href="?city={{ city }}&q={{ query }}&avail=available"
+                 class="fam-checkbox {% if availability == 'available' %}fam-checkbox--active{% endif %}">
+                Available Now
+              </a>
+              <a href="?city={{ city }}&q={{ query }}&avail=assigned"
+                 class="fam-checkbox {% if availability == 'assigned' %}fam-checkbox--active{% endif %}">
+                Currently Assigned
+              </a>
+              <a href="?city={{ city }}&q={{ query }}"
+                 class="fam-checkbox {% if not availability %}fam-checkbox--active{% endif %}">
+                All
+              </a>
             </div>
           </div>
         </div>
-
-        <!-- --- Work Arrangement --- -->
-        <div class="fam-filter-group">
-          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-work">
-            <span><i class="fa-solid fa-house-user"></i> Work Arrangement</span>
-            <i class="fa-solid fa-chevron-down fam-chevron"></i>
-          </button>
-          <div class="fam-filter-group-body" id="fg-work">
-            <div class="fam-checkbox-list">
-              <label class="fam-checkbox"><input type="checkbox" name="workType" value="Live-in" /> Live-in</label>
-              <label class="fam-checkbox"><input type="checkbox" name="workType" value="Live-out" /> Live-out</label>
-              <label class="fam-checkbox"><input type="checkbox" name="workType" value="Part-time" /> Part-time</label>
-              <label class="fam-checkbox"><input type="checkbox" name="workType" value="Full-time" /> Full-time</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- --- Experience --- -->
-        <div class="fam-filter-group">
-          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-exp">
-            <span><i class="fa-solid fa-award"></i> Experience</span>
-            <i class="fa-solid fa-chevron-down fam-chevron"></i>
-          </button>
-          <div class="fam-filter-group-body" id="fg-exp">
-            <div class="fam-checkbox-list">
-              <label class="fam-checkbox"><input type="checkbox" name="experience" value="0-2" /> 0 – 2 Years</label>
-              <label class="fam-checkbox"><input type="checkbox" name="experience" value="3-5" /> 3 – 5 Years</label>
-              <label class="fam-checkbox"><input type="checkbox" name="experience" value="6-10" /> 6 – 10 Years</label>
-              <label class="fam-checkbox"><input type="checkbox" name="experience" value="10+" /> 10+ Years</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- --- Minimum Rating --- -->
-        <div class="fam-filter-group">
-          <button class="fam-filter-group-toggle" aria-expanded="true" aria-controls="fg-rating">
-            <span><i class="fa-solid fa-star"></i> Minimum Rating</span>
-            <i class="fa-solid fa-chevron-down fam-chevron"></i>
-          </button>
-          <div class="fam-filter-group-body" id="fg-rating">
-            <div class="fam-radio-list">
-              <label class="fam-radio"><input type="radio" name="minRating" value="0" checked /> Any Rating</label>
-              <label class="fam-radio"><input type="radio" name="minRating" value="4" />
-                <span class="fam-star-row"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i></span> 4.0+
-              </label>
-              <label class="fam-radio"><input type="radio" name="minRating" value="4.5" />
-                <span class="fam-star-row"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span> 4.5+
-              </label>
-              <label class="fam-radio"><input type="radio" name="minRating" value="4.8" />
-                <span class="fam-star-row"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span> 4.8+
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- --- Skills --- -->
-        <div class="fam-filter-group">
-          <button class="fam-filter-group-toggle" aria-expanded="false" aria-controls="fg-skills">
-            <span><i class="fa-solid fa-hands"></i> Skills</span>
-            <i class="fa-solid fa-chevron-down fam-chevron"></i>
-          </button>
-          <div class="fam-filter-group-body fam-filter-group-body--collapsed" id="fg-skills">
-            <div class="fam-skill-tags">
-              <button class="fam-skill-tag" data-skill="Housekeeping">Housekeeping</button>
-              <button class="fam-skill-tag" data-skill="Cooking">Cooking</button>
-              <button class="fam-skill-tag" data-skill="Childcare">Childcare</button>
-              <button class="fam-skill-tag" data-skill="Laundry">Laundry</button>
-              <button class="fam-skill-tag" data-skill="Ironing">Ironing</button>
-              <button class="fam-skill-tag" data-skill="Deep Cleaning">Deep Cleaning</button>
-              <button class="fam-skill-tag" data-skill="Infant Care">Infant Care</button>
-              <button class="fam-skill-tag" data-skill="Elderly Care">Elderly Care</button>
-              <button class="fam-skill-tag" data-skill="Organising">Organising</button>
-              <button class="fam-skill-tag" data-skill="Driving">Driving</button>
-              <button class="fam-skill-tag" data-skill="First Aid">First Aid</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Apply button (mobile) -->
-        <button class="btn btn-primary fam-apply-btn" id="applyFiltersBtn">
-          <i class="fa-solid fa-sliders"></i> Apply Filters
-        </button>
 
       </aside>
       <!-- /fam-sidebar -->
@@ -327,15 +235,44 @@
         </div>
 
         <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
         <div class="fam-pagination" id="famPagination" aria-label="Pagination">
-          <button class="fam-page-btn fam-page-btn--prev" id="prevPage" aria-label="Previous page" disabled>
+          {% if page_obj.has_previous %}
+          <a href="?q={{ query }}&city={{ city }}&avail={{ availability }}&page={{ page_obj.previous_page_number }}"
+             class="fam-page-btn fam-page-btn--prev" aria-label="Previous page">
             <i class="fa-solid fa-chevron-left"></i>
-          </button>
-          <div class="fam-page-numbers" id="pageNumbers"></div>
-          <button class="fam-page-btn fam-page-btn--next" id="nextPage" aria-label="Next page">
+          </a>
+          {% else %}
+          <span class="fam-page-btn fam-page-btn--prev" aria-disabled="true">
+            <i class="fa-solid fa-chevron-left"></i>
+          </span>
+          {% endif %}
+
+          <div class="fam-page-numbers" id="pageNumbers">
+            {% for num in page_obj.paginator.page_range %}
+              {% if num == page_obj.number %}
+                <span class="fam-page-num fam-page-num--active" aria-current="page">{{ num }}</span>
+              {% elif num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                <a href="?q={{ query }}&city={{ city }}&avail={{ availability }}&page={{ num }}"
+                   class="fam-page-num">{{ num }}</a>
+              {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+                <span class="fam-page-ellipsis">…</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          {% if page_obj.has_next %}
+          <a href="?q={{ query }}&city={{ city }}&avail={{ availability }}&page={{ page_obj.next_page_number }}"
+             class="fam-page-btn fam-page-btn--next" aria-label="Next page">
             <i class="fa-solid fa-chevron-right"></i>
-          </button>
+          </a>
+          {% else %}
+          <span class="fam-page-btn fam-page-btn--next" aria-disabled="true">
+            <i class="fa-solid fa-chevron-right"></i>
+          </span>
+          {% endif %}
         </div>
+        {% endif %}
 
       </div>
       <!-- /fam-listings -->

@@ -309,46 +309,95 @@
     </div>
     <!-- ── TAB: Maids ── -->
     <div class="tab-panel" id="tab-maids">
-      <div class="card">
-        <div class="card-head"><h2><i class="fa-solid fa-plus" style="color:var(--accent);"></i> &nbsp;Add Maid Profile</h2></div>
-        <div class="card-body">
-          <form method="post" enctype="multipart/form-data" action="#">
-            {% csrf_token %}
-            <div class="form-grid">
-              <div class="form-field"><label>First name</label><input type="text" name="first_name" placeholder="Ada" /></div>
-              <div class="form-field"><label>Last name</label><input type="text" name="last_name" placeholder="Johnson" /></div>
-              <div class="form-field"><label>Role</label><select name="role"><option value="maid">Maid / House Help</option><option value="cook">Cook / Chef</option><option value="nanny">Nanny / Babysitter</option><option value="caregiver">Caregiver</option><option value="driver">Driver</option></select></div>
-              <div class="form-field"><label>Work type</label><select name="work_type"><option value="both">Live-in or Live-out</option><option value="live_in">Live-in only</option><option value="live_out">Live-out only</option></select></div>
-              <div class="form-field"><label>State</label><input type="text" name="state" placeholder="Lagos" /></div>
-              <div class="form-field"><label>City</label><input type="text" name="city" placeholder="Victoria Island" /></div>
-              <div class="form-field"><label>Years experience</label><input type="number" name="years_experience" min="0" placeholder="3" /></div>
-              <div class="form-field"><label>Expected salary</label><input type="text" name="expected_salary" placeholder="₦30,000 / month" /></div>
-              <div class="form-field"><label>Profile photo</label><input type="file" name="profile_photo" accept="image/*" /></div>
-              <div class="form-field"><label>Languages</label><input type="text" name="languages" placeholder="English, Yoruba" /></div>
-              <div class="form-field full"><label>Skills</label><input type="text" name="skills" placeholder="Cooking, Laundry, Ironing…" /></div>
-              <div class="form-field full"><label>Bio &amp; work history</label><textarea name="bio" placeholder="Brief background…"></textarea></div>
-            </div>
-            <div style="margin-top:8px;"><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button></div>
-          </form>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.05rem;font-weight:800;">Maid Profiles</h2>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">
+            {{ all_maids|length }} profile{{ all_maids|length|pluralize }} imported from SelectRoyal database
+          </p>
         </div>
+        <a href="{% url 'MaidApp:find-a-maid' %}" target="_blank" class="btn btn-ghost" style="font-size:.82rem;">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> View Public Page
+        </a>
       </div>
+
+      <!-- Search bar -->
+      <form method="get" action="{% url 'Authentication:admin_dashboard' %}" style="display:flex;gap:10px;margin-bottom:20px;">
+        <input type="hidden" name="tab" value="maids" />
+        <input type="text" name="mq" value="{{ maid_query }}"
+               placeholder="Search by name or reg number…"
+               style="flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;" />
+        <button type="submit" class="btn btn-primary" style="padding:9px 18px;">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+        {% if maid_query %}
+        <a href="{% url 'Authentication:admin_dashboard' %}?tab=maids" class="btn btn-ghost" style="padding:9px 14px;">Clear</a>
+        {% endif %}
+      </form>
+
       <div class="card">
-        <div class="card-head"><h2>All Applications</h2></div>
         <div style="overflow-x:auto;">
           <table class="data-table">
-            <thead><tr><th>Name</th><th>Role</th><th>Location</th><th>Exp.</th><th>Applied</th><th>Actions</th></tr></thead>
+            <thead>
+              <tr>
+                <th style="width:44px;"></th>
+                <th>Name</th>
+                <th>Reg #</th>
+                <th>Age</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
             <tbody>
               {% for maid in all_maids %}
               <tr>
-                <td><strong>{{ maid.first_name }} {{ maid.last_name }}</strong><br><small style="color:var(--muted);">{{ maid.email }}</small></td>
-                <td>{{ maid.get_role_display }}</td>
-                <td>{{ maid.city }}, {{ maid.state }}</td>
-                <td>{{ maid.years_experience }} yr{{ maid.years_experience|pluralize }}</td>
-                <td>{{ maid.created_at|date:"M d, Y" }}</td>
-                <td><a href="#" class="btn btn-ghost" style="padding:6px 12px;font-size:.78rem;"><i class="fa-solid fa-eye"></i> View</a></td>
+                <td style="padding:8px;">
+                  {% if maid.photo_url %}
+                  <img src="{{ maid.photo_url }}" alt=""
+                       style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;"
+                       onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                  <div style="display:none;width:36px;height:36px;border-radius:50%;background:var(--accent-lt);color:var(--accent);align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">
+                    {{ maid.full_name|first|upper }}
+                  </div>
+                  {% else %}
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--accent-lt);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">
+                    {{ maid.full_name|first|upper }}
+                  </div>
+                  {% endif %}
+                </td>
+                <td>
+                  <strong style="font-size:.875rem;">{{ maid.full_name }}</strong>
+                  {% if maid.email %}<br><small style="color:var(--muted);">{{ maid.email }}</small>{% endif %}
+                </td>
+                <td style="font-size:.82rem;white-space:nowrap;">{{ maid.reg_number }}</td>
+                <td style="font-size:.82rem;">{{ maid.age|default:"—" }}</td>
+                <td style="font-size:.78rem;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ maid.address }}</td>
+                <td style="font-size:.8rem;white-space:nowrap;">{{ maid.phone }}</td>
+                <td>
+                  {% if maid.is_available %}
+                  <span class="status-pill active">Available</span>
+                  {% else %}
+                  <span class="status-pill inactive">Assigned</span>
+                  {% endif %}
+                  {% if maid.is_featured %}<br><span class="badge badge-amber" style="margin-top:3px;display:inline-flex;font-size:.65rem;">Featured</span>{% endif %}
+                </td>
+                <td style="white-space:nowrap;">
+                  <a href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}"
+                     target="_blank"
+                     class="btn btn-ghost" style="padding:6px 10px;font-size:.78rem;">
+                    <i class="fa-solid fa-eye"></i> View
+                  </a>
+                </td>
               </tr>
               {% empty %}
-              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No applications on record.</td></tr>
+              <tr>
+                <td colspan="8" style="text-align:center;color:var(--muted);padding:48px;">
+                  <i class="fa-solid fa-users" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>
+                  No maid profiles found{% if maid_query %} matching "<strong>{{ maid_query }}</strong>"{% endif %}.
+                </td>
+              </tr>
               {% endfor %}
             </tbody>
           </table>

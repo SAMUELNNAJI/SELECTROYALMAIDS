@@ -4,10 +4,9 @@ from . import views
 app_name = "Authentication"
 
 urlpatterns = [
-    path('login/',                                 views.login_view,              name='login'),
-    path('signup/',                                views.signup_view,             name='signup'),
-    path('signup/payment/callback/',               views.payment_callback_view,   name='payment_callback'),
-    path('logout/',                                views.logout_view,             name='logout'),
+    path('login/',                                 views.login_view,          name='login'),
+    path('signup/',                                views.signup_view,         name='signup'),
+    path('logout/',                                views.logout_view,         name='logout'),
     path('employer/dashboard/',                    views.employer_dashboard,  name='employer_dashboard'),
     path('admin/dashboard/',                       views.admin_dashboard,     name='admin_dashboard'),
     # FAQ CRUD
