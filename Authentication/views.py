@@ -77,7 +77,12 @@ def logout_view(request):
 
 @login_required
 def employer_dashboard(request):
-    return render(request, 'Dashboard/Employer.html')
+    # Messages sent by staff (not by this employer themselves) that haven't been read
+    unread_count = SupportMessage.objects.filter(
+        employer=request.user,
+        is_read=False,
+    ).exclude(sender=request.user).count()
+    return render(request, 'Dashboard/Employer.html', {'unread_count': unread_count})
 
 
 @login_required
@@ -97,6 +102,11 @@ def admin_dashboard(request):
         'maid_count':            MaidRegistration.objects.count(),
         'employer_count':        User.objects.filter(is_superuser=False, is_active=True).count(),
         'support_count':         SupportMessage.objects.count(),
+        # unread badge — messages sent by employers (non-staff) that admin hasn't read
+        'unread_count':          SupportMessage.objects.filter(
+                                     is_read=False,
+                                     sender__is_staff=False,
+                                 ).count(),
         # maids tab
         'maid_query':            maid_query,
         'recent_maids':          MaidRegistration.objects.order_by('-created_at')[:5],

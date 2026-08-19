@@ -18,6 +18,12 @@
 
   const scrollBottom = (smooth = true) => msgBox.scrollTo({ top: msgBox.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
   const nowTime = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  // Track every message ID already in the DOM (server-rendered + JS-added)
+  const renderedIds = new Set(
+    [...msgBox.querySelectorAll('[data-message-id]')].map(el => Number(el.dataset.messageId))
+  );
+
   const appendSystemMessage = (iconClass, statusClass, text) => {
     const message = document.createElement('div');
     message.className = 'sys-msg';
@@ -28,6 +34,9 @@
     scrollBottom();
   };
   const appendBubble = ({ id, sender, initials, body, outgoing, time }) => {
+    // Skip if already rendered (prevents duplicates from overlapping poll + send)
+    if (id && renderedIds.has(Number(id))) return;
+    if (id) renderedIds.add(Number(id));
     const row = document.createElement('div');
     row.className = `msg-row js-added ${outgoing ? 'outgoing' : 'incoming'}`;
     row.dataset.messageId = id;

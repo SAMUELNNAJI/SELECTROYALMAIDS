@@ -47,6 +47,16 @@
     .sidebar-nav a:hover,.sidebar-nav a.active { background:rgba(37,99,235,.25); color:#fff; }
     .sidebar-nav a.active { background:var(--accent); }
     .sidebar-nav a.danger:hover { background:rgba(220,38,38,.2); color:#fca5a5; }
+
+    /* ── Unread badge ─────────────────────────────────────── */
+    .nav-badge-wrap { justify-content:flex-start; }
+    .nav-badge {
+      margin-left:auto; min-width:20px; height:20px; padding:0 6px;
+      border-radius:100px; background:#ef4444; color:#fff;
+      font-size:.7rem; font-weight:700;
+      display:inline-flex; align-items:center; justify-content:center;
+      line-height:1; flex-shrink:0;
+    }
     .sidebar-footer { padding:16px; border-top:1px solid rgba(255,255,255,.07); }
     .sidebar-user { display:flex; align-items:center; gap:10px; }
     .sidebar-avatar { width:36px; height:36px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:.85rem; flex-shrink:0; }
@@ -292,7 +302,7 @@
     <a href="#" data-tab="faq"><i class="fa-solid fa-circle-question icon"></i> FAQs</a>
     <a href="#" data-tab="services"><i class="fa-solid fa-sliders icon"></i> Services</a>
     <div class="sidebar-label">Support</div>
-    <a href="{% url 'MaidApp:support-chat' %}"><i class="fa-solid fa-comments icon"></i> Support Chat</a>
+    <a href="{% url 'MaidApp:support-chat' %}" class="nav-badge-wrap"><i class="fa-solid fa-comments icon"></i> Support Chat{% if unread_count %}<span class="nav-badge">{{ unread_count }}</span>{% endif %}</a>
     <a href="{% url 'MaidApp:index' %}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square icon"></i> View Website</a>
     <a href="{% url 'Authentication:logout' %}" class="danger"><i class="fa-solid fa-right-from-bracket icon"></i> Log Out</a>
   </nav>

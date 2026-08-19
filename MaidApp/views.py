@@ -196,12 +196,18 @@ def support_chat(request):
     else:
         chat_employer = request.user
 
+    if chat_employer:
+        # Mark as read: messages the current viewer did NOT send
+        SupportMessage.objects.filter(
+            employer=chat_employer,
+            is_read=False,
+        ).exclude(sender=request.user).update(is_read=True)
+
     return render(request, 'Dashboard/support-chat.html', {
         'chat_messages': SupportMessage.objects.filter(employer=chat_employer).select_related('sender').order_by('created_at')[:100] if chat_employer else [],
         'chat_employer': chat_employer,
         'employers': employers if request.user.is_staff else [],
     })
-
 
 @login_required
 def support_messages(request):
