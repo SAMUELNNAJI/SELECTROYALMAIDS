@@ -169,6 +169,8 @@ class MaidProfile(models.Model):
     description    = models.TextField(blank=True)
     photo_filename = models.CharField(max_length=300, blank=True,
                                       help_text='Filename as stored on old server')
+    image          = models.ImageField(upload_to='maid_profiles/', blank=True, null=True,
+                                      help_text='Upload a profile photo')
     assign_status  = models.CharField(max_length=20, choices=ASSIGN_STATUS,
                                       default='unassigned')
     is_featured    = models.BooleanField(default=False)
@@ -183,14 +185,15 @@ class MaidProfile(models.Model):
     def photo_url(self):
         """
         Return the best URL for this maid's photo.
-        Photos are hosted on the old site at:
+        Uploaded image takes priority over legacy filename.
+        Legacy photos are hosted on the old site at:
           https://selectroyalmaids.com.ng/maids_photos/<filename>
-        Some filenames already carry a 'maids/' prefix stored in the DB.
         """
+        if self.image:
+            return self.image.url
         if not self.photo_filename:
             return ''
         name = self.photo_filename
-        # Strip any leading 'maids/' prefix already in the stored value
         if name.startswith('maids/'):
             name = name[len('maids/'):]
         return f'https://selectroyalmaids.com.ng/maids_photos/{name}'

@@ -9,6 +9,11 @@ urlpatterns = [
     path('logout/',                                views.logout_view,         name='logout'),
     path('employer/dashboard/',                    views.employer_dashboard,  name='employer_dashboard'),
     path('admin/dashboard/',                       views.admin_dashboard,     name='admin_dashboard'),
+    # MaidProfile CRUD
+    path('admin/maid/create/',                     views.maid_create,         name='maid_create'),
+    path('admin/maid/<int:maid_id>/edit/',         views.maid_edit,           name='maid_edit'),
+    path('admin/maid/<int:maid_id>/delete/',       views.maid_delete,         name='maid_delete'),
+    path('admin/maid/<int:maid_id>/toggle/',       views.maid_toggle_status,  name='maid_toggle_status'),
     # FAQ CRUD
     path('admin/faq/create/',                      views.faq_create,          name='faq_create'),
     path('admin/faq/<int:faq_id>/edit/',           views.faq_edit,            name='faq_edit'),

@@ -394,10 +394,20 @@
       .content { padding: 20px 16px; }
       .topbar { padding: 0 16px; }
       .welcome-banner { flex-direction: column; align-items: flex-start; }
+      .actions-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .topbar-greeting { display: none; }
+      .actions-grid { grid-template-columns: 1fr 1fr; }
+      .card-head { padding: 16px 18px; }
+      .card-body { padding: 18px; }
+      .data-table th, .data-table td { padding: 10px 12px; font-size: .82rem; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .actions-grid { grid-template-columns: 1fr; }
+      .content { padding: 16px 12px; }
     }
   </style>
 </head>

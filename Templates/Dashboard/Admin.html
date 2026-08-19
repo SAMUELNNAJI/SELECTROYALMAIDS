@@ -167,6 +167,9 @@
     /* Sidebar overlay */
     .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:199; }
     /* Responsive */
+    @media(max-width:1024px){
+      .service-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
+    }
     @media(max-width:900px){
       .sidebar{transform:translateX(-100%);}
       .sidebar.open{transform:translateX(0);}
@@ -176,11 +179,33 @@
       .content{padding:20px 16px;}
       .topbar{padding:0 16px;}
       .form-grid{grid-template-columns:1fr;}
+      .tab-nav{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+      .tab-nav::-webkit-scrollbar{display:none;}
+      .tab-btn{white-space:nowrap;}
+    }
+    @media(max-width:768px){
+      .tab-btn{flex-shrink:0;}
     }
     @media(max-width:640px){
       .stats-grid{grid-template-columns:1fr 1fr;}
       .tab-btn{padding:8px 12px;font-size:.8rem;}
       .tab-btn span{display:none;}
+      .service-grid{grid-template-columns:1fr;}
+      .card-head{padding:16px 18px;}
+      .card-body{padding:18px;}
+      .data-table th,.data-table td{padding:10px 12px;font-size:.82rem;}
+      .modal{max-width:95vw;}
+      .modal-head,.modal-body,.modal-foot{padding-left:16px;padding-right:16px;}
+      .faq-row-head{flex-wrap:wrap;gap:8px;}
+      .faq-a{padding-left:18px;padding-right:18px;}
+      .btn{padding:8px 16px;font-size:.82rem;}
+    }
+    @media(max-width:480px){
+      .stats-grid{grid-template-columns:1fr;}
+      .topbar h1{font-size:1rem;}
+      .content{padding:16px 12px;}
+      .tab-nav{margin-left:-12px;margin-right:-12px;border-radius:0;border-left:none;border-right:none;}
+      .card-head,.card-body{padding:14px;}
     }
   </style>
 </head>
@@ -309,17 +334,22 @@
     </div>
     <!-- ── TAB: Maids ── -->
     <div class="tab-panel" id="tab-maids">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-        <div>
-          <h2 style="font-size:1.05rem;font-weight:800;">Maid Profiles</h2>
-          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">
-            {{ all_maids|length }} profile{{ all_maids|length|pluralize }} imported from SelectRoyal database
-          </p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2 style="font-size:1.05rem;font-weight:800;">Maid Profiles</h2>
+            <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">
+              {{ all_maids|length }} profile{{ all_maids|length|pluralize }} imported from SelectRoyal database
+            </p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="openAddMaid" style="font-size:.82rem;">
+              <i class="fa-solid fa-plus"></i> Add Maid
+            </button>
+            <a href="{% url 'MaidApp:find-a-maid' %}" target="_blank" class="btn btn-ghost" style="font-size:.82rem;">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> View Public Page
+            </a>
+          </div>
         </div>
-        <a href="{% url 'MaidApp:find-a-maid' %}" target="_blank" class="btn btn-ghost" style="font-size:.82rem;">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> View Public Page
-        </a>
-      </div>
 
       <!-- Search bar -->
       <form method="get" action="{% url 'Authentication:admin_dashboard' %}" style="display:flex;gap:10px;margin-bottom:20px;">
@@ -389,6 +419,14 @@
                      class="btn btn-ghost" style="padding:6px 10px;font-size:.78rem;">
                     <i class="fa-solid fa-eye"></i> View
                   </a>
+                  <button class="btn btn-ghost" style="padding:6px 10px;font-size:.78rem;"
+                    onclick="openMaidEdit({{ maid.pk }},'{{ maid.full_name|escapejs }}','{{ maid.reg_number|escapejs }}','{{ maid.address|escapejs }}','{{ maid.age|escapejs }}','{{ maid.phone|escapejs }}','{{ maid.email|escapejs }}','{{ maid.description|escapejs }}','{{ maid.assign_status }}',{{ maid.is_featured|yesno:'true,false' }},{{ maid.is_active|yesno:'true,false' }})">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button class="btn btn-danger" style="padding:6px 10px;font-size:.78rem;"
+                    onclick="openMaidDelete({{ maid.pk }},'{{ maid.full_name|escapejs }}')">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
                 </td>
               </tr>
               {% empty %}
@@ -414,10 +452,12 @@
             <i class="fa-solid fa-circle-info" style="color:var(--accent);font-size:1.3rem;"></i>
             <p style="font-size:.9rem;color:#1e40af;">Paystack live transaction webhooks will populate this table automatically once payment integration is active.</p>
           </div>
-          <table class="data-table">
-            <thead><tr><th>Employer</th><th>Email</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
-            <tbody><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No payment records yet.</td></tr></tbody>
-          </table>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr><th>Employer</th><th>Email</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No payment records yet.</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -583,6 +623,78 @@
 
   </div><!-- /content -->
 </div><!-- /main -->
+<!-- ══ MAID: ADD MODAL ══ -->
+<div class="modal-backdrop" id="addMaidModal">
+  <div class="modal" style="max-width:680px;" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-plus" style="color:var(--accent);"></i> &nbsp;Add Maid Profile</h3><button class="modal-close" onclick="closeModal('addMaidModal')">&times;</button></div>
+    <form method="post" action="{% url 'Authentication:maid_create' %}">{% csrf_token %}
+      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
+        <div class="form-grid">
+          <div class="form-field"><label>Full Name</label><input type="text" name="full_name" required /></div>
+          <div class="form-field"><label>Reg Number</label><input type="text" name="reg_number" required /></div>
+          <div class="form-field full"><label>Address</label><input type="text" name="address" /></div>
+          <div class="form-field"><label>Age</label><input type="text" name="age" /></div>
+          <div class="form-field"><label>Phone</label><input type="text" name="phone" /></div>
+          <div class="form-field"><label>Email</label><input type="email" name="email" /></div>
+          <div class="form-field"><label>Status</label><select name="assign_status"><option value="unassigned">Available</option><option value="assigned">Assigned</option></select></div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_featured" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Featured</span>
+          </div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_active" checked /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Active</span>
+          </div>
+          <div class="form-field full"><label>Description</label><textarea name="description" style="min-height:110px;"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('addMaidModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Maid</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ MAID: EDIT MODAL ══ -->
+<div class="modal-backdrop" id="editMaidModal">
+  <div class="modal" style="max-width:680px;" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-pen" style="color:var(--accent);"></i> &nbsp;Edit Maid Profile</h3><button class="modal-close" onclick="closeModal('editMaidModal')">&times;</button></div>
+    <form method="post" id="editMaidForm" action="">{% csrf_token %}
+      <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
+        <div class="form-grid">
+          <div class="form-field"><label>Full Name</label><input type="text" name="full_name" id="emFullName" required /></div>
+          <div class="form-field"><label>Reg Number</label><input type="text" name="reg_number" id="emRegNumber" required /></div>
+          <div class="form-field full"><label>Address</label><input type="text" name="address" id="emAddress" /></div>
+          <div class="form-field"><label>Age</label><input type="text" name="age" id="emAge" /></div>
+          <div class="form-field"><label>Phone</label><input type="text" name="phone" id="emPhone" /></div>
+          <div class="form-field"><label>Email</label><input type="email" name="email" id="emEmail" /></div>
+          <div class="form-field"><label>Status</label><select name="assign_status" id="emAssignStatus"><option value="unassigned">Available</option><option value="assigned">Assigned</option></select></div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_featured" id="emIsFeatured" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Featured</span>
+          </div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_active" id="emIsActive" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Active</span>
+          </div>
+          <div class="form-field full"><label>Description</label><textarea name="description" id="emDescription" style="min-height:110px;"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('editMaidModal')">Cancel</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div>
+    </form>
+  </div>
+</div>
+<!-- ══ MAID: DELETE MODAL ══ -->
+<div class="modal-backdrop" id="deleteMaidModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3><i class="fa-solid fa-trash" style="color:var(--red);"></i> &nbsp;Delete Maid Profile</h3><button class="modal-close" onclick="closeModal('deleteMaidModal')">&times;</button></div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;">Are you sure you want to delete this maid profile?</p>
+      <p id="deleteMaidPreview" style="margin-top:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.875rem;font-weight:700;"></p>
+      <p style="font-size:.8rem;color:var(--red);margin-top:10px;"><i class="fa-solid fa-triangle-exclamation"></i> This cannot be undone.</p>
+    </div>
+    <form method="post" id="deleteMaidForm" action="">{% csrf_token %}
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" onclick="closeModal('deleteMaidModal')">Cancel</button><button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Yes, Delete</button></div>
+    </form>
+  </div>
+</div>
 <!-- ══ FAQ: ADD MODAL ══ -->
 <div class="modal-backdrop" id="addFaqModal">
   <div class="modal" role="dialog" aria-modal="true">
@@ -749,6 +861,8 @@
   document.querySelectorAll('.modal-backdrop').forEach(bd => bd.addEventListener('click', e => { if(e.target===bd) closeModal(bd.id); }));
   document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-backdrop.open').forEach(bd => closeModal(bd.id)); });
 
+  /* ── Maid modals ── */
+  document.getElementById('openAddMaid').addEventListener('click', () => { activateTab('maids'); openModal('addMaidModal'); });
   /* ── FAQ modals ── */
   document.getElementById('openAddFaq').addEventListener('click', () => { activateTab('faq'); openModal('addFaqModal'); });
   function openFaqEdit(pk, order, isActive, question, answer) {
@@ -790,6 +904,27 @@
     document.getElementById('deleteServiceForm').action = `/admin/service/${pk}/delete/`;
     document.getElementById('deleteServicePreview').textContent = title;
     openModal('deleteServiceModal');
+  }
+
+  function openMaidEdit(pk, fullName, regNumber, address, age, phone, email, description, assignStatus, isFeatured, isActive) {
+    document.getElementById('editMaidForm').action = `/admin/maid/${pk}/edit/`;
+    document.getElementById('emFullName').value    = fullName;
+    document.getElementById('emRegNumber').value   = regNumber;
+    document.getElementById('emAddress').value     = address;
+    document.getElementById('emAge').value         = age;
+    document.getElementById('emPhone').value       = phone;
+    document.getElementById('emEmail').value       = email;
+    document.getElementById('emDescription').value = description;
+    const as = document.getElementById('emAssignStatus');
+    for(let i=0;i<as.options.length;i++) as.options[i].selected = as.options[i].value === assignStatus;
+    document.getElementById('emIsFeatured').checked = isFeatured;
+    document.getElementById('emIsActive').checked   = isActive;
+    openModal('editMaidModal');
+  }
+  function openMaidDelete(pk, fullName) {
+    document.getElementById('deleteMaidForm').action = `/admin/maid/${pk}/delete/`;
+    document.getElementById('deleteMaidPreview').textContent = fullName;
+    openModal('deleteMaidModal');
   }
 
   function openBlogDelete(pk,title) {

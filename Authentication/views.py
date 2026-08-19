@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
+from django.core.paginator import Paginator
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, Service, SupportMessage
 
 
@@ -111,7 +111,90 @@ def admin_dashboard(request):
     return render(request, 'Dashboard/Admin.html', context)
 
 
-# ── FAQ CRUD ──────────────────────────────────────────────────────────────────
+# ── MaidProfile CRUD ──────────────────────────────────────────────────────────
+
+@login_required
+def maid_edit(request, maid_id):
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    maid = get_object_or_404(MaidProfile, pk=maid_id)
+    if request.method == 'POST':
+        maid.full_name      = request.POST.get('full_name',   maid.full_name).strip()
+        maid.reg_number     = request.POST.get('reg_number',  maid.reg_number).strip()
+        maid.address        = request.POST.get('address',     maid.address).strip()
+        maid.age            = request.POST.get('age',         maid.age).strip()
+        maid.phone          = request.POST.get('phone',       maid.phone).strip()
+        maid.email          = request.POST.get('email',       maid.email).strip()
+        maid.description    = request.POST.get('description', maid.description).strip()
+        maid.assign_status  = request.POST.get('assign_status', maid.assign_status)
+        maid.is_featured    = request.POST.get('is_featured') == 'on'
+        maid.is_active      = request.POST.get('is_active')  == 'on'
+        maid.save()
+        messages.success(request, f'Profile "{maid.full_name}" updated.')
+    page = request.POST.get('page', 1)
+    return redirect(f'/admin/dashboard/?tab=maids&page={page}')
+
+
+@login_required
+def maid_delete(request, maid_id):
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    if request.method == 'POST':
+        maid = MaidProfile.objects.filter(pk=maid_id).first()
+        if maid:
+            name = maid.full_name
+            maid.delete()
+            messages.success(request, f'Profile "{name}" deleted.')
+    page = request.POST.get('page', 1)
+    return redirect(f'/admin/dashboard/?tab=maids&page={page}')
+
+
+@login_required
+def maid_toggle_status(request, maid_id):
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    if request.method == 'POST':
+        maid = get_object_or_404(MaidProfile, pk=maid_id)
+        maid.assign_status = 'unassigned' if maid.assign_status == 'assigned' else 'assigned'
+        maid.save()
+        messages.success(request, f'{maid.full_name} marked as {"Available" if maid.assign_status == "unassigned" else "Assigned"}.')
+    page = request.POST.get('page', 1)
+    return redirect(f'/admin/dashboard/?tab=maids&page={page}')
+
+
+@login_required
+def maid_create(request):
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name', '').strip()
+        reg_number = request.POST.get('reg_number', '').strip()
+        if full_name and reg_number:
+            import re
+            slug_base = re.sub(r'[^a-z0-9]+', '-', full_name.lower()).strip('-')
+            slug = slug_base
+            counter = 1
+            while MaidProfile.objects.filter(slug=slug).exists():
+                slug = f'{slug_base}-{counter}'
+                counter += 1
+            MaidProfile.objects.create(
+                legacy_id=MaidProfile.objects.order_by('-legacy_id').values_list('legacy_id', flat=True).first() + 1,
+                reg_number=reg_number,
+                slug=slug,
+                full_name=full_name,
+                address=request.POST.get('address', '').strip(),
+                age=request.POST.get('age', '').strip(),
+                phone=request.POST.get('phone', '').strip(),
+                email=request.POST.get('email', '').strip(),
+                description=request.POST.get('description', '').strip(),
+                assign_status=request.POST.get('assign_status', 'unassigned'),
+                is_featured=request.POST.get('is_featured') == 'on',
+                is_active=True,
+            )
+            messages.success(request, f'Maid "{full_name}" added.')
+        else:
+            messages.error(request, 'Full name and registration number are required.')
+    return redirect('/admin/dashboard/?tab=maids')
 
 @login_required
 def faq_create(request):
