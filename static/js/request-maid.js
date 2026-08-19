@@ -208,7 +208,13 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', 'X-CSRFToken': csrfToken(), Accept: 'application/json' },
       body: new URLSearchParams(payload),
+      redirect: 'manual',
     });
+    if (response.status === 302 || response.status === 301) {
+      const location = response.headers.get('Location');
+      window.location.href = location || submitUrl;
+      return;
+    }
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
       throw new Error(data.error || 'We could not submit your request. Please try again.');

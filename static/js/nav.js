@@ -44,19 +44,23 @@
     if (navLinks.querySelector('.mobile-nav-cta')) return;
 
     var loginHref = 'login.html';
+    var loginText = 'Login';
     var findHref  = 'find-a-maid.html';
 
     if (navCta) {
       var loginAnchor = navCta.querySelector('.nav-login');
       var findAnchor  = navCta.querySelector('.nav-find-btn');
-      if (loginAnchor) loginHref = loginAnchor.getAttribute('href');
-      if (findAnchor)  findHref  = findAnchor.getAttribute('href');
+      if (loginAnchor) {
+        loginHref = loginAnchor.getAttribute('href');
+        loginText = loginAnchor.textContent.trim();
+      }
+      if (findAnchor) findHref = findAnchor.getAttribute('href');
     }
 
     var li = document.createElement('li');
     li.innerHTML =
       '<div class="mobile-nav-cta">' +
-        '<a href="' + loginHref + '" class="mobile-login-btn">Login</a>' +
+        '<a href="' + loginHref + '" class="mobile-login-btn">' + loginText + '</a>' +
         '<a href="' + findHref  + '" class="btn btn-primary">' +
           '<i class="fa-solid fa-magnifying-glass"></i> FIND A MAID' +
         '</a>' +
