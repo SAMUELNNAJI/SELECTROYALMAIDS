@@ -109,12 +109,22 @@
           </div>
 
           <div class="vp-cta-stack">
+            {% if maid.is_available %}
             <a href="{% url 'MaidApp:request-maid' %}" class="btn btn-primary">
               <i class="fa-solid fa-calendar-check"></i> Request Interview
             </a>
             <a href="{% url 'MaidApp:contact' %}" class="btn btn-outline">
               <i class="fa-regular fa-message"></i> Send Message
             </a>
+            {% else %}
+            <span class="btn btn-primary vp-btn-locked" title="This professional is currently assigned">
+              <i class="fa-solid fa-lock"></i> Request Interview
+            </span>
+            <span class="btn btn-outline vp-btn-locked" title="This professional is currently assigned">
+              <i class="fa-regular fa-message"></i> Send Message
+            </span>
+            <p class="vp-locked-note"><i class="fa-solid fa-circle-info"></i> Currently assigned — contact us to join the waitlist.</p>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -150,7 +160,7 @@
             <div class="vp-info-icon vp-info-icon--purple"><i class="fa-solid fa-location-dot"></i></div>
             <div>
               <p class="vp-info-label">Address</p>
-              <p class="vp-info-value">{{ maid.address }}</p>
+              <p class="vp-info-value {% if not maid.is_available %}vp-blurred{% endif %}">{{ maid.address }}</p>
             </div>
           </div>
           {% if maid.phone %}
@@ -158,7 +168,7 @@
             <div class="vp-info-icon vp-info-icon--teal"><i class="fa-solid fa-phone"></i></div>
             <div>
               <p class="vp-info-label">Phone</p>
-              <p class="vp-info-value">{{ maid.phone }}</p>
+              <p class="vp-info-value {% if not maid.is_available %}vp-blurred{% endif %}">{{ maid.phone }}</p>
             </div>
           </div>
           {% endif %}
@@ -167,7 +177,7 @@
             <div class="vp-info-icon vp-info-icon--navy"><i class="fa-solid fa-envelope"></i></div>
             <div>
               <p class="vp-info-label">Email</p>
-              <p class="vp-info-value" style="word-break:break-all;">{{ maid.email }}</p>
+              <p class="vp-info-value {% if not maid.is_available %}vp-blurred{% endif %}" style="word-break:break-all;">{{ maid.email }}</p>
             </div>
           </div>
           {% endif %}
@@ -269,12 +279,21 @@
               </p>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              {% if maid.is_available %}
               <a href="{% url 'MaidApp:request-maid' %}" class="btn btn-primary">
                 <i class="fa-solid fa-calendar-check"></i> Request Interview
               </a>
               <a href="{% url 'MaidApp:contact' %}" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">
                 <i class="fa-regular fa-message"></i> Contact Us
               </a>
+              {% else %}
+              <span class="btn btn-primary vp-btn-locked">
+                <i class="fa-solid fa-lock"></i> Request Interview
+              </span>
+              <span class="btn vp-btn-locked" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.15);">
+                <i class="fa-regular fa-message"></i> Contact Us
+              </span>
+              {% endif %}
             </div>
           </div>
         </div>

@@ -811,3 +811,39 @@
   .vp-timeline-item { grid-template-columns: 30px 1fr; }
   .vp-cert-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Assigned profile — blurred contact details ───────────────────────────── */
+.vp-blurred {
+  filter: blur(5px);
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: filter 0.2s;
+}
+
+/* ── Assigned profile — locked / disabled buttons ─────────────────────────── */
+.vp-btn-locked {
+  opacity: 0.45;
+  filter: blur(1px);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.vp-cta-stack .vp-btn-locked {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Note shown below locked buttons ──────────────────────────────────────── */
+.vp-locked-note {
+  font-size: 0.75rem;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+}
