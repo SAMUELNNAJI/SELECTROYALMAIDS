@@ -599,7 +599,7 @@
           {% else %}
             <span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">‹ Prev</span>
           {% endif %}
-          {% for num in page_obj.paginator.get_elided_page_range(page_obj.number, on_each_side=2, on_ends=1) %}
+          {% for num in page_range %}
             {% if num == page_obj.number %}
               <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;font-size:.82rem;font-weight:700;">{{ num }}</span>
             {% elif num == page_obj.paginator.ELLIPSIS %}
@@ -752,7 +752,7 @@
       <div class="maid-editor-scroll">
         <div class="maid-editor-profile">
           <div class="photo-wrap">
-            <img id="emImagePreview" class="photo-preview hidden" src="" alt="" onerror="this.classList.add('hidden');document.getElementById('emImagePlaceholder').classList.remove('hidden');" />
+            <img id="emImagePreview" class="photo-preview hidden" src="" alt="Profile photo" />
             <div id="emImagePlaceholder" class="photo-placeholder"><i class="fa-solid fa-camera"></i></div>
           </div>
           <div class="maid-editor-profile-copy"><strong id="emProfileName">Maid profile</strong><span id="emProfileReg">No registration number</span></div>
@@ -1040,14 +1040,22 @@
     document.getElementById('emIsActive').checked   = isActive;
     const preview = document.getElementById('emImagePreview');
     const placeholder = document.getElementById('emImagePlaceholder');
+    preview.src = '';
+    preview.classList.add('hidden');
+    placeholder.classList.remove('hidden');
     if (imageUrl) {
-      preview.src = imageUrl;
-      preview.classList.remove('hidden');
-      placeholder.classList.add('hidden');
-    } else {
-      preview.src = '';
-      preview.classList.add('hidden');
-      placeholder.classList.remove('hidden');
+      const tmp = new Image();
+      tmp.onload = () => {
+        preview.src = imageUrl;
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+      };
+      tmp.onerror = () => {
+        preview.src = '';
+        preview.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+      };
+      tmp.src = imageUrl;
     }
     const fileInput = document.querySelector('#editMaidForm input[name=profile_image]');
     if (fileInput) fileInput.value = '';
