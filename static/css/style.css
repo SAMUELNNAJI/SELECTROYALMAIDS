@@ -225,6 +225,8 @@ ul { list-style: none; }
   transition: var(--transition);
 }
 .nav-links a:hover { color: var(--blue); background: var(--blue-light); }
+.nav-links a.nav-active { color: var(--blue); background: var(--blue-light); font-weight: 700; }
+.nav-find-btn.nav-active { box-shadow: 0 0 0 3px rgba(37, 99, 235, .18); }
 
 /* Right CTA area */
 .nav-cta {

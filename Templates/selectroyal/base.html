@@ -27,12 +27,12 @@
         </div>
       </a>
       <ul class="nav-links">
-        <li><a href="{% url 'MaidApp:find-a-maid' %}">Find A Maid</a></li>
-        <li><a href="{% url 'MaidApp:services' %}">Services</a></li>
-        <li><a href="{% url 'MaidApp:how-it-works' %}">How It Works</a></li>
-        <li><a href="{% url 'MaidApp:about' %}">About Us</a></li>
-        <li><a href="{% url 'MaidApp:blog' %}">Blog</a></li>
-        <li><a href="{% url 'MaidApp:contact' %}">Contact</a></li>
+        <li><a href="{% url 'MaidApp:find-a-maid' %}" class="{% if request.resolver_match.url_name == 'find-a-maid' or request.resolver_match.url_name == 'view-profile' %}nav-active{% endif %}">Find A Maid</a></li>
+        <li><a href="{% url 'MaidApp:services' %}" class="{% if request.resolver_match.url_name == 'services' %}nav-active{% endif %}">Services</a></li>
+        <li><a href="{% url 'MaidApp:how-it-works' %}" class="{% if request.resolver_match.url_name == 'how-it-works' %}nav-active{% endif %}">How It Works</a></li>
+        <li><a href="{% url 'MaidApp:about' %}" class="{% if request.resolver_match.url_name == 'about' %}nav-active{% endif %}">About Us</a></li>
+        <li><a href="{% url 'MaidApp:blog' %}" class="{% if request.resolver_match.url_name == 'blog' or request.resolver_match.url_name == 'blog-post' %}nav-active{% endif %}">Blog</a></li>
+        <li><a href="{% url 'MaidApp:contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}nav-active{% endif %}">Contact</a></li>
       </ul>
       <div class="nav-cta">
         {% if user.is_authenticated %}
@@ -44,7 +44,7 @@
         {% else %}
           <a href="{% url 'Authentication:login' %}" class="nav-login">Login</a>
         {% endif %}
-        <a href="{% url 'MaidApp:request-maid' %}" class="btn btn-primary nav-find-btn"><i class="fa-solid fa-magnifying-glass"></i> FIND A MAID</a>
+        <a href="{% url 'MaidApp:request-maid' %}" class="btn btn-primary nav-find-btn {% if request.resolver_match.url_name == 'request-maid' %}nav-active{% endif %}"><i class="fa-solid fa-magnifying-glass"></i> FIND A MAID</a>
       </div>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
         <span></span><span></span><span></span>
