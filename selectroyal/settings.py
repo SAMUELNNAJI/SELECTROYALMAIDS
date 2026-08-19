@@ -16,7 +16,7 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1','selectroyalmaids.onrender.com').split()
 
 # Check if a RENDER external URL environment variable exists
 if 'RENDER_EXTERNAL_HOSTNAME' in os.environ:
