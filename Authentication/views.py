@@ -162,30 +162,31 @@ def payment_callback(request):
     plan  = pending.get('plan', 'standard')
 
     # Verify amount matches what we expect
-    flw_amount   = data['data'].get('amount', 0)
+    try:
+        flw_amount = float(data['data'].get('amount', 0))
+    except (TypeError, ValueError):
+        flw_amount = 0
     expected_amt = 20000 if plan == 'premium' else 10000
-    if int(flw_amount) < expected_amt:
+    if flw_amount < expected_amt:
         return redirect('Authentication:payment_failed')
 
     # ── Create the account now that payment is confirmed ──────────────────────
     # Guard against duplicate (e.g. user hitting back/refresh)
     try:
-        user, _ = User.objects.get_or_create(
-            email__iexact=email,
-            defaults={
-                'username': email,
-                'password': pending['password'],
-                'first_name': pending.get('first_name', ''),
-                'last_name': pending.get('last_name', ''),
-                'is_active': True,
-                'is_staff': False,
-                'is_superuser': False,
-            },
-        )
-    except Exception:
         user = User.objects.filter(email__iexact=email).first()
         if not user:
-            raise
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=pending.get('password', ''),
+                first_name=pending.get('first_name', ''),
+                last_name=pending.get('last_name', ''),
+                is_active=True,
+                is_staff=False,
+                is_superuser=False,
+            )
+    except Exception:
+        return redirect('Authentication:payment_failed')
 
     # Create/update employer profile
     profile, _ = EmployerProfile.objects.get_or_create(user=user)
