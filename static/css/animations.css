@@ -10,13 +10,15 @@
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
-  [data-reveal] { opacity: 1 !important; transform: none !important; }
+  .js [data-reveal] { opacity: 1 !important; transform: none !important; }
 }
 
 /* ============================================================
    SCROLL REVEAL — base state (hidden)
+   Only hidden when JS has loaded (.js class on <html>).
+   Without JS the content is always visible — no blank flash.
    ============================================================ */
-[data-reveal] {
+.js [data-reveal] {
   opacity: 0;
   transition:
     opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
@@ -24,14 +26,14 @@
 }
 
 /* Directions */
-[data-reveal="fade"]        { transform: none; }
-[data-reveal="up"]          { transform: translateY(36px); }
-[data-reveal="down"]        { transform: translateY(-28px); }
-[data-reveal="left"]        { transform: translateX(-40px); }
-[data-reveal="right"]       { transform: translateX(40px); }
-[data-reveal="scale"]       { transform: scale(0.92); }
-[data-reveal="scale-up"]    { transform: scale(0.88) translateY(20px); }
-[data-reveal="flip-up"]     { transform: perspective(600px) rotateX(12deg) translateY(28px); }
+.js [data-reveal="fade"]        { transform: none; }
+.js [data-reveal="up"]          { transform: translateY(36px); }
+.js [data-reveal="down"]        { transform: translateY(-28px); }
+.js [data-reveal="left"]        { transform: translateX(-40px); }
+.js [data-reveal="right"]       { transform: translateX(40px); }
+.js [data-reveal="scale"]       { transform: scale(0.92); }
+.js [data-reveal="scale-up"]    { transform: scale(0.88) translateY(20px); }
+.js [data-reveal="flip-up"]     { transform: perspective(600px) rotateX(12deg) translateY(28px); }
 
 /* ── Revealed state ── */
 [data-reveal].is-visible {

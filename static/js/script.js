@@ -212,19 +212,6 @@
 })();
 
 /* ============================================================
-   STICKY NAVBAR SHADOW ON SCROLL
-   ============================================================ */
-(function () {
-  const navbar = document.querySelector('.navbar');
-  if (!navbar) return;
-  window.addEventListener('scroll', function () {
-    navbar.style.boxShadow = window.scrollY > 10
-      ? '0 4px 24px rgba(0,0,0,.10)'
-      : '0 2px 12px rgba(0,0,0,.06)';
-  });
-})();
-
-/* ============================================================
    SCROLL REVEAL (lightweight)
    ============================================================ */
 (function () {

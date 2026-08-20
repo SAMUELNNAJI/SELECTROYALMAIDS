@@ -5,14 +5,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}SelectRoyalMaids – Nigeria's Most Trusted Domestic Staffing Platform{% endblock %}</title>
-<link rel="icon" href="{% static 'image/logo (1).png' %}" type="image/png" />
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8" />
+  <!-- Mark JS available BEFORE any stylesheet is parsed so .js [data-reveal] rules
+       apply immediately — eliminates the opacity-0 flash on content sections. -->
+  <script>document.documentElement.classList.add('js');</script>
+  <!-- DNS prefetch for external CDNs — resolves hostnames in parallel with page parse -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+  <link rel="icon" href="{% static 'image/logo (1).png' %}" type="image/png" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9" />
   <link rel="stylesheet" href="{% static 'css/animations.css' %}" />
   {% block extra_css %}{% endblock %}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Font Awesome loaded non-blocking: media trick defers it until after render,
+       then onload swaps media to 'all' so icons appear without blocking FCP. -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        media="print" onload="this.media='all'" />
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  </noscript>
 </head>
 <body>
 
@@ -213,65 +226,8 @@
     });
   </script>
 
-  <style>
-    /* WhatsApp Widget Styling */
-    .whatsapp-widget {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 60px;
-      height: 60px;
-      background-color: #25d366;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-      cursor: grab;
-      transition: all 0.3s ease;
-      z-index: 1000;
-      user-select: none;
-    }
-
-    .whatsapp-widget:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 16px rgba(37, 211, 102, 0.6);
-    }
-
-    .whatsapp-widget:active {
-      cursor: grabbing;
-    }
-
-    .whatsapp-link {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 28px;
-      text-decoration: none;
-    }
-
-    .whatsapp-link:hover {
-      color: white;
-    }
-
-    @media (max-width: 768px) {
-      .whatsapp-widget {
-        width: 55px;
-        height: 55px;
-        bottom: 20px;
-        right: 20px;
-      }
-
-      .whatsapp-link {
-        font-size: 24px;
-      }
-    }
-  </style>
-
-  <script src="{% static 'js/script.js' %}?v=7"></script>
+  <!-- WhatsApp widget styles live in style.css -->
+  <script src="{% static 'js/script.js' %}?v=7" defer></script>
   <script src="{% static 'js/animations.js' %}" defer></script>
   {% block extra_js %}{% endblock %}
 </body>
