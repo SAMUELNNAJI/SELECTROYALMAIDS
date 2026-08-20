@@ -95,14 +95,12 @@
 
 .vp-photo-wrap {
   position: relative;
-  aspect-ratio: 3 / 4;
-  max-height: 340px;
   background: #e2e8f0;
   overflow: hidden;
 }
 .vp-photo-wrap img {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: cover;
   object-position: center 20%;
   display: block;
