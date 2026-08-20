@@ -5,7 +5,7 @@
 /* ---- Page Hero (reuses policy.css pattern) ---- */
 .page-hero {
   position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #001F3F 60%, #001F3F 100%);
   overflow: hidden;
   padding: 80px 0 88px;
   text-align: center;
@@ -30,7 +30,7 @@
 }
 .page-hero::before {
   width: 420px; height: 420px;
-  background: #3b82f6;
+  background: #4A7FA5;
   top: -120px; left: -100px;
 }
 .page-hero::after {
@@ -71,7 +71,7 @@
   margin: 0;
 }
 
-.page-hero-title .accent-light { color: #93c5fd; }
+.page-hero-title .accent-light { color: #8FBDD6; }
 
 .page-hero-sub {
   font-size: 1.05rem;
@@ -122,8 +122,8 @@
 }
 
 .hiw-audience-pill--blue {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #D6E4F0;
+  color: #001F3F;
 }
 
 .hiw-audience-pill--green {
@@ -198,7 +198,7 @@
   flex-shrink: 0;
 }
 
-.hiw-icon--blue  { background: #dbeafe; color: #2563eb; }
+.hiw-icon--blue  { background: #D6E4F0; color: #001F3F; }
 .hiw-icon--green { background: #dcfce7; color: #16a34a; }
 
 .hiw-num {

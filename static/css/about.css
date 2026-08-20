@@ -5,7 +5,7 @@
 /* ---- Page Hero ---- */
 .page-hero {
   position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #001F3F 60%, #001F3F 100%);
   overflow: hidden;
   padding: 80px 0 88px;
   text-align: center;
@@ -30,7 +30,7 @@
 }
 .page-hero::before {
   width: 420px; height: 420px;
-  background: #3b82f6;
+  background: #4A7FA5;
   top: -100px; left: -120px;
 }
 .page-hero::after {
@@ -72,7 +72,7 @@
 }
 
 .page-hero-title .accent-light {
-  color: #93c5fd;
+  color: #8FBDD6;
 }
 
 .page-hero-sub {
@@ -174,7 +174,7 @@
   border-radius: var(--radius-lg);
   object-fit: cover;
   height: 440px;
-  box-shadow: 0 24px 64px rgba(37,99,235,.15);
+  box-shadow: 0 24px 64px rgba(0,31,63,.15);
 }
 
 .about-mission-badge {
@@ -265,7 +265,7 @@
 /* ---- Numbers Section ---- */
 .about-numbers-section {
   padding: 80px 0;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #001F3F 60%, #001F3F 100%);
 }
 
 .about-numbers-grid {
@@ -293,7 +293,7 @@
   display: block;
   font-size: 2.25rem;
   font-weight: 800;
-  color: #93c5fd;
+  color: #8FBDD6;
   margin-bottom: 6px;
 }
 

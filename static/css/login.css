@@ -26,11 +26,11 @@
   color: #64748b;
   cursor: pointer;
 }
-.login-remember input { accent-color: #2563eb; width: 15px; height: 15px; }
+.login-remember input { accent-color: #001F3F; width: 15px; height: 15px; }
 .login-forgot {
   font-size: 13px;
   font-weight: 600;
-  color: #2563eb;
+  color: #001F3F;
   text-decoration: none;
 }
 .login-forgot:hover { text-decoration: underline; }
@@ -43,7 +43,7 @@
   margin-top: 4px;
 }
 .login-signup-row a {
-  color: #2563eb;
+  color: #001F3F;
   font-weight: 700;
   text-decoration: none;
 }
@@ -75,7 +75,7 @@
   gap: 7px;
 }
 .login-type-tab + .login-type-tab { border-left: 1.5px solid #e2e8f0; }
-.login-type-tab.active { background: #2563eb; color: #fff; }
+.login-type-tab.active { background: #001F3F; color: #fff; }
 .login-type-tab:hover:not(.active) { background: #f8fafc; }
 
 /* Forgot password panel */
@@ -83,7 +83,7 @@
 .forgot-back {
   background: none;
   border: none;
-  color: #2563eb;
+  color: #001F3F;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;

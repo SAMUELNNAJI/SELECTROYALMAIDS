@@ -7,7 +7,7 @@
    ============================================================ */
 .srv-hero {
   position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #001F3F 55%, #001F3F 100%);
   overflow: hidden;
   height: 100vh;
   min-height: 620px;
@@ -38,7 +38,7 @@
 }
 .srv-hero::before {
   width: 500px; height: 500px;
-  background: #3b82f6;
+  background: #4A7FA5;
   top: -150px; left: -150px;
 }
 .srv-hero::after {
@@ -88,7 +88,7 @@
   margin: 0;
 }
 
-.srv-hero-title .accent-light { color: #93c5fd; }
+.srv-hero-title .accent-light { color: #8FBDD6; }
 
 .srv-hero-sub {
   font-size: .92rem;
@@ -328,7 +328,7 @@
   width: fit-content;
 }
 
-.srv-badge--blue   { background: #dbeafe; color: #1d4ed8; }
+.srv-badge--blue   { background: #D6E4F0; color: #001F3F; }
 .srv-badge--green  { background: #dcfce7; color: #15803d; }
 .srv-badge--orange { background: #ffedd5; color: #c2410c; }
 .srv-badge--purple { background: #f3e8ff; color: #7c3aed; }
@@ -467,7 +467,7 @@
   margin-bottom: 18px;
 }
 
-.srv-why-icon--blue   { background: #dbeafe; color: #2563eb; }
+.srv-why-icon--blue   { background: #D6E4F0; color: #001F3F; }
 .srv-why-icon--green  { background: #dcfce7; color: #16a34a; }
 .srv-why-icon--orange { background: #ffedd5; color: #f97316; }
 .srv-why-icon--purple { background: #f3e8ff; color: #7c3aed; }
@@ -530,7 +530,7 @@
   font-weight: 800;
   letter-spacing: .1em;
   color: var(--blue);
-  background: #dbeafe;
+  background: #D6E4F0;
   padding: 4px 10px;
   border-radius: 100px;
   margin-bottom: 12px;
@@ -687,7 +687,7 @@
    ============================================================ */
 .srv-cta-section {
   position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #001F3F 55%, #001F3F 100%);
   overflow: hidden;
   padding: 88px 0;
 }
@@ -724,7 +724,7 @@
   font-weight: 800;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: #93c5fd;
+  color: #8FBDD6;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -777,7 +777,7 @@
   display: block;
   font-size: 1.75rem;
   font-weight: 800;
-  color: #93c5fd;
+  color: #8FBDD6;
   margin-bottom: 6px;
 }
 
