@@ -547,6 +547,15 @@
                     </select>
                     <button class="btn btn-primary" type="submit" style="padding:7px 10px;font-size:.75rem;">Conclude</button>
                   </form>
+                  {% elif placement.has_free_replacement %}
+                  <form method="post" action="{% url 'Authentication:record_free_replacement' placement.pk %}" style="display:flex;gap:6px;align-items:center;">
+                    {% csrf_token %}
+                    <select name="candidate_id" required style="max-width:190px;padding:6px;border:1px solid var(--border);border-radius:6px;">
+                      <option value="" selected disabled>Select replacement</option>
+                      {% for maid in all_maids %}{% if maid.is_available %}<option value="{{ maid.pk }}">{{ maid.full_name }} — {{ maid.reg_number }}</option>{% endif %}{% endfor %}
+                    </select>
+                    <button class="btn btn-ghost" type="submit" style="padding:7px 10px;font-size:.75rem;">Replace free</button>
+                  </form>
                   {% else %}<span style="font-size:.78rem;color:var(--muted);">Concluded {{ placement.concluded_at|date:"d M Y" }}</span>{% endif %}
                 </td>
               </tr>
