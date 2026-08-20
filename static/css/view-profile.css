@@ -95,14 +95,16 @@
 
 .vp-photo-wrap {
   position: relative;
-  height: 280px;
+  aspect-ratio: 3 / 4;
+  max-height: 340px;
   background: #e2e8f0;
+  overflow: hidden;
 }
 .vp-photo-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center;
+  object-position: center 20%;
   display: block;
 }
 .vp-avail-badge {
@@ -796,7 +798,6 @@
 @media (max-width: 640px) {
   .vp-hero { padding: 28px 0 24px; }
   .vp-section { padding: 24px 0 60px; }
-  .vp-photo-wrap { height: 240px; }
   .vp-similar-grid { grid-template-columns: 1fr 1fr; padding: 16px; }
   .vp-cert-grid { grid-template-columns: 1fr; }
   .vp-card-body-pad { padding: 18px 16px; }

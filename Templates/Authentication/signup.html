@@ -180,7 +180,7 @@
               </div>
             </div>
 
-            <button type="submit" class="af-submit">
+            <button type="button" class="af-submit" id="step2Continue">
               Continue <i class="fa-solid fa-arrow-right"></i>
             </button>
           </form>
@@ -489,16 +489,20 @@
     document.getElementById('toggleConfirm').addEventListener('click', function () { togglePwd('confirmPassword', 'eyeIcon2'); });
 
     /* ── Step 2 ── */
-    document.getElementById('step2Form').addEventListener('submit', function (e) {
-      e.preventDefault();
+    function advanceFromPasswordStep() {
       var pw  = document.getElementById('password').value;
       var cpw = document.getElementById('confirmPassword').value;
       if (pw.length < 8) { showError('Password must be at least 8 characters.'); return; }
       if (pw !== cpw)    { showError('Passwords do not match.'); return; }
       formData.password = pw;
-      formData.service  = document.getElementById('service').value  || 'Not specified';
-      formData.source   = document.getElementById('howHeard').value || 'Not specified';
+      formData.service  = 'Not specified';
+      formData.source   = 'Not specified';
       setStep(3);
+    }
+    document.getElementById('step2Continue').addEventListener('click', advanceFromPasswordStep);
+    document.getElementById('step2Form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      advanceFromPasswordStep();
     });
 
     /* ── Plan card selection highlight ── */
@@ -526,7 +530,6 @@
         ['Email',   formData.email],
         ['Phone',   formData.phone],
         ['City',    formData.city],
-        ['Service', formData.service],
         ['Plan',    formData.planLabel],
       ].map(function (r) {
         var isplan = r[0] === 'Plan';
