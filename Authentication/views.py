@@ -158,8 +158,10 @@ def payment_callback(request):
         # Session expired — send back to start
         return redirect('Authentication:signup')
 
-    email = pending['email']
+    email = pending.get('email', '')
     plan  = pending.get('plan', 'standard')
+    if not email:
+        return redirect('Authentication:payment_failed')
 
     # Verify amount matches what we expect
     try:
@@ -185,31 +187,34 @@ def payment_callback(request):
                 is_staff=False,
                 is_superuser=False,
             )
+
+        # Create/update employer profile
+        profile, _ = EmployerProfile.objects.get_or_create(user=user)
+        profile.phone          = pending.get('phone', '')
+        profile.city           = pending.get('city', '')
+        profile.service_needed = pending.get('service', '')
+        profile.how_heard      = pending.get('how_heard', '')
+        profile.plan           = plan
+        profile.payment_status = 'paid'
+        profile.payment_ref    = str(transaction_id)
+        profile.save()
     except Exception:
         return redirect('Authentication:payment_failed')
-
-    # Create/update employer profile
-    profile, _ = EmployerProfile.objects.get_or_create(user=user)
-    profile.phone          = pending.get('phone', '')
-    profile.city           = pending.get('city', '')
-    profile.service_needed = pending.get('service', '')
-    profile.how_heard      = pending.get('how_heard', '')
-    profile.plan           = plan
-    profile.payment_status = 'paid'
-    profile.payment_ref    = str(transaction_id)
-    profile.save()
 
     # Clear the pending session data
     request.session.pop('pending_signup', None)
 
     # Log the user in and go to the success page
-    login(request, user)
     try:
-        send_signup_welcome_email(user, plan)
-    except Exception:
-        pass
-    try:
-        send_payment_success_email(user, plan)
+        login(request, user)
+        try:
+            send_signup_welcome_email(user, plan)
+        except Exception:
+            pass
+        try:
+            send_payment_success_email(user, plan)
+        except Exception:
+            pass
     except Exception:
         pass
     return redirect('Authentication:payment_success')
