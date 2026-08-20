@@ -296,6 +296,7 @@
     <div class="sidebar-label">Workspace</div>
     <a href="#" class="active" data-tab="overview"><i class="fa-solid fa-chart-pie icon"></i> Overview</a>
     <a href="#" data-tab="maids"><i class="fa-solid fa-users icon"></i> Maid Applications</a>
+    <a href="#" data-tab="placements"><i class="fa-solid fa-briefcase icon"></i> Placements</a>
     <a href="#" data-tab="employers"><i class="fa-solid fa-building icon"></i> Employers &amp; Payments</a>
     <div class="sidebar-label">Content</div>
     <a href="#" data-tab="blog"><i class="fa-solid fa-newspaper icon"></i> Blog Posts</a>
@@ -335,8 +336,9 @@
     <!-- Tab nav -->
     <div class="tab-nav" role="tablist">
       <button class="tab-btn active" data-tab="overview" role="tab"><i class="fa-solid fa-chart-pie"></i> <span>Overview</span></button>
-      <button class="tab-btn" data-tab="maids" role="tab"><i class="fa-solid fa-users"></i> <span>Maids</span></button>
-      <button class="tab-btn" data-tab="employers" role="tab"><i class="fa-solid fa-building"></i> <span>Employers</span></button>
+       <button class="tab-btn" data-tab="maids" role="tab"><i class="fa-solid fa-users"></i> <span>Maids</span></button>
+       <button class="tab-btn" data-tab="placements" role="tab"><i class="fa-solid fa-briefcase"></i> <span>Placements</span></button>
+       <button class="tab-btn" data-tab="employers" role="tab"><i class="fa-solid fa-building"></i> <span>Employers</span></button>
       <button class="tab-btn" data-tab="blog" role="tab"><i class="fa-solid fa-newspaper"></i> <span>Blog</span></button>
       <button class="tab-btn" data-tab="faq" role="tab"><i class="fa-solid fa-circle-question"></i> <span>FAQs</span></button>
       <button class="tab-btn" data-tab="services" role="tab"><i class="fa-solid fa-sliders"></i> <span>Services</span></button>
@@ -515,7 +517,45 @@
       </div>
     </div>
 
-    <!-- ── TAB: Employers ── -->
+      <!-- ── TAB: Placements ── -->
+      <div class="tab-panel" id="tab-placements">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2 style="font-size:1.05rem;font-weight:800;">Placement tracking</h2>
+            <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">Concluding a Premium placement starts its 365-day same-role replacement window.</p>
+          </div>
+        </div>
+        <div class="card"><div style="overflow-x:auto;">
+          <table class="data-table" style="min-width:980px;">
+            <thead><tr><th>Employer</th><th>Role</th><th>Plan</th><th>Candidate</th><th>Replacement cover</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              {% for placement in placements %}
+              <tr>
+                <td><strong>{{ placement.employer.get_full_name|default:placement.employer.username }}</strong><br><small style="color:var(--muted);">{{ placement.requested_at|date:"d M Y" }}</small></td>
+                <td>{{ placement.role }}</td>
+                <td><span class="badge {% if placement.plan == 'premium' %}badge-blue{% else %}badge-amber{% endif %}">{{ placement.get_plan_display }}</span>{% if placement.requires_payment %}<br><small style="color:#b45309;">Payment required</small>{% endif %}</td>
+                <td>{% if placement.candidate %}{{ placement.candidate.full_name }}{% else %}—{% endif %}</td>
+                <td>{% if placement.replacement_expires_at %}Until {{ placement.replacement_expires_at|date:"d M Y" }}{% elif placement.plan == 'standard' %}Not included{% else %}Starts on conclusion{% endif %}</td>
+                <td><span class="badge {% if placement.status == 'concluded' %}badge-green{% else %}badge-amber{% endif %}">{{ placement.get_status_display }}</span></td>
+                <td>
+                  {% if placement.status == 'requested' %}
+                  <form method="post" action="{% url 'Authentication:conclude_placement' placement.pk %}" style="display:flex;gap:6px;align-items:center;">
+                    {% csrf_token %}
+                    <select name="candidate_id" required style="max-width:190px;padding:6px;border:1px solid var(--border);border-radius:6px;">
+                      <option value="" selected disabled>Select candidate</option>
+                      {% for maid in all_maids %}{% if maid.is_available %}<option value="{{ maid.pk }}">{{ maid.full_name }} — {{ maid.reg_number }}</option>{% endif %}{% endfor %}
+                    </select>
+                    <button class="btn btn-primary" type="submit" style="padding:7px 10px;font-size:.75rem;">Conclude</button>
+                  </form>
+                  {% else %}<span style="font-size:.78rem;color:var(--muted);">Concluded {{ placement.concluded_at|date:"d M Y" }}</span>{% endif %}
+                </td>
+              </tr>
+              {% empty %}<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:34px;">No placement requests yet.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+      <!-- ── TAB: Employers ── -->
     <div class="tab-panel" id="tab-employers">
       <div class="card">
         <div class="card-head"><h2>Employers &amp; Paystack Payments</h2></div>
@@ -966,7 +1006,7 @@
   overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
 
   /* ── Tab system ── */
-  const titleMap = { overview:'Overview', maids:'Maid Applications', employers:'Employers & Payments', blog:'Blog Posts', faq:'FAQs', services:'Services' };
+  const titleMap = { overview:'Overview', maids:'Maid Applications', placements:'Placements', employers:'Employers & Payments', blog:'Blog Posts', faq:'FAQs', services:'Services' };
   function activateTab(name) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     document.querySelectorAll('.sidebar-nav a[data-tab]').forEach(a => a.classList.toggle('active', a.dataset.tab === name));

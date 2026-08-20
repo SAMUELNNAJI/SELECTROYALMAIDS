@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import BlogPost, FAQ, MaidProfile, MaidRegistration, Service, SupportMessage
+from .models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
 
 
 def _pdf_escape(value):
@@ -243,6 +243,13 @@ def request_maid(request):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['GET', 'POST'])
 
+    from Authentication.models import EmployerProfile
+    profile = EmployerProfile.objects.filter(user=request.user).first()
+    plan = profile.plan if profile else 'standard'
+    prior_requests = PlacementRequest.objects.filter(employer=request.user).exclude(status='expired')
+    if plan == 'premium' and prior_requests.exists():
+        return JsonResponse({'error': 'Your Premium subscription is tied to your existing position. Contact support to request a replacement for that same role.'}, status=403)
+
     request_fields = [
         ('Service', 'service'), ('State', 'state'), ('City / Area', 'city'),
         ('Full Address', 'address'), ('Closest Landmark', 'landmark'),
@@ -275,9 +282,18 @@ def request_maid(request):
         f'<tbody>{table_rows}</tbody>'
         '</table>'
     )
+    requires_payment = plan == 'standard' and prior_requests.exists()
+    placement = PlacementRequest.objects.create(
+        employer=request.user,
+        role=request.POST.get('service', '').strip() or 'Unspecified role',
+        plan=plan,
+        requires_payment=requires_payment,
+    )
     SupportMessage.objects.create(sender=request.user, employer=request.user, body=body)
     return JsonResponse({
         'success': True,
+        'placement_id': placement.pk,
+        'requires_payment': requires_payment,
         'chat_url': f"{request.build_absolute_uri('/support-chat/')}",
     }, status=201)
 

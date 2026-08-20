@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
-from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, Service, SupportMessage
+from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
+from .models import EmployerProfile
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -62,6 +63,14 @@ def signup_view(request):
         user.is_staff     = False
         user.is_superuser = False
         user.save()
+        EmployerProfile.objects.create(
+            user=user,
+            phone=request.POST.get('phone', '').strip(),
+            city=request.POST.get('city', '').strip(),
+            service_needed=request.POST.get('service', '').strip(),
+            how_heard=request.POST.get('howHeard', '').strip(),
+            plan=request.POST.get('plan', 'standard').strip() if request.POST.get('plan') in ('standard', 'premium') else 'standard',
+        )
         login(request, user)
         return redirect('Authentication:employer_dashboard')
 
@@ -166,11 +175,44 @@ def admin_dashboard(request):
         'services':              Service.objects.all(),
         'service_icon_choices':  Service.ICON_CHOICES,
         'service_badge_choices': Service.BADGE_CHOICES,
+        'placements':            PlacementRequest.objects.select_related('employer', 'candidate').all()[:50],
         'page_obj':           Paginator(BlogPost.objects.all(), 20).get_page(request.GET.get('page', 1)),
         'page_range':         Paginator(BlogPost.objects.all(), 20).get_elided_page_range(request.GET.get('page', 1) or 1, on_each_side=2, on_ends=1),
         'blog_categories':    BlogPost.CATEGORY_CHOICES,
     }
     return render(request, 'Dashboard/Admin.html', context)
+
+
+@login_required
+def conclude_placement(request, placement_id):
+    if not request.user.is_superuser or request.method != 'POST':
+        return redirect('Authentication:employer_dashboard')
+    placement = get_object_or_404(PlacementRequest, pk=placement_id, status='requested')
+    candidate = get_object_or_404(MaidProfile, pk=request.POST.get('candidate_id'), is_active=True)
+    placement.conclude(candidate)
+    candidate.assign_status = 'assigned'
+    candidate.save(update_fields=['assign_status'])
+    message = f'Placement concluded for {placement.employer.get_full_name() or placement.employer.username}. '
+    message += 'The Premium replacement window ends ' + placement.replacement_expires_at.strftime('%d %b %Y') + '.' if placement.plan == 'premium' else 'Standard requests do not include free replacements.'
+    messages.success(request, message)
+    return redirect('/admin/dashboard/?tab=placements')
+
+
+@login_required
+def record_free_replacement(request, placement_id):
+    if not request.user.is_superuser or request.method != 'POST':
+        return redirect('Authentication:employer_dashboard')
+    placement = get_object_or_404(PlacementRequest, pk=placement_id)
+    candidate = get_object_or_404(MaidProfile, pk=request.POST.get('candidate_id'), is_active=True, assign_status='unassigned')
+    try:
+        replacement = placement.record_free_replacement(candidate)
+    except ValueError as error:
+        messages.error(request, str(error))
+        return redirect('/admin/dashboard/?tab=placements')
+    candidate.assign_status = 'assigned'
+    candidate.save(update_fields=['assign_status'])
+    messages.success(request, f'Free Premium replacement recorded for the same {replacement.role} position. Coverage still expires {replacement.replacement_expires_at.strftime("%d %b %Y")}.')
+    return redirect('/admin/dashboard/?tab=placements')
 
 
 # ── MaidProfile CRUD ──────────────────────────────────────────────────────────

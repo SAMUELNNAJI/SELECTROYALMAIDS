@@ -9,6 +9,7 @@ urlpatterns = [
     path('logout/',                                views.logout_view,         name='logout'),
     path('employer/dashboard/',                    views.employer_dashboard,  name='employer_dashboard'),
     path('admin/dashboard/',                       views.admin_dashboard,     name='admin_dashboard'),
+    path('admin/placements/<int:placement_id>/conclude/', views.conclude_placement, name='conclude_placement'),
     # MaidProfile CRUD
     path('admin/maid/create/',                     views.maid_create,         name='maid_create'),
     path('admin/maid/<int:maid_id>/edit/',         views.maid_edit,           name='maid_edit'),

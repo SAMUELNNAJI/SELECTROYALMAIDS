@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 
 
 class MaidRegistration(models.Model):
@@ -220,6 +222,64 @@ class MaidProfile(models.Model):
 
     def __str__(self):
         return f'{self.full_name} ({self.reg_number})'
+
+
+class PlacementRequest(models.Model):
+    """A single employer position, from request through completed placement."""
+    STATUS_CHOICES = [
+        ('requested', 'Requested'),
+        ('concluded', 'Placement concluded'),
+        ('expired', 'Replacement window expired'),
+    ]
+
+    employer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='placement_requests')
+    role = models.CharField(max_length=100)
+    candidate = models.ForeignKey(MaidProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='placements')
+    plan = models.CharField(max_length=20, choices=[('standard', 'Standard'), ('premium', 'Premium')])
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='requested')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    concluded_at = models.DateTimeField(null=True, blank=True)
+    replacement_expires_at = models.DateTimeField(null=True, blank=True)
+    requires_payment = models.BooleanField(default=False)
+    replacement_for = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replacements')
+
+    class Meta:
+        ordering = ['-requested_at']
+
+    def __str__(self):
+        return f'{self.employer} — {self.role} ({self.get_status_display()})'
+
+    def conclude(self, candidate):
+        """Lock the candidate and start the Premium one-year replacement period."""
+        self.candidate = candidate
+        self.status = 'concluded'
+        self.concluded_at = timezone.now()
+        self.replacement_expires_at = (
+            self.concluded_at + timedelta(days=365) if self.plan == 'premium' else None
+        )
+        self.save(update_fields=['candidate', 'status', 'concluded_at', 'replacement_expires_at'])
+
+    @property
+    def has_free_replacement(self):
+        return bool(
+            self.plan == 'premium' and self.status == 'concluded' and
+            self.replacement_expires_at and timezone.now() <= self.replacement_expires_at
+        )
+
+    def record_free_replacement(self, candidate):
+        """Create a same-role Premium replacement without extending the guarantee."""
+        if not self.has_free_replacement:
+            raise ValueError('This placement is not eligible for a free replacement.')
+        return PlacementRequest.objects.create(
+            employer=self.employer,
+            role=self.role,
+            candidate=candidate,
+            plan='premium',
+            status='concluded',
+            concluded_at=timezone.now(),
+            replacement_expires_at=self.replacement_expires_at,
+            replacement_for=self,
+        )
 
 
 class FAQ(models.Model):
