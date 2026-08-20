@@ -39,8 +39,8 @@ def login_view(request):
 
 def signup_view(request):
     if request.method == 'POST':
-        import json
         from django.http import JsonResponse
+        from django.urls import reverse
 
         first_name       = request.POST.get('firstName', '').strip()
         last_name        = request.POST.get('lastName', '').strip()
@@ -89,7 +89,6 @@ def signup_view(request):
         )
 
         login(request, user)
-        from django.urls import reverse
         return JsonResponse({'ok': True, 'redirect': reverse('Authentication:employer_dashboard')})
 
     return render(request, 'Authentication/signup.html')

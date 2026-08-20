@@ -3,6 +3,104 @@
 {% block title %}{% if maid %}{{ maid.full_name }} – Maid Profile{% else %}Profile Not Found{% endif %} | SelectRoyal Maids{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/view-profile.css' %}" />
+<style>
+/* ── Auth Guard Modal ─────────────────────────────────── */
+.vp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: vpFadeIn .18s ease;
+}
+.vp-modal-backdrop[hidden] { display: none; }
+
+@keyframes vpFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.vp-modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 40px 36px 36px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,.22);
+  animation: vpSlideUp .22s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes vpSlideUp {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.vp-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+}
+.vp-modal-close:hover { background: #f1f5f9; color: #1e293b; }
+
+.vp-modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.vp-modal-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.vp-modal-body {
+  font-size: .93rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.vp-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.vp-modal-btn {
+  flex: 1;
+  min-width: 130px;
+  max-width: 180px;
+  text-align: center;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -104,12 +202,21 @@
 
           <div class="vp-cta-stack">
             {% if maid.is_available %}
+            {% if user.is_authenticated %}
             <a href="{{ whatsapp_interview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
               <i class="fa-brands fa-whatsapp"></i> Request Interview
             </a>
             <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
               <i class="fa-brands fa-whatsapp"></i> Send Message
             </a>
+            {% else %}
+            <button type="button" class="btn btn-primary vp-auth-guard" data-action="interview">
+              <i class="fa-brands fa-whatsapp"></i> Request Interview
+            </button>
+            <button type="button" class="btn btn-outline vp-auth-guard" data-action="message">
+              <i class="fa-brands fa-whatsapp"></i> Send Message
+            </button>
+            {% endif %}
             {% else %}
             <span class="btn btn-primary vp-btn-locked" title="This professional is currently assigned">
               <i class="fa-solid fa-lock"></i> Request Interview
@@ -267,12 +374,21 @@
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
               {% if maid.is_available %}
+              {% if user.is_authenticated %}
               <a href="{{ whatsapp_interview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                 <i class="fa-brands fa-whatsapp"></i> Request Interview
               </a>
               <a href="{% url 'MaidApp:contact' %}" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">
                 <i class="fa-regular fa-message"></i> Contact Us
               </a>
+              {% else %}
+              <button type="button" class="btn btn-primary vp-auth-guard" data-action="interview">
+                <i class="fa-brands fa-whatsapp"></i> Request Interview
+              </button>
+              <button type="button" class="btn vp-auth-guard" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);" data-action="contact">
+                <i class="fa-regular fa-message"></i> Contact Us
+              </button>
+              {% endif %}
               {% else %}
               <span class="btn btn-primary vp-btn-locked">
                 <i class="fa-solid fa-lock"></i> Request Interview
@@ -331,9 +447,69 @@
 
 {% endif %}
 
+<!-- ===== AUTH GUARD MODAL ===== -->
+<div id="vpAuthModal" class="vp-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="vpAuthModalTitle" hidden>
+  <div class="vp-modal">
+    <button class="vp-modal-close" id="vpAuthModalClose" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="vp-modal-icon">
+      <i class="fa-solid fa-lock"></i>
+    </div>
+    <h2 class="vp-modal-title" id="vpAuthModalTitle">Login Required</h2>
+    <p class="vp-modal-body">
+      You need to be logged in to hire or contact a maid.<br>
+      Please log in or create a free account to continue.
+    </p>
+    <div class="vp-modal-actions">
+      <a href="{% url 'Authentication:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary vp-modal-btn">
+        <i class="fa-solid fa-right-to-bracket"></i> Log In
+      </a>
+      <a href="{% url 'Authentication:signup' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline vp-modal-btn">
+        <i class="fa-solid fa-user-plus"></i> Sign Up
+      </a>
+    </div>
+  </div>
+</div>
+
 <!-- ===== FOOTER ===== -->
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/nav.js' %}"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Auth guard modal ─────────────────────────────────── */
+  const modal      = document.getElementById('vpAuthModal');
+  const closeBtn   = document.getElementById('vpAuthModalClose');
+  const guardBtns  = document.querySelectorAll('.vp-auth-guard');
+
+  function openModal() {
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  guardBtns.forEach(btn => btn.addEventListener('click', openModal));
+
+  closeBtn?.addEventListener('click', closeModal);
+
+  /* Close on backdrop click */
+  modal?.addEventListener('click', function (e) {
+    if (e.target === modal) closeModal();
+  });
+
+  /* Close on Escape key */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+}());
+</script>
 {% endblock %}

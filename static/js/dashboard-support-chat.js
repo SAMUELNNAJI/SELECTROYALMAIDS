@@ -180,7 +180,7 @@
   });
 
   /* ── Select a conversation ────────────────────────────── */
-  function selectConversation(item) {
+  async function selectConversation(item) {
     const eid  = item.dataset.employerId;
     const name = item.dataset.name;
 
@@ -230,8 +230,12 @@
         <div class="date-divider">Today</div>
       `;
       renderedIds.clear();
-      loadMessages(true);
+      await loadMessages(true);
     }
+
+    // Immediately refresh the conv list so the unread badge clears
+    // without waiting for the next poll tick (server marks as read on GET)
+    if (isStaff) loadConversationList();
 
     // (Re)start polling
     clearInterval(pollTimer);

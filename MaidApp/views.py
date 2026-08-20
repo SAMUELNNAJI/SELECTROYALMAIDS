@@ -365,6 +365,13 @@ def support_messages(request):
         if after_id.isdigit():
             records = records.filter(pk__gt=int(after_id))
         records = records[:100]
+
+        # Mark as read: any unread messages the current viewer did NOT send
+        SupportMessage.objects.filter(
+            employer=employer,
+            is_read=False,
+        ).exclude(sender=request.user).update(is_read=True)
+
         return JsonResponse({'messages': [_support_message_data(item, request.user) for item in records]})
 
     if request.method != 'POST':
