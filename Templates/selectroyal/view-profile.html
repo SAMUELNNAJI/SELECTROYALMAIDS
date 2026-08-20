@@ -203,10 +203,10 @@
           <div class="vp-cta-stack">
             {% if maid.is_available %}
             {% if user.is_authenticated %}
-            <a href="{{ whatsapp_interview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+            <a href="{{ whatsapp_interview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary vp-whatsapp-action" data-action="Request Interview" data-maid-slug="{{ maid.slug }}">
               <i class="fa-brands fa-whatsapp"></i> Request Interview
             </a>
-            <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+            <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline vp-whatsapp-action" data-action="Send Message" data-maid-slug="{{ maid.slug }}">
               <i class="fa-brands fa-whatsapp"></i> Send Message
             </a>
             {% else %}
@@ -373,15 +373,15 @@
               </p>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              {% if maid.is_available %}
-              {% if user.is_authenticated %}
-              <a href="{{ whatsapp_interview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                <i class="fa-brands fa-whatsapp"></i> Request Interview
-              </a>
-              <a href="{% url 'MaidApp:contact' %}" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">
-                <i class="fa-regular fa-message"></i> Contact Us
-              </a>
-              {% else %}
+               {% if maid.is_available %}
+               {% if user.is_authenticated %}
+               <a href="{{ whatsapp_interview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary vp-whatsapp-action" data-action="Request Interview" data-maid-slug="{{ maid.slug }}">
+                 <i class="fa-brands fa-whatsapp"></i> Request Interview
+               </a>
+               <a href="{% url 'MaidApp:contact' %}" class="btn vp-contact-action" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);" data-action="Contact Us" data-maid-slug="{{ maid.slug }}">
+                 <i class="fa-regular fa-message"></i> Contact Us
+               </a>
+               {% else %}
               <button type="button" class="btn btn-primary vp-auth-guard" data-action="interview">
                 <i class="fa-brands fa-whatsapp"></i> Request Interview
               </button>
@@ -478,38 +478,54 @@
 {% block extra_js %}
 <script src="{% static 'js/nav.js' %}"></script>
 <script>
-(function () {
-  'use strict';
+  (function () {
+    'use strict';
 
-  /* ── Auth guard modal ─────────────────────────────────── */
-  const modal      = document.getElementById('vpAuthModal');
-  const closeBtn   = document.getElementById('vpAuthModalClose');
-  const guardBtns  = document.querySelectorAll('.vp-auth-guard');
+    function getCookie(name) {
+      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? match[2] : null;
+    }
 
-  function openModal() {
-    modal.hidden = false;
-    document.body.style.overflow = 'hidden';
-    closeBtn.focus();
-  }
+    function sendActionEmail(action, maidSlug, callback) {
+      fetch("{% url 'MaidApp:employer-action-email' %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({action: action, maid_slug: maidSlug}),
+      }).then(function (resp) {
+        return resp.json();
+      }).then(function (data) {
+        if (callback) callback(data);
+      }).catch(function () {
+        if (callback) callback({ok: false});
+      });
+    }
 
-  function closeModal() {
-    modal.hidden = true;
-    document.body.style.overflow = '';
-  }
+    document.querySelectorAll('.vp-whatsapp-action').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        var action = btn.getAttribute('data-action') || 'Action';
+        var maidSlug = btn.getAttribute('data-maid-slug') || '';
+        var href = btn.getAttribute('href');
+        e.preventDefault();
+        sendActionEmail(action, maidSlug, function () {
+          window.open(href, '_blank');
+        });
+      });
+    });
 
-  guardBtns.forEach(btn => btn.addEventListener('click', openModal));
-
-  closeBtn?.addEventListener('click', closeModal);
-
-  /* Close on backdrop click */
-  modal?.addEventListener('click', function (e) {
-    if (e.target === modal) closeModal();
-  });
-
-  /* Close on Escape key */
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !modal.hidden) closeModal();
-  });
-}());
+    document.querySelectorAll('.vp-contact-action').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        var action = btn.getAttribute('data-action') || 'Contact Us';
+        var maidSlug = btn.getAttribute('data-maid-slug') || '';
+        var href = btn.getAttribute('href');
+        e.preventDefault();
+        sendActionEmail(action, maidSlug, function () {
+          window.location.href = href;
+        });
+      });
+    });
+  }());
 </script>
 {% endblock %}

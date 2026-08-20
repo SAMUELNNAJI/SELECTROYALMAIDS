@@ -23,4 +23,6 @@ urlpatterns = [
     path('support-chat/list/', views.conversation_list, name='conversation-list'),
     path('terms-of-service/', views.terms_of_service, name='terms-of-service'),
     path('view-profile/', views.view_profile, name='view-profile'),
+    path('api/employer-action/', views.employer_action_email, name='employer-action-email'),
+    path('api/blog-subscribe/', views.blog_subscribe, name='blog-subscribe'),
 ]

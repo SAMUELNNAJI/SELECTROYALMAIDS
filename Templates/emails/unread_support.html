@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unread Support Messages</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background-color:#1e3a8a;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;font-size:1.5rem;color:#ffffff;font-weight:700;">SelectRoyal Maids</h1>
+              <p style="margin:8px 0 0;color:#93c5fd;font-size:0.9rem;">Support Chat Reminder</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 40px;">
+              <h2 style="margin:0 0 16px;font-size:1.25rem;color:#0f172a;">Hi {{ employer.get_full_name|default:employer.username }},</h2>
+              <p style="margin:0 0 16px;color:#334155;font-size:1rem;line-height:1.6;">
+                You have <strong>{{ unread_count }}</strong> unread message{{ unread_count|pluralize }} in your support dashboard.
+              </p>
+              <p style="margin:0 0 24px;color:#334155;font-size:1rem;line-height:1.6;">
+                Please log in to your dashboard to read and reply. Our team is ready to assist you.
+              </p>
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background-color:#1e3a8a;border-radius:8px;padding:12px 24px;">
+                    <a href="{{ request.build_absolute_uri|default:'#' }}{% url 'MaidApp:support-chat' %}" style="color:#ffffff;text-decoration:none;font-weight:600;font-size:1rem;">Open Support Chat</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 40px;border-top:1px solid #e2e8f0;text-align:center;">
+              <p style="margin:0;color:#64748b;font-size:0.85rem;">&copy; 2026 SelectRoyal Maids. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

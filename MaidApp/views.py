@@ -5,7 +5,10 @@ from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
+from .models import BlogPost, BlogSubscriber, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
+from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email
 
 
 def _pdf_escape(value):
@@ -290,6 +293,10 @@ def request_maid(request):
         requires_payment=requires_payment,
     )
     SupportMessage.objects.create(sender=request.user, employer=request.user, body=body)
+    try:
+        send_request_form_email(request.user, placement)
+    except Exception:
+        pass
     return JsonResponse({
         'success': True,
         'placement_id': placement.pk,
@@ -384,6 +391,15 @@ def support_messages(request):
         return JsonResponse({'error': 'Messages are limited to 2,000 characters.'}, status=400)
 
     message = SupportMessage.objects.create(sender=request.user, employer=employer, body=body)
+    if request.user.is_staff:
+        unread_count = SupportMessage.objects.filter(
+            employer=employer,
+            is_read=False,
+        ).exclude(sender=employer).count()
+        try:
+            send_unread_support_email(employer, unread_count=unread_count)
+        except Exception:
+            pass
     return JsonResponse({'message': _support_message_data(message, request.user)}, status=201)
 
 
@@ -526,3 +542,61 @@ def view_profile(request):
         'whatsapp_url': whatsapp_url,
         'whatsapp_interview_url': whatsapp_interview_url,
     })
+
+
+@require_POST
+def employer_action_email(request):
+    from django.middleware.csrf import get_token
+    import json
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON.'}, status=400)
+
+    action = data.get('action', '').strip()
+    maid_slug = data.get('maid_slug', '').strip()
+    maid = None
+    if maid_slug:
+        maid = MaidProfile.objects.filter(slug=maid_slug, is_active=True).first()
+
+    if not action:
+        return JsonResponse({'error': 'Action is required.'}, status=400)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required.'}, status=401)
+
+    try:
+        send_employer_action_email(request.user, action, maid=maid)
+    except Exception:
+        pass
+
+    return JsonResponse({'ok': True})
+
+
+@require_POST
+def blog_subscribe(request):
+    import json
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON.'}, status=400)
+
+    email = data.get('email', '').strip()
+    if not email:
+        return JsonResponse({'error': 'Email is required.'}, status=400)
+
+    subscriber, created = BlogSubscriber.objects.get_or_create(
+        email=email,
+        defaults={'is_active': True},
+    )
+    if not created and not subscriber.is_active:
+        subscriber.is_active = True
+        subscriber.save(update_fields=['is_active'])
+
+    try:
+        send_blog_subscribe_email(email)
+    except Exception:
+        pass
+
+    return JsonResponse({'ok': True, 'subscribed': created})

@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
+from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email
 from .models import EmployerProfile
 
 
@@ -198,6 +199,8 @@ def payment_callback(request):
 
     # Log the user in and go to the success page
     login(request, user)
+    send_signup_welcome_email(user, plan)
+    send_payment_success_email(user, plan)
     return redirect('Authentication:payment_success')
 
 
@@ -210,6 +213,16 @@ def payment_success(request):
 
 def payment_failed(request):
     """Shown when payment is cancelled or verification fails."""
+    pending = request.session.get('pending_signup')
+    if pending:
+        email = pending.get('email', '')
+        if email:
+            try:
+                user = User.objects.filter(email__iexact=email).first()
+                if user:
+                    send_payment_failed_email(user)
+            except Exception:
+                pass
     return render(request, 'Authentication/payment_failed.html')
 
 
@@ -575,6 +588,16 @@ def blog_create(request):
                 published_at=timezone.now(),
             )
             messages.success(request, f'Post "{title}" published.')
+            try:
+                post = BlogPost.objects.filter(slug=slug).first()
+                if post:
+                    for user in User.objects.filter(is_active=True, is_staff=False):
+                        try:
+                            send_blog_alert_email(user, post)
+                        except Exception:
+                            pass
+            except Exception:
+                pass
             return redirect('/admin/dashboard/?tab=blog')
         else:
             messages.error(request, 'Slug and title are required.')
