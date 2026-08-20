@@ -47,6 +47,7 @@
                 <img src="{{ maid.photo_url }}"
                      alt="{{ maid.full_name }}"
                      class="hero-card-avatar"
+                     loading="eager"
                      onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ maid.full_name|urlencode }}&background=1e3a8a&color=fff&size=80';" />
                 <div>
                   <p class="hero-card-name">{{ maid.full_name }}</p>
@@ -106,6 +107,7 @@
                 <img src="{{ maid.photo_url }}"
                      alt="{{ maid.full_name }}"
                      class="hero-card-avatar"
+                     loading="lazy"
                      onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ maid.full_name|urlencode }}&background=1e3a8a&color=fff&size=80';" />
                 <div>
                   <p class="hero-card-name">{{ maid.full_name }}</p>
@@ -165,6 +167,7 @@
                 <img src="{{ maid.photo_url }}"
                      alt="{{ maid.full_name }}"
                      class="hero-card-avatar"
+                     loading="lazy"
                      onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ maid.full_name|urlencode }}&background=1e3a8a&color=fff&size=80';" />
                 <div>
                   <p class="hero-card-name">{{ maid.full_name }}</p>
@@ -270,7 +273,7 @@
 
         <div class="service-card">
           <div class="service-img-wrap">
-            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Nigerian maid cleaning home" />
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Nigerian maid cleaning home" loading="lazy" />
             <span class="service-tag">Most Popular</span>
           </div>
           <div class="service-body">
