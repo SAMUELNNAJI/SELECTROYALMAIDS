@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Failed – SelectRoyalMaids</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #fff5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+
+    .fail-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.09);
+      padding: 52px 40px 44px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .fail-circle {
+      width: 88px;
+      height: 88px;
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      animation: popIn .5s cubic-bezier(.175,.885,.32,1.275) both;
+    }
+    .fail-circle i { font-size: 2.4rem; color: #fff; }
+
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .fail-title { font-size: 1.7rem; font-weight: 800; color: #1e293b; margin-bottom: 10px; }
+    .fail-sub   { font-size: .95rem; color: #64748b; line-height: 1.7; margin-bottom: 28px; }
+
+    .fail-reasons {
+      background: #fff5f5;
+      border: 1px solid #fecaca;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+    .fail-reasons p { font-size: .82rem; font-weight: 700; color: #dc2626; margin-bottom: 10px; }
+    .fail-reasons ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .fail-reasons li { font-size: .84rem; color: #7f1d1d; display: flex; align-items: center; gap: 9px; }
+    .fail-reasons li i { color: #ef4444; font-size: .75rem; flex-shrink: 0; }
+
+    .fail-actions { display: flex; flex-direction: column; gap: 12px; }
+
+    .btn-retry {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+      padding: 15px 24px;
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity .2s;
+      cursor: pointer;
+    }
+    .btn-retry:hover { opacity: .88; color: #fff; }
+
+    .btn-restart {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+      padding: 13px 24px;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: .9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .btn-restart:hover { background: #e2e8f0; color: #1e293b; }
+
+    .logo-top { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 32px; text-decoration: none; }
+    .logo-top img { height: 32px; }
+    .logo-top-text { font-size: 1rem; font-weight: 800; color: #1e3a8a; }
+  </style>
+</head>
+<body>
+
+  <div class="fail-card">
+
+    <a href="{% url 'MaidApp:index' %}" class="logo-top">
+      <img src="{% static 'image/logo (1).png' %}" alt="SelectRoyalMaids" />
+      <span class="logo-top-text">SelectRoyalMaids</span>
+    </a>
+
+    <div class="fail-circle">
+      <i class="fa-solid fa-xmark"></i>
+    </div>
+
+    <h1 class="fail-title">Payment Not Completed</h1>
+    <p class="fail-sub">
+      Your payment was not successful and <strong>no account has been created</strong>.<br />
+      Please try again — your details are still saved for this session.
+    </p>
+
+    <div class="fail-reasons">
+      <p><i class="fa-solid fa-circle-exclamation" style="margin-right:6px"></i> Common reasons for failure:</p>
+      <ul>
+        <li><i class="fa-solid fa-circle-dot"></i> Insufficient funds on card</li>
+        <li><i class="fa-solid fa-circle-dot"></i> Card declined by issuing bank</li>
+        <li><i class="fa-solid fa-circle-dot"></i> Payment was cancelled</li>
+        <li><i class="fa-solid fa-circle-dot"></i> Network or connection timeout</li>
+      </ul>
+    </div>
+
+    <div class="fail-actions">
+      <a href="{% url 'Authentication:payment_page' %}" class="btn-retry">
+        <i class="fa-solid fa-rotate-right"></i> Try Payment Again
+      </a>
+      <a href="{% url 'Authentication:signup' %}" class="btn-restart">
+        <i class="fa-solid fa-arrow-left"></i> Start Sign Up Over
+      </a>
+    </div>
+
+  </div>
+
+</body>
+</html>

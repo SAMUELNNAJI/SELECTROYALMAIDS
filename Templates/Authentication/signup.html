@@ -269,26 +269,10 @@
 
           <div class="plan-cards" role="radiogroup" aria-label="Select a plan">
 
-            <!-- Standard -->
-            <label class="plan-card" id="cardStandard" for="planStandard">
-              <input class="plan-radio" type="radio" name="planChoice" id="planStandard" value="standard" checked />
-              <div class="plan-badge plan-badge-std"><i class="fa-solid fa-user"></i> Standard</div>
-              <div class="plan-head">
-                <span class="plan-title">Standard Plan</span>
-                <span class="plan-price">₦10,000 <span>/ once</span></span>
-              </div>
-              <p class="plan-desc">Great for households hiring one domestic professional.</p>
-              <ul class="plan-features">
-                <li><i class="fa-solid fa-circle-check"></i> Access to verified candidates</li>
-                <li><i class="fa-solid fa-circle-check"></i> 1 active hire request</li>
-                <li><i class="fa-solid fa-circle-check"></i> Standard support (Mon–Fri)</li>
-              </ul>
-            </label>
-
             <!-- Premium -->
             <label class="plan-card plan-premium" id="cardPremium" for="planPremium">
               <span class="plan-best-value"><i class="fa-solid fa-crown" style="margin-right:4px"></i> Best Value</span>
-              <input class="plan-radio" type="radio" name="planChoice" id="planPremium" value="premium" />
+              <input class="plan-radio" type="radio" name="planChoice" id="planPremium" value="premium" checked />
               <div class="plan-badge plan-badge-premium"><i class="fa-solid fa-crown"></i> Premium</div>
               <div class="plan-head">
                 <span class="plan-title">Premium Plan</span>
@@ -302,6 +286,22 @@
                 <li><i class="fa-solid fa-circle-check"></i> Dedicated placement advisor</li>
                 <li><i class="fa-solid fa-circle-check"></i> 1 year replacement validity</li>
                 <li><i class="fa-solid fa-circle-check"></i> Medical fitness test</li>
+              </ul>
+            </label>
+
+            <!-- Standard -->
+            <label class="plan-card" id="cardStandard" for="planStandard">
+              <input class="plan-radio" type="radio" name="planChoice" id="planStandard" value="standard" />
+              <div class="plan-badge plan-badge-std"><i class="fa-solid fa-user"></i> Standard</div>
+              <div class="plan-head">
+                <span class="plan-title">Standard Plan</span>
+                <span class="plan-price">₦10,000 <span>/ once</span></span>
+              </div>
+              <p class="plan-desc">Great for households hiring one domestic professional.</p>
+              <ul class="plan-features">
+                <li><i class="fa-solid fa-circle-check"></i> Access to verified candidates</li>
+                <li><i class="fa-solid fa-circle-check"></i> 1 active hire request</li>
+                <li><i class="fa-solid fa-circle-check"></i> Standard support (Mon–Fri)</li>
               </ul>
             </label>
 
@@ -342,7 +342,7 @@
             </div>
 
             <button type="submit" class="af-submit" id="createAccBtn">
-              <i class="fa-solid fa-credit-card"></i> Pay &amp; Create Account
+              <i class="fa-solid fa-lock"></i> Continue to Payment
             </button>
 
             <div style="text-align:center;margin-top:10px">
@@ -531,7 +531,7 @@
       }
 
       var btn = document.getElementById('createAccBtn');
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating account…';
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving details…';
       btn.disabled  = true;
 
       var body = new URLSearchParams({
@@ -556,16 +556,8 @@
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data.ok) {
-          /* Hide form steps and show success screen */
-          [1, 2, 3, 4].forEach(function (i) {
-            var el = document.getElementById('step' + i);
-            if (el) el.style.display = 'none';
-          });
-          document.getElementById('afSteps').style.display     = 'none';
-          document.getElementById('loginLinkRow').style.display = 'none';
-          document.getElementById('signupSuccess').style.display = 'block';
-          /* Redirect after a short pause so the user sees the success message */
-          setTimeout(function () { window.location.href = data.redirect; }, 2000);
+          /* Go straight to the payment page — no fake "account created" screen */
+          window.location.href = data.redirect;
         } else {
           showError(data.error || 'Something went wrong. Please try again.');
           btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Pay &amp; Create Account';

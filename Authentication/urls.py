@@ -7,6 +7,13 @@ urlpatterns = [
     path('login/',                                 views.login_view,          name='login'),
     path('signup/',                                views.signup_view,         name='signup'),
     path('logout/',                                views.logout_view,         name='logout'),
+
+    # ── Payment flow ──────────────────────────────────────────────────────────
+    path('payment/',                               views.payment_page,        name='payment_page'),
+    path('payment/callback/',                      views.payment_callback,    name='payment_callback'),
+    path('payment/success/',                       views.payment_success,     name='payment_success'),
+    path('payment/failed/',                        views.payment_failed,      name='payment_failed'),
+
     path('employer/dashboard/',                    views.employer_dashboard,  name='employer_dashboard'),
     path('admin/dashboard/',                       views.admin_dashboard,     name='admin_dashboard'),
     path('admin/placements/<int:placement_id>/conclude/', views.conclude_placement, name='conclude_placement'),

@@ -38,6 +38,11 @@ def login_view(request):
 
 
 def signup_view(request):
+    """
+    Validates signup data and stores it in the session.
+    No user is created here — account creation happens only after payment succeeds.
+    Returns JSON so the multi-step form can stay on the page.
+    """
     if request.method == 'POST':
         from django.http import JsonResponse
         from django.urls import reverse
@@ -52,7 +57,7 @@ def signup_view(request):
         plan_raw         = request.POST.get('plan', 'standard').strip()
         plan             = plan_raw if plan_raw in ('standard', 'premium') else 'standard'
 
-        # Validate all required fields
+        # ── Field validation ──────────────────────────────────────────────────
         if not first_name:
             return JsonResponse({'ok': False, 'error': 'Please enter your first name.'})
         if not last_name:
@@ -68,30 +73,144 @@ def signup_view(request):
         if User.objects.filter(email__iexact=email).exists():
             return JsonResponse({'ok': False, 'error': 'An account with this email already exists.'})
 
+        # ── Store signup data in session (no DB write yet) ────────────────────
+        request.session['pending_signup'] = {
+            'first_name': first_name,
+            'last_name':  last_name,
+            'email':      email,
+            'password':   password,
+            'phone':      phone,
+            'city':       city,
+            'plan':       plan,
+            'service':    request.POST.get('service', '').strip(),
+            'how_heard':  request.POST.get('howHeard', '').strip(),
+        }
+        request.session.modified = True
+
+        return JsonResponse({'ok': True, 'redirect': reverse('Authentication:payment_page')})
+
+    return render(request, 'Authentication/signup.html')
+
+
+def payment_page(request):
+    """
+    Renders the Flutterwave inline payment page.
+    Requires a pending_signup in session — otherwise sends user back to signup.
+    """
+    from django.conf import settings as django_settings
+
+    pending = request.session.get('pending_signup')
+    if not pending:
+        return redirect('Authentication:signup')
+
+    plan        = pending.get('plan', 'standard')
+    amount      = 20000 if plan == 'premium' else 10000
+    plan_label  = 'Premium Plan — ₦20,000' if plan == 'premium' else 'Standard Plan — ₦10,000'
+
+    context = {
+        'flw_public_key': django_settings.FLUTTERWAVE_PUBLIC_KEY,
+        'email':          pending['email'],
+        'first_name':     pending['first_name'],
+        'last_name':      pending['last_name'],
+        'phone':          pending.get('phone', ''),
+        'amount':         amount,
+        'plan':           plan,
+        'plan_label':     plan_label,
+    }
+    return render(request, 'Authentication/payment.html', context)
+
+
+def payment_callback(request):
+    """
+    Flutterwave redirects here after the customer completes (or cancels) payment.
+    Query params: status, tx_ref, transaction_id
+    We verify server-side, then create the account only on confirmed success.
+    """
+    import uuid, requests as http_requests
+    from django.conf import settings as django_settings
+
+    status         = request.GET.get('status', '')
+    transaction_id = request.GET.get('transaction_id', '')
+
+    # ── Payment not completed / cancelled ────────────────────────────────────
+    if status != 'successful' or not transaction_id:
+        return redirect('Authentication:payment_failed')
+
+    # ── Server-side verification ──────────────────────────────────────────────
+    try:
+        verify_url = django_settings.FLUTTERWAVE_VERIFY_URL.format(id=transaction_id)
+        resp = http_requests.get(
+            verify_url,
+            headers={'Authorization': f'Bearer {django_settings.FLUTTERWAVE_SECRET_KEY}'},
+            timeout=15,
+        )
+        data = resp.json()
+    except Exception:
+        return redirect('Authentication:payment_failed')
+
+    if data.get('status') != 'success' or data.get('data', {}).get('status') != 'successful':
+        return redirect('Authentication:payment_failed')
+
+    # ── Retrieve pending signup from session ──────────────────────────────────
+    pending = request.session.get('pending_signup')
+    if not pending:
+        # Session expired — send back to start
+        return redirect('Authentication:signup')
+
+    email = pending['email']
+    plan  = pending.get('plan', 'standard')
+
+    # Verify amount matches what we expect
+    flw_amount   = data['data'].get('amount', 0)
+    expected_amt = 20000 if plan == 'premium' else 10000
+    if int(flw_amount) < expected_amt:
+        return redirect('Authentication:payment_failed')
+
+    # ── Create the account now that payment is confirmed ──────────────────────
+    # Guard against duplicate (e.g. user hitting back/refresh)
+    if User.objects.filter(email__iexact=email).exists():
+        user = User.objects.get(email__iexact=email)
+    else:
         user = User.objects.create_user(
             username=email,
             email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-        )
-        user.is_staff     = False
-        user.is_superuser = False
-        user.save()
-
-        EmployerProfile.objects.create(
-            user=user,
-            phone=phone,
-            city=city,
-            service_needed=request.POST.get('service', '').strip(),
-            how_heard=request.POST.get('howHeard', '').strip(),
-            plan=plan,
+            password=pending['password'],
+            first_name=pending['first_name'],
+            last_name=pending['last_name'],
+            is_active=True,
+            is_staff=False,
+            is_superuser=False,
         )
 
-        login(request, user)
-        return JsonResponse({'ok': True, 'redirect': reverse('Authentication:employer_dashboard')})
+    # Create/update employer profile
+    profile, _ = EmployerProfile.objects.get_or_create(user=user)
+    profile.phone          = pending.get('phone', '')
+    profile.city           = pending.get('city', '')
+    profile.service_needed = pending.get('service', '')
+    profile.how_heard      = pending.get('how_heard', '')
+    profile.plan           = plan
+    profile.payment_status = 'paid'
+    profile.payment_ref    = str(transaction_id)
+    profile.save()
 
-    return render(request, 'Authentication/signup.html')
+    # Clear the pending session data
+    request.session.pop('pending_signup', None)
+
+    # Log the user in and go to the success page
+    login(request, user)
+    return redirect('Authentication:payment_success')
+
+
+def payment_success(request):
+    """Success landing page shown after a confirmed payment."""
+    if not request.user.is_authenticated:
+        return redirect('Authentication:login')
+    return render(request, 'Authentication/payment_success.html')
+
+
+def payment_failed(request):
+    """Shown when payment is cancelled or verification fails."""
+    return render(request, 'Authentication/payment_failed.html')
 
 
 def logout_view(request):
@@ -106,7 +225,14 @@ def employer_dashboard(request):
     from django.utils.html import strip_tags
     import re
 
-    # Unread support messages
+    # ── Payment gate ──────────────────────────────────────────────────────────
+    try:
+        profile = request.user.employer_profile
+    except Exception:
+        profile = None
+
+    if profile is None or not profile.is_paid:
+        return redirect('Authentication:payment_page')
     unread_count = SupportMessage.objects.filter(
         employer=request.user,
         is_read=False,
@@ -145,12 +271,6 @@ def employer_dashboard(request):
         body__contains='New employer placement request',
     ).count()
     maids_available = MaidProfile.objects.filter(is_active=True, assign_status='unassigned').count()
-
-    # Employer profile
-    try:
-        profile = request.user.employer_profile
-    except Exception:
-        profile = None
 
     return render(request, 'Dashboard/Employer.html', {
         'unread_count':    unread_count,

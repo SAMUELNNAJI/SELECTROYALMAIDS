@@ -198,3 +198,9 @@ LOGGING = {
 
 # ── Misc ──────────────────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Flutterwave ───────────────────────────────────────────────────────────────
+FLUTTERWAVE_PUBLIC_KEY  = os.environ.get('FLUTTERWAVE_PUBLIC_KEY', '')
+FLUTTERWAVE_SECRET_KEY  = os.environ.get('FLUTTERWAVE_SECRET_KEY', '')
+FLUTTERWAVE_ENCRYPT_KEY = os.environ.get('FLUTTERWAVE_ENCRYPT_KEY', '')
+FLUTTERWAVE_VERIFY_URL  = 'https://api.flutterwave.com/v3/transactions/{id}/verify'

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Successful – SelectRoyalMaids</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f0fdf4; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+
+    .success-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.09);
+      padding: 52px 40px 44px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* Animated checkmark */
+    .check-circle {
+      width: 88px;
+      height: 88px;
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      animation: popIn .5s cubic-bezier(.175,.885,.32,1.275) both;
+    }
+    .check-circle i { font-size: 2.4rem; color: #fff; }
+
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title { font-size: 1.7rem; font-weight: 800; color: #1e293b; margin-bottom: 10px; }
+    .success-sub   { font-size: .95rem; color: #64748b; line-height: 1.7; margin-bottom: 32px; }
+
+    .success-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .sf-item { display: flex; align-items: center; gap: 12px; font-size: .88rem; color: #166534; font-weight: 600; }
+    .sf-item i { color: #16a34a; font-size: .9rem; flex-shrink: 0; }
+
+    .success-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+      padding: 15px 24px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .success-btn:hover { opacity: .88; color: #fff; }
+
+    .redirect-note {
+      margin-top: 14px;
+      font-size: .78rem;
+      color: #94a3b8;
+    }
+    .redirect-note span { font-weight: 700; color: #2563eb; }
+
+    .logo-top { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 32px; text-decoration: none; }
+    .logo-top img { height: 32px; }
+    .logo-top-text { font-size: 1rem; font-weight: 800; color: #1e3a8a; }
+  </style>
+</head>
+<body>
+
+  <div class="success-card">
+
+    <a href="{% url 'MaidApp:index' %}" class="logo-top">
+      <img src="{% static 'image/logo (1).png' %}" alt="SelectRoyalMaids" />
+      <span class="logo-top-text">SelectRoyalMaids</span>
+    </a>
+
+    <div class="check-circle">
+      <i class="fa-solid fa-check"></i>
+    </div>
+
+    <h1 class="success-title">Payment Successful!</h1>
+    <p class="success-sub">
+      Welcome to SelectRoyalMaids, <strong>{{ request.user.first_name }}</strong>!<br />
+      Your employer account is fully activated. Start browsing verified domestic staff right away.
+    </p>
+
+    <div class="success-features">
+      <div class="sf-item"><i class="fa-solid fa-circle-check"></i> Account fully activated</div>
+      <div class="sf-item"><i class="fa-solid fa-circle-check"></i> Access to all verified maid profiles</div>
+      <div class="sf-item"><i class="fa-solid fa-circle-check"></i> Request placements from your dashboard</div>
+      <div class="sf-item"><i class="fa-solid fa-circle-check"></i> Dedicated support advisor assigned</div>
+    </div>
+
+    <a href="{% url 'Authentication:employer_dashboard' %}" class="success-btn" id="dashBtn">
+      <i class="fa-solid fa-house-chimney"></i> Go to My Dashboard
+    </a>
+
+    <p class="redirect-note">
+      Redirecting automatically in <span id="countdown">5</span>s…
+    </p>
+
+  </div>
+
+  <script>
+    var secs = 5;
+    var el   = document.getElementById('countdown');
+    var timer = setInterval(function () {
+      secs--;
+      if (el) el.textContent = secs;
+      if (secs <= 0) {
+        clearInterval(timer);
+        window.location.href = "{% url 'Authentication:employer_dashboard' %}";
+      }
+    }, 1000);
+  </script>
+
+</body>
+</html>

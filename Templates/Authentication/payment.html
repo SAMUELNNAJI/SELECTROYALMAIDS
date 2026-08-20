@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete Payment – SelectRoyalMaids</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+
+    .pay-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.10);
+      padding: 44px 40px 40px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .pay-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 28px; text-decoration: none; }
+    .pay-logo img { height: 36px; }
+    .pay-logo-text { font-size: 1.1rem; font-weight: 800; color: #1e3a8a; }
+
+    .pay-icon { width: 72px; height: 72px; background: linear-gradient(135deg,#1e3a8a,#2563eb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .pay-icon i { font-size: 1.8rem; color: #fff; }
+
+    .pay-title { font-size: 1.4rem; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
+    .pay-sub   { font-size: .9rem; color: #64748b; margin-bottom: 28px; line-height: 1.6; }
+
+    .pay-summary {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+    .pay-summary-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #e2e8f0; font-size: .87rem; }
+    .pay-summary-row:last-child { border-bottom: none; }
+    .pay-summary-row .label  { color: #64748b; font-weight: 600; }
+    .pay-summary-row .value  { color: #1e293b; font-weight: 700; }
+    .pay-summary-row .amount { color: #2563eb; font-size: 1.05rem; font-weight: 800; }
+
+    .pay-btn {
+      width: 100%;
+      padding: 15px 24px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity .2s;
+      font-family: inherit;
+    }
+    .pay-btn:hover   { opacity: .88; }
+    .pay-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    .pay-secure { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; font-size: .78rem; color: #94a3b8; }
+    .pay-secure i { color: #22c55e; }
+
+    .pay-cancel { display: block; margin-top: 14px; font-size: .82rem; color: #94a3b8; text-decoration: none; }
+    .pay-cancel:hover { color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="pay-card">
+
+    <a href="{% url 'MaidApp:index' %}" class="pay-logo">
+      <img src="{% static 'image/logo (1).png' %}" alt="SelectRoyalMaids" />
+      <span class="pay-logo-text">SelectRoyalMaids</span>
+    </a>
+
+    <div class="pay-icon">
+      <i class="fa-solid fa-credit-card"></i>
+    </div>
+
+    <h1 class="pay-title">Complete Your Payment</h1>
+    <p class="pay-sub">You're one step away. Pay securely via Flutterwave to activate your employer account.</p>
+
+    <div class="pay-summary">
+      <div class="pay-summary-row">
+        <span class="label">Name</span>
+        <span class="value">{{ first_name }} {{ last_name }}</span>
+      </div>
+      <div class="pay-summary-row">
+        <span class="label">Email</span>
+        <span class="value">{{ email }}</span>
+      </div>
+      <div class="pay-summary-row">
+        <span class="label">Plan</span>
+        <span class="value">{{ plan_label }}</span>
+      </div>
+      <div class="pay-summary-row">
+        <span class="label">Amount</span>
+        <span class="value amount">₦{{ amount|floatformat:"0" }}</span>
+      </div>
+    </div>
+
+    <button class="pay-btn" id="payBtn" onclick="launchPayment()">
+      <i class="fa-solid fa-lock"></i> Pay ₦{{ amount|floatformat:"0" }} Securely
+    </button>
+
+    <div class="pay-secure">
+      <i class="fa-solid fa-shield-halved"></i>
+      Secured by Flutterwave &nbsp;·&nbsp; 256-bit SSL encryption
+    </div>
+
+    <a href="{% url 'Authentication:signup' %}" class="pay-cancel">
+      <i class="fa-solid fa-arrow-left" style="margin-right:4px"></i> Cancel and start over
+    </a>
+
+  </div>
+
+  <!-- Flutterwave inline JS SDK -->
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+  <script>
+    function launchPayment() {
+      var btn = document.getElementById('payBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Opening payment…';
+
+      FlutterwaveCheckout({
+        public_key: "{{ flw_public_key }}",
+        tx_ref:     "SRM-" + Date.now(),
+        amount:     {{ amount }},
+        currency:   "NGN",
+        payment_options: "card,banktransfer,ussd",
+        redirect_url: "{{ request.scheme }}://{{ request.get_host }}{% url 'Authentication:payment_callback' %}",
+        customer: {
+          email:        "{{ email }}",
+          phone_number: "{{ phone }}",
+          name:         "{{ first_name }} {{ last_name }}",
+        },
+        customizations: {
+          title:       "SelectRoyalMaids",
+          description: "{{ plan_label }}",
+          logo:        "{{ request.scheme }}://{{ request.get_host }}{% static 'image/logo (1).png' %}",
+        },
+        callback: function(data) {
+          // Inline success — redirect to callback with params
+          if (data.status === "successful") {
+            window.location.href = "{% url 'Authentication:payment_callback' %}?status=successful&transaction_id=" + data.transaction_id + "&tx_ref=" + data.tx_ref;
+          } else {
+            window.location.href = "{% url 'Authentication:payment_failed' %}";
+          }
+        },
+        onclose: function() {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay ₦{{ amount|floatformat:"0" }} Securely';
+        },
+      });
+    }
+  </script>
+
+</body>
+</html>
