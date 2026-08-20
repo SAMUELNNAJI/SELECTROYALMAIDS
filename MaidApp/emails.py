@@ -24,7 +24,7 @@ def send_email(subject, to_email, template_name, context=None, from_email=None):
 
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=True)
+    msg.send(fail_silently=False)
 
 
 def send_payment_success_email(user, plan):
