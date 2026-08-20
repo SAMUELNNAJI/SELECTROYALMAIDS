@@ -1,10 +1,124 @@
 from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import BlogPost, FAQ, MaidProfile, MaidRegistration, Service, SupportMessage
+
+
+def _pdf_escape(value):
+    """Return text that is safe for the built-in PDF Helvetica font."""
+    import unicodedata
+    value = unicodedata.normalize('NFKD', str(value)).encode('ascii', 'ignore').decode('ascii')
+    return value.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
+
+
+def _maid_application_pdf(application):
+    """Build a compact, dependency-free PDF containing the complete application."""
+    rows = [
+        ('Application ID', application.pk),
+        ('Submitted', application.created_at.strftime('%d %B %Y, %H:%M')),
+        ('Full name', f'{application.first_name} {application.last_name}'),
+        ('Email', application.email), ('Phone', application.phone),
+        ('Date of birth', application.date_of_birth.strftime('%d %B %Y')),
+        ('Gender', application.gender), ('State', application.state),
+        ('City / area', application.city), ('Role', application.get_role_display()),
+        ('Work type', application.get_work_type_display()),
+        ('Years of experience', application.years_experience),
+        ('Availability', application.availability), ('Expected salary', application.expected_salary),
+        ('Languages', application.languages), ('Skills', application.skills),
+        ('About applicant', application.bio), ('NIN', application.nin),
+        ('Reference name', application.reference_name),
+        ('Reference phone', application.reference_phone),
+    ]
+    lines = ['SELECTROYAL MAIDS - MAID APPLICATION', '']
+    for label, value in rows:
+        text = f'{label}: {value}'
+        while len(text) > 92:
+            cut = text.rfind(' ', 0, 92) or 92
+            lines.append(text[:cut])
+            text = '    ' + text[cut:].lstrip()
+        lines.append(text)
+
+    page_lines = 46
+    chunks = [lines[index:index + page_lines] for index in range(0, len(lines), page_lines)]
+    objects = ['<< /Type /Catalog /Pages 2 0 R >>', None]
+    page_ids, content_ids = [], []
+    for _ in chunks:
+        page_ids.append(len(objects) + 1)
+        objects.append(None)
+        content_ids.append(len(objects) + 1)
+        objects.append(None)
+    objects[1] = f'<< /Type /Pages /Kids [{" ".join(f"{item} 0 R" for item in page_ids)}] /Count {len(page_ids)} >>'
+    for index, chunk in enumerate(chunks):
+        content = ['BT', '/F1 11 Tf', '50 790 Td', '14 TL']
+        content.extend(f'({_pdf_escape(line)}) Tj T*' for line in chunk)
+        content.append('ET')
+        stream = '\n'.join(content).encode('latin-1')
+        objects[page_ids[index] - 1] = f'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents {content_ids[index]} 0 R >>'
+        objects[content_ids[index] - 1] = b'<< /Length %d >>\nstream\n' % len(stream) + stream + b'\nendstream'
+
+    pdf = bytearray(b'%PDF-1.4\n')
+    offsets = [0]
+    for number, obj in enumerate(objects, 1):
+        offsets.append(len(pdf))
+        pdf.extend(f'{number} 0 obj\n'.encode())
+        pdf.extend(obj if isinstance(obj, bytes) else obj.encode())
+        pdf.extend(b'\nendobj\n')
+    startxref = len(pdf)
+    pdf.extend(f'xref\n0 {len(objects) + 1}\n0000000000 65535 f \n'.encode())
+    pdf.extend(b''.join(f'{offset:010d} 00000 n \n'.encode() for offset in offsets[1:]))
+    pdf.extend(f'trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{startxref}\n%%EOF'.encode())
+    return bytes(pdf)
+
+
+def _send_maid_application_to_whatsapp(application):
+    """Upload the PDF to Meta and send it to the team WhatsApp number."""
+    if not settings.WHATSAPP_ACCESS_TOKEN or not settings.WHATSAPP_PHONE_NUMBER_ID:
+        return False
+
+    import json
+    import uuid
+    from urllib.request import Request, urlopen
+
+    boundary = f'----SelectRoyal{uuid.uuid4().hex}'
+    filename = f'maid-application-{application.pk}.pdf'
+    pdf = _maid_application_pdf(application)
+    body = (
+        f'--{boundary}\r\nContent-Disposition: form-data; name="messaging_product"\r\n\r\nwhatsapp\r\n'
+        f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{filename}"\r\n'
+        'Content-Type: application/pdf\r\n\r\n'
+    ).encode() + pdf + f'\r\n--{boundary}--\r\n'.encode()
+    headers = {
+        'Authorization': f'Bearer {settings.WHATSAPP_ACCESS_TOKEN}',
+        'Content-Type': f'multipart/form-data; boundary={boundary}',
+    }
+    media_url = f'https://graph.facebook.com/v22.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/media'
+    media_request = Request(media_url, data=body, headers=headers, method='POST')
+    with urlopen(media_request, timeout=15) as response:
+        media_id = json.loads(response.read().decode())['id']
+
+    message = {
+        'messaging_product': 'whatsapp',
+        'to': settings.WHATSAPP_APPLICATION_RECIPIENT,
+        'type': 'document',
+        'document': {
+            'id': media_id,
+            'filename': filename,
+            'caption': f'New maid application: {application.first_name} {application.last_name}',
+        },
+    }
+    message_url = f'https://graph.facebook.com/v22.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages'
+    message_request = Request(
+        message_url, data=json.dumps(message).encode(),
+        headers={'Authorization': f'Bearer {settings.WHATSAPP_ACCESS_TOKEN}', 'Content-Type': 'application/json'},
+        method='POST',
+    )
+    with urlopen(message_request, timeout=15):
+        pass
+    return True
 
 
 def index(request):
@@ -180,7 +294,14 @@ def register_as_maid(request):
         if request.FILES.get('profile_photo'):
             application.profile_photo = request.FILES['profile_photo']
         application.save()
-        messages.success(request, 'Your application has been received. Our verification team will contact you shortly.')
+        try:
+            sent_to_whatsapp = _send_maid_application_to_whatsapp(application)
+        except Exception:
+            sent_to_whatsapp = False
+        if sent_to_whatsapp:
+            messages.success(request, 'Your application has been received and sent to our verification team.')
+        else:
+            messages.success(request, 'Your application has been received. Our verification team will contact you shortly.')
         return redirect('MaidApp:apply')
     return render(request, 'selectroyal/register-as-maid.html')
 

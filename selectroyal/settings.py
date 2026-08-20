@@ -164,6 +164,12 @@ PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
 PAYSTACK_VERIFY_URL = 'https://api.paystack.co/transaction/verify/'
 PAYSTACK_INIT_URL   = 'https://api.paystack.co/transaction/initialize'
 
+# WhatsApp Business Cloud API. Set these in the deployment environment to have
+# maid applications delivered to WhatsApp as PDF documents.
+WHATSAPP_ACCESS_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', '')
+WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '')
+WHATSAPP_APPLICATION_RECIPIENT = os.environ.get('WHATSAPP_APPLICATION_RECIPIENT', '2349137894958')
+
 # ── Logging (suppress noisy HTTPS-on-HTTP 400s in dev) ───────────────────────
 LOGGING = {
     'version': 1,
