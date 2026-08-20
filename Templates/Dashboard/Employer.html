@@ -244,7 +244,7 @@
     .card-body { padding: 24px; }
 
     /* ── Table ───────────────────────────────────────────── */
-    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table { width: 100%; border-collapse: collapse; min-width: 480px; }
     .data-table th,
     .data-table td {
       text-align: left;
@@ -427,6 +427,8 @@
       .stats-grid { grid-template-columns: 1fr; }
       .actions-grid { grid-template-columns: 1fr; }
       .content { padding: 16px 12px; }
+      /* Table wrapper fills 90% of screen so content is reachable */
+      .card > div[style*="overflow-x"] { width: 90vw; max-width: 90vw; }
     }
   </style>
 </head>
@@ -574,33 +576,41 @@
       <div class="stat-card">
         <div class="stat-icon blue"><i class="fa-solid fa-file-lines"></i></div>
         <div class="stat-body">
-          <div class="stat-label">Active Requests</div>
-          <div class="stat-value">3</div>
-          <div class="stat-sub up"><i class="fa-solid fa-arrow-trend-up"></i> 2 pending review</div>
+          <div class="stat-label">My Requests</div>
+          <div class="stat-value">{{ total_requests }}</div>
+          <div class="stat-sub">Total submitted</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon green"><i class="fa-solid fa-user-check"></i></div>
+        <div class="stat-icon green"><i class="fa-solid fa-users"></i></div>
         <div class="stat-body">
-          <div class="stat-label">Shortlisted</div>
-          <div class="stat-value">7</div>
-          <div class="stat-sub up"><i class="fa-solid fa-arrow-trend-up"></i> +2 this week</div>
+          <div class="stat-label">Maids Available</div>
+          <div class="stat-value">{{ maids_available }}</div>
+          <div class="stat-sub">Ready to hire now</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon amber"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="stat-icon amber"><i class="fa-solid fa-id-badge"></i></div>
         <div class="stat-body">
-          <div class="stat-label">Interviews</div>
-          <div class="stat-value">2</div>
-          <div class="stat-sub">Scheduled today</div>
+          <div class="stat-label">My Plan</div>
+          <div class="stat-value" style="font-size:1.1rem;">
+            {% if profile %}{{ profile.get_plan_display }}{% else %}Standard{% endif %}
+          </div>
+          <div class="stat-sub">
+            {% if profile and profile.is_paid %}
+              <i class="fa-solid fa-circle-check" style="color:var(--green);"></i> Active
+            {% else %}
+              <i class="fa-solid fa-clock" style="color:var(--amber);"></i> Payment pending
+            {% endif %}
+          </div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon purple"><i class="fa-solid fa-bookmark"></i></div>
+        <div class="stat-icon purple"><i class="fa-solid fa-calendar-days"></i></div>
         <div class="stat-body">
-          <div class="stat-label">Saved Searches</div>
-          <div class="stat-value">5</div>
-          <div class="stat-sub">Across 3 cities</div>
+          <div class="stat-label">Member Since</div>
+          <div class="stat-value" style="font-size:1.1rem;">{{ user.date_joined|date:"M Y" }}</div>
+          <div class="stat-sub">{{ user.date_joined|timesince }} ago</div>
         </div>
       </div>
     </div>
@@ -627,45 +637,29 @@
               </tr>
             </thead>
             <tbody>
+              {% for req in recent_requests %}
               <tr>
                 <td>
                   <div style="display:flex;align-items:center;gap:8px;">
                     <span style="width:28px;height:28px;background:var(--accent-lt);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--accent);flex-shrink:0;">
-                      <i class="fa-solid fa-broom"></i>
+                      <i class="fa-solid fa-file-lines"></i>
                     </span>
-                    <span>Maid / House Help</span>
+                    <span>{{ req.service }}</span>
                   </div>
                 </td>
-                <td>Lagos</td>
-                <td><span class="badge badge-amber"><i class="fa-solid fa-clock"></i> In Progress</span></td>
-                <td style="color:var(--muted);font-size:.8rem;">Aug 18, 2026</td>
+                <td>{{ req.city }}</td>
+                <td><span class="badge badge-amber"><i class="fa-solid fa-clock"></i> Pending</span></td>
+                <td style="color:var(--muted);font-size:.8rem;">{{ req.date|date:"M d, Y" }}</td>
               </tr>
+              {% empty %}
               <tr>
-                <td>
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="width:28px;height:28px;background:var(--green-lt);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--green);flex-shrink:0;">
-                      <i class="fa-solid fa-utensils"></i>
-                    </span>
-                    <span>Cook / Chef</span>
-                  </div>
+                <td colspan="4" style="text-align:center;padding:32px 16px;color:var(--muted);">
+                  <i class="fa-solid fa-inbox" style="font-size:1.6rem;display:block;margin-bottom:8px;opacity:.4;"></i>
+                  No requests yet.
+                  <a href="{% url 'MaidApp:request-maid' %}" style="color:var(--accent);font-weight:600;margin-left:4px;">Submit your first request →</a>
                 </td>
-                <td>Abuja</td>
-                <td><span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Matched</span></td>
-                <td style="color:var(--muted);font-size:.8rem;">Aug 15, 2026</td>
               </tr>
-              <tr>
-                <td>
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="width:28px;height:28px;background:#f3e8ff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#7c3aed;flex-shrink:0;">
-                      <i class="fa-solid fa-baby"></i>
-                    </span>
-                    <span>Baby Sitter</span>
-                  </div>
-                </td>
-                <td>Port Harcourt</td>
-                <td><span class="badge badge-blue"><i class="fa-solid fa-sparkles"></i> New</span></td>
-                <td style="color:var(--muted);font-size:.8rem;">Aug 12, 2026</td>
-              </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
@@ -681,10 +675,10 @@
             <div class="progress-wrap">
               <div class="progress-label">
                 <span>Account setup</span>
-                <span style="font-weight:700;color:var(--accent);">65%</span>
+                <span style="font-weight:700;color:var(--green);">100%</span>
               </div>
               <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width:65%;"></div>
+                <div class="progress-bar-fill" style="width:100%;background:linear-gradient(90deg,#16a34a,#4ade80);"></div>
               </div>
             </div>
             <ul style="margin-top:16px;list-style:none;display:flex;flex-direction:column;gap:9px;">
@@ -696,13 +690,13 @@
                 <i class="fa-solid fa-circle-check" style="color:var(--green);width:16px;"></i>
                 Account created
               </li>
-              <li style="display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted);">
-                <i class="fa-regular fa-circle" style="width:16px;"></i>
-                Phone number added
+              <li style="display:flex;align-items:center;gap:10px;font-size:.85rem;">
+                <i class="fa-solid fa-circle-check" style="color:var(--green);width:16px;"></i>
+                Profile activated
               </li>
-              <li style="display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted);">
-                <i class="fa-regular fa-circle" style="width:16px;"></i>
-                First request submitted
+              <li style="display:flex;align-items:center;gap:10px;font-size:.85rem;">
+                <i class="fa-solid fa-circle-check" style="color:var(--green);width:16px;"></i>
+                Ready to hire
               </li>
             </ul>
           </div>

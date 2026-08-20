@@ -19,6 +19,8 @@ urlpatterns = [
     path('services/', views.services, name='services'),
     path('support-chat/', views.support_chat, name='support-chat'),
     path('support-chat/messages/', views.support_messages, name='support-messages'),
+    path('support-chat/resolve/', views.resolve_conversation, name='resolve-conversation'),
+    path('support-chat/list/', views.conversation_list, name='conversation-list'),
     path('terms-of-service/', views.terms_of_service, name='terms-of-service'),
     path('view-profile/', views.view_profile, name='view-profile'),
 ]

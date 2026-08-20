@@ -211,7 +211,10 @@
               {% endif %}
               <div class="mc-actions">
                 <a href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" class="mc-btn mc-btn--ghost">View Profile</a>
-                <a href="{% url 'MaidApp:request-maid' %}" class="mc-btn mc-btn--primary">Request</a>
+                {% with profile_url=request.scheme|add:"://"|add:request.get_host|add:"/view-profile/?slug="|add:maid.slug %}
+                {% with wa_text="Hello SelectRoyalMaids, I want to hire this maid:%0AName: "|add:maid.full_name|add:"%0AReg Number: "|add:maid.reg_number|add:"%0AProfile: "|add:profile_url %}
+                <a href="https://wa.me/2349137894958?text={{ wa_text|urlencode }}" target="_blank" rel="noopener noreferrer" class="mc-btn mc-btn--primary"><i class="fa-brands fa-whatsapp"></i> Request</a>
+                {% endwith %}{% endwith %}
               </div>
             </div>
           </article>

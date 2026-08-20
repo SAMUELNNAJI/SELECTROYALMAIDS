@@ -77,12 +77,62 @@ def logout_view(request):
 
 @login_required
 def employer_dashboard(request):
-    # Messages sent by staff (not by this employer themselves) that haven't been read
+    from django.utils.html import strip_tags
+    import re
+
+    # Unread support messages
     unread_count = SupportMessage.objects.filter(
         employer=request.user,
         is_read=False,
     ).exclude(sender=request.user).count()
-    return render(request, 'Dashboard/Employer.html', {'unread_count': unread_count})
+
+    # Real maid requests — messages the employer sent that start with the request header
+    raw_requests = (
+        SupportMessage.objects
+        .filter(employer=request.user, sender=request.user)
+        .filter(body__contains='New employer placement request')
+        .order_by('-created_at')[:5]
+    )
+
+    # Parse service and city out of each stored HTML table body
+    def _extract(body, label):
+        pattern = re.compile(
+            r'<td[^>]*>\s*' + re.escape(label) + r'\s*</td>\s*<td[^>]*>(.*?)</td>',
+            re.IGNORECASE | re.DOTALL,
+        )
+        m = pattern.search(body)
+        if m:
+            return strip_tags(m.group(1)).strip() or '—'
+        return '—'
+
+    recent_requests = []
+    for msg in raw_requests:
+        recent_requests.append({
+            'service':  _extract(msg.body, 'Service'),
+            'city':     _extract(msg.body, 'City / Area'),
+            'date':     msg.created_at,
+        })
+
+    # Dashboard stat counts
+    total_requests  = SupportMessage.objects.filter(
+        employer=request.user, sender=request.user,
+        body__contains='New employer placement request',
+    ).count()
+    maids_available = MaidProfile.objects.filter(is_active=True, assign_status='unassigned').count()
+
+    # Employer profile
+    try:
+        profile = request.user.employer_profile
+    except Exception:
+        profile = None
+
+    return render(request, 'Dashboard/Employer.html', {
+        'unread_count':    unread_count,
+        'recent_requests': recent_requests,
+        'profile':         profile,
+        'total_requests':  total_requests,
+        'maids_available': maids_available,
+    })
 
 
 @login_required

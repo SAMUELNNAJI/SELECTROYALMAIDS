@@ -110,11 +110,11 @@
 
           <div class="vp-cta-stack">
             {% if maid.is_available %}
-            <a href="{% url 'MaidApp:request-maid' %}" class="btn btn-primary">
-              <i class="fa-solid fa-calendar-check"></i> Request Interview
+            <a href="{{ whatsapp_interview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+              <i class="fa-brands fa-whatsapp"></i> Request Interview
             </a>
-            <a href="{% url 'MaidApp:contact' %}" class="btn btn-outline">
-              <i class="fa-regular fa-message"></i> Send Message
+            <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <i class="fa-brands fa-whatsapp"></i> Send Message
             </a>
             {% else %}
             <span class="btn btn-primary vp-btn-locked" title="This professional is currently assigned">
@@ -164,7 +164,7 @@
             </div>
           </div>
           {% if maid.phone %}
-          <div class="vp-info-item">
+          <div class="vp-info-item" style="display:none;">
             <div class="vp-info-icon vp-info-icon--teal"><i class="fa-solid fa-phone"></i></div>
             <div>
               <p class="vp-info-label">Phone</p>
@@ -173,7 +173,7 @@
           </div>
           {% endif %}
           {% if maid.email %}
-          <div class="vp-info-item">
+          <div class="vp-info-item" style="display:none;">
             <div class="vp-info-icon vp-info-icon--navy"><i class="fa-solid fa-envelope"></i></div>
             <div>
               <p class="vp-info-label">Email</p>
@@ -280,8 +280,8 @@
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
               {% if maid.is_available %}
-              <a href="{% url 'MaidApp:request-maid' %}" class="btn btn-primary">
-                <i class="fa-solid fa-calendar-check"></i> Request Interview
+              <a href="{{ whatsapp_interview_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                <i class="fa-brands fa-whatsapp"></i> Request Interview
               </a>
               <a href="{% url 'MaidApp:contact' %}" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">
                 <i class="fa-regular fa-message"></i> Contact Us

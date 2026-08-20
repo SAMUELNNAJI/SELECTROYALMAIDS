@@ -1228,6 +1228,7 @@ ul { list-style: none; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   padding: 10px 12px;
   border-radius: 100px;
   font-size: 12.5px;
