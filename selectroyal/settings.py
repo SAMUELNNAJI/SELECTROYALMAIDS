@@ -5,6 +5,9 @@ Production-ready: reads secrets from environment variables.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -158,11 +161,7 @@ EMAIL_BACKEND = os.environ.get(
     'django.core.mail.backends.console.EmailBackend',
 )
 
-# ── Paystack ──────────────────────────────────────────────────────────────────
-PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
-PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
-PAYSTACK_VERIFY_URL = 'https://api.paystack.co/transaction/verify/'
-PAYSTACK_INIT_URL   = 'https://api.paystack.co/transaction/initialize'
+
 
 # WhatsApp Business Cloud API. Set these in the deployment environment to have
 # maid applications delivered to WhatsApp as PDF documents.

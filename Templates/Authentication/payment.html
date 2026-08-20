@@ -139,7 +139,7 @@
         tx_ref:     "SRM-" + Date.now(),
         amount:     {{ amount }},
         currency:   "NGN",
-        payment_options: "card,banktransfer,ussd",
+        payment_options: "card,account,ussd",
         redirect_url: "{{ request.scheme }}://{{ request.get_host }}{% url 'Authentication:payment_callback' %}",
         customer: {
           email:        "{{ email }}",
