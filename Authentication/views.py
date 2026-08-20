@@ -199,8 +199,14 @@ def payment_callback(request):
 
     # Log the user in and go to the success page
     login(request, user)
-    send_signup_welcome_email(user, plan)
-    send_payment_success_email(user, plan)
+    try:
+        send_signup_welcome_email(user, plan)
+    except Exception:
+        pass
+    try:
+        send_payment_success_email(user, plan)
+    except Exception:
+        pass
     return redirect('Authentication:payment_success')
 
 
@@ -565,7 +571,6 @@ def service_delete(request, service_id):
 # ── Blog CRUD ─────────────────────────────────────────────────────────────────
 
 @login_required
-@login_required
 def blog_create(request):
     if not request.user.is_superuser:
         return redirect('Authentication:employer_dashboard')
@@ -601,7 +606,9 @@ def blog_create(request):
             return redirect('/admin/dashboard/?tab=blog')
         else:
             messages.error(request, 'Slug and title are required.')
-    return render(request, 'Dashboard/blog_create.html')
+    return render(request, 'Dashboard/blog_create.html', {
+        'blog_categories': BlogPost.CATEGORY_CHOICES,
+    })
 
 
 @login_required
@@ -633,7 +640,10 @@ def blog_edit(request, post_id):
         post.save()
         messages.success(request, f'Post "{post.title}" updated.')
         return redirect('/admin/dashboard/?tab=blog')
-    return render(request, 'Dashboard/blog_edit.html', {'post': post})
+    return render(request, 'Dashboard/blog_edit.html', {
+        'post': post,
+        'blog_categories': BlogPost.CATEGORY_CHOICES,
+    })
 
 
 @login_required

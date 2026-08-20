@@ -526,6 +526,38 @@
         });
       });
     });
+
+    var modal = document.getElementById('vpAuthModal');
+    var closeBtn = document.getElementById('vpAuthModalClose');
+
+    function openModal() {
+      if (modal) { modal.hidden = false; }
+    }
+
+    function closeModal() {
+      if (modal) { modal.hidden = true; }
+    }
+
+    document.querySelectorAll('.vp-auth-guard').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal();
+      });
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeModal);
+    }
+
+    if (modal) {
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) { closeModal(); }
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal && !modal.hidden) { closeModal(); }
+    });
   }());
 </script>
 {% endblock %}
