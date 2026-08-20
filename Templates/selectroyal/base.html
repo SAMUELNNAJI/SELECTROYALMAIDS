@@ -44,7 +44,7 @@
         {% else %}
           <a href="{% url 'Authentication:login' %}" class="nav-login">Login</a>
         {% endif %}
-        <a href="{% url 'MaidApp:request-maid' %}" class="btn btn-primary nav-find-btn {% if request.resolver_match.url_name == 'request-maid' %}nav-active{% endif %}"><i class="fa-solid fa-magnifying-glass"></i> FIND A MAID</a>
+        <a href="{% url 'Authentication:signup' %}" class="btn btn-primary nav-find-btn"><i class="fa-solid fa-user-plus"></i> REGISTER</a>
       </div>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
         <span></span><span></span><span></span>

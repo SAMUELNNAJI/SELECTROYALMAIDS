@@ -150,6 +150,7 @@
     var loginHref = 'login.html';
     var loginText = 'Login';
     var findHref  = 'find-a-maid.html';
+    var findText  = '<i class="fa-solid fa-user-plus"></i> REGISTER';
 
     // Grab actual hrefs from the desktop CTA if present
     if (navCta) {
@@ -159,16 +160,17 @@
         loginHref = loginAnchor.getAttribute('href');
         loginText = loginAnchor.textContent.trim();
       }
-      if (findAnchor)  findHref  = findAnchor.getAttribute('href');
+      if (findAnchor) {
+        findHref = findAnchor.getAttribute('href');
+        findText = findAnchor.innerHTML;
+      }
     }
 
     var ctaDiv = document.createElement('li');
     ctaDiv.innerHTML =
       '<div class="mobile-nav-cta">' +
         '<a href="' + loginHref + '" class="mobile-login-btn">' + loginText + '</a>' +
-        '<a href="' + findHref  + '" class="btn btn-primary">' +
-          '<i class="fa-solid fa-magnifying-glass"></i> FIND A MAID' +
-        '</a>' +
+        '<a href="' + findHref  + '" class="btn btn-primary">' + findText + '</a>' +
       '</div>';
     navLinks.appendChild(ctaDiv);
   }
