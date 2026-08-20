@@ -222,8 +222,8 @@
 }
 .cf-chip:hover,
 .cf-chip.active {
-  border-color: #001F3F;
-  color: #001F3F;
+  border-color: #C5952E;
+  color: #C5952E;
   background: #EEF4FA;
 }
 
@@ -231,7 +231,7 @@
 .cf-submit {
   width: 100%;
   padding: 14px;
-  background: #001F3F;
+  background: #C5952E;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -246,7 +246,7 @@
   transition: background .2s, transform .15s;
   margin-top: 4px;
 }
-.cf-submit:hover { background: #001F3F; transform: translateY(-1px); }
+.cf-submit:hover { background: #A87A22; transform: translateY(-1px); }
 .cf-submit:active { transform: translateY(0); }
 
 /* Success message */
@@ -321,7 +321,7 @@
 
 /* Hours block */
 .cs-hours-block {
-  background: linear-gradient(135deg, #001F3F 0%, #001F3F 100%);
+  background: linear-gradient(135deg, #001F3F 0%, #00305F 100%);
   border-radius: 20px;
   padding: 28px 32px;
   color: #fff;

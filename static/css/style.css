@@ -1255,13 +1255,13 @@ ul { list-style: none; }
   background: var(--blue-light);
 }
 .mc-btn--primary {
-  background: var(--blue);
+  background: #C5952E;
   color: #fff;
-  border-color: var(--blue);
+  border-color: #C5952E;
 }
 .mc-btn--primary:hover {
-  background: var(--blue-dark);
-  border-color: var(--blue-dark);
+  background: #A87A22;
+  border-color: #A87A22;
 }
 
 
@@ -2306,7 +2306,7 @@ ul { list-style: none; }
     background: #D6E4F0;
   }
   .nav-links.open .mobile-nav-cta .btn-primary {
-    background: var(--blue);
+    background: #C5952E;
     color: #fff;
     padding: 14px 20px;
     border-radius: 100px;

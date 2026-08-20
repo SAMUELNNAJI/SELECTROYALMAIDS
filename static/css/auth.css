@@ -286,7 +286,7 @@ body {
 .af-submit {
   width: 100%;
   padding: 13px;
-  background: #001F3F;
+  background: #C5952E;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -301,7 +301,7 @@ body {
   transition: background .2s, transform .15s;
   margin-bottom: 16px;
 }
-.af-submit:hover { background: #001F3F; transform: translateY(-1px); }
+.af-submit:hover { background: #A87A22; transform: translateY(-1px); }
 .af-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
 /* Error */

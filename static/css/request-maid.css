@@ -539,12 +539,12 @@
   cursor: not-allowed;
 }
 .rm-btn--next {
-  background: #001F3F;
+  background: #C5952E;
   color: #fff;
-  border-color: #001F3F;
+  border-color: #C5952E;
   padding: 11px 28px;
 }
-.rm-btn--next:hover { background: #001F3F; border-color: #001F3F; }
+.rm-btn--next:hover { background: #A87A22; border-color: #001F3F; }
 .rm-btn--submit {
   background: #16a34a;
   color: #fff;
