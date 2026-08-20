@@ -1062,11 +1062,16 @@ ul { list-style: none; }
 .maid-photo-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Preserve the full profile photo, including portrait uploads. */
+  object-fit: contain;
   object-position: top center;
   transition: transform .45s ease;
 }
-.maid-card:hover .maid-photo-wrap img { transform: scale(1.05); }
+.maid-photo-wrap img.maid-photo-placeholder {
+  /* Generated initial avatars are square, so let them fill the card frame. */
+  object-fit: cover;
+}
+.maid-card:hover .maid-photo-wrap img { transform: none; }
 
 /* Availability pill — top left */
 .mc-avail {

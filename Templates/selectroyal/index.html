@@ -426,7 +426,7 @@
             {% if maid.photo_url %}
             <img src="{{ maid.photo_url }}"
                  alt="{{ maid.full_name }}"
-                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ maid.full_name|urlencode }}&background=1e3a8a&color=fff&size=400';" />
+                 onerror="this.onerror=null;this.classList.add('maid-photo-placeholder');this.src='https://ui-avatars.com/api/?name={{ maid.full_name|urlencode }}&background=1e3a8a&color=fff&size=400';" />
             {% else %}
             <div style="width:100%;height:220px;background:linear-gradient(135deg,#1e3a8a,#2563eb);display:flex;align-items:center;justify-content:center;font-size:3rem;color:rgba(255,255,255,.4);">
               <i class="fa-solid fa-user"></i>
