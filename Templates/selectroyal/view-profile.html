@@ -79,12 +79,6 @@
           <h2 class="vp-name">{{ maid.full_name }}</h2>
           <p class="vp-role">{{ maid.reg_number }}</p>
 
-          <div class="vp-meta-row">
-            <span class="vp-location">
-              <i class="fa-solid fa-location-dot"></i> {{ maid.address|truncatechars:50 }}
-            </span>
-          </div>
-
           {% if maid.age %}
           <div class="vp-meta-row" style="margin-top:6px;">
             <span class="vp-location">
@@ -154,13 +148,6 @@
             <div>
               <p class="vp-info-label">Availability</p>
               <p class="vp-info-value">{% if maid.is_available %}Available Now{% else %}Currently Assigned{% endif %}</p>
-            </div>
-          </div>
-          <div class="vp-info-item">
-            <div class="vp-info-icon vp-info-icon--purple"><i class="fa-solid fa-location-dot"></i></div>
-            <div>
-              <p class="vp-info-label">Address</p>
-              <p class="vp-info-value {% if not maid.is_available %}vp-blurred{% endif %}">{{ maid.address }}</p>
             </div>
           </div>
           {% if maid.phone %}
