@@ -213,7 +213,7 @@
                 <a href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" class="mc-btn mc-btn--ghost">View Profile</a>
                 {% with profile_url=request.scheme|add:"://"|add:request.get_host|add:"/view-profile/?slug="|add:maid.slug %}
                 {% with wa_text="Hello SelectRoyalMaids, I want to hire this maid:%0AName: "|add:maid.full_name|add:"%0AReg Number: "|add:maid.reg_number|add:"%0AProfile: "|add:profile_url %}
-                <a href="https://wa.me/2349137894958?text={{ wa_text|urlencode }}" target="_blank" rel="noopener noreferrer" class="mc-btn mc-btn--primary"><i class="fa-brands fa-whatsapp"></i> Request</a>
+                <a href="https://wa.me/2349137894958?text={{ wa_text }}" target="_blank" rel="noopener noreferrer" class="mc-btn mc-btn--primary"><i class="fa-brands fa-whatsapp"></i> Request</a>
                 {% endwith %}{% endwith %}
               </div>
             </div>
@@ -296,7 +296,7 @@
       <h2 class="cta-heading">Can't Find Exactly<br />What You're Looking For?</h2>
       <p class="cta-sub">Tell us your exact requirements and our placement advisors will personally match you with the perfect candidate — fast.</p>
       <div class="cta-buttons">
-        <a href="{% url 'MaidApp:request-maid' %}" class="cta-btn cta-btn--white"><i class="fa-solid fa-paper-plane"></i> SUBMIT YOUR REQUEST</a>
+        <a href="{% url 'MaidApp:contact' %}" class="cta-btn cta-btn--white"><i class="fa-solid fa-phone"></i> CONTACT</a>
         <a href="{% url 'MaidApp:request-maid' %}" class="cta-btn cta-btn--outline"><i class="fa-solid fa-paper-plane"></i> REQUEST A MAID</a>
       </div>
       <div class="cta-trust-bar">
