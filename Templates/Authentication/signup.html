@@ -122,13 +122,6 @@
           <span id="afErrorText"></span>
         </div>
 
-        {% if messages %}
-          <div class="af-error" style="display:flex;">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>{% for message in messages %}{{ message }}{% endfor %}</span>
-          </div>
-        {% endif %}
-
         <!-- STEP 1 -->
         <div id="step1">
           <form id="step1Form" novalidate>
@@ -327,8 +320,7 @@
 
         <!-- STEP 4 — Review & Submit -->
         <div id="step4" style="display:none">
-          <form id="step3Form" method="post" action="{% url 'Authentication:signup' %}" novalidate>
-            {% csrf_token %}
+          <form id="step3Form" novalidate>
 
             <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:18px;">
               <p style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;">Review your details</p>

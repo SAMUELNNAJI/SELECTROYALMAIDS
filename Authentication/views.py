@@ -39,19 +39,34 @@ def login_view(request):
 
 def signup_view(request):
     if request.method == 'POST':
+        import json
+        from django.http import JsonResponse
+
         first_name       = request.POST.get('firstName', '').strip()
         last_name        = request.POST.get('lastName', '').strip()
         email            = request.POST.get('email', '').strip()
         password         = request.POST.get('password', '')
         confirm_password = request.POST.get('confirmPassword', '')
+        phone            = request.POST.get('phone', '').strip()
+        city             = request.POST.get('city', '').strip()
+        plan_raw         = request.POST.get('plan', 'standard').strip()
+        plan             = plan_raw if plan_raw in ('standard', 'premium') else 'standard'
 
+        # Validate all required fields
+        if not first_name:
+            return JsonResponse({'ok': False, 'error': 'Please enter your first name.'})
+        if not last_name:
+            return JsonResponse({'ok': False, 'error': 'Please enter your last name.'})
+        if not email:
+            return JsonResponse({'ok': False, 'error': 'Please enter your email address.'})
+        if not password:
+            return JsonResponse({'ok': False, 'error': 'Please enter a password.'})
+        if len(password) < 8:
+            return JsonResponse({'ok': False, 'error': 'Password must be at least 8 characters.'})
         if password != confirm_password:
-            messages.error(request, 'Passwords do not match.')
-            return render(request, 'Authentication/signup.html')
-
-        if User.objects.filter(username=email).exists():
-            messages.error(request, 'An account with this email already exists.')
-            return render(request, 'Authentication/signup.html')
+            return JsonResponse({'ok': False, 'error': 'Passwords do not match.'})
+        if User.objects.filter(email__iexact=email).exists():
+            return JsonResponse({'ok': False, 'error': 'An account with this email already exists.'})
 
         user = User.objects.create_user(
             username=email,
@@ -63,16 +78,19 @@ def signup_view(request):
         user.is_staff     = False
         user.is_superuser = False
         user.save()
+
         EmployerProfile.objects.create(
             user=user,
-            phone=request.POST.get('phone', '').strip(),
-            city=request.POST.get('city', '').strip(),
+            phone=phone,
+            city=city,
             service_needed=request.POST.get('service', '').strip(),
             how_heard=request.POST.get('howHeard', '').strip(),
-            plan=request.POST.get('plan', 'standard').strip() if request.POST.get('plan') in ('standard', 'premium') else 'standard',
+            plan=plan,
         )
+
         login(request, user)
-        return redirect('Authentication:employer_dashboard')
+        from django.urls import reverse
+        return JsonResponse({'ok': True, 'redirect': reverse('Authentication:employer_dashboard')})
 
     return render(request, 'Authentication/signup.html')
 
