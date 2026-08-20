@@ -1062,8 +1062,7 @@ ul { list-style: none; }
 .maid-photo-wrap img {
   width: 100%;
   height: 100%;
-  /* Preserve the full profile photo, including portrait uploads. */
-  object-fit: contain;
+  object-fit: cover;
   object-position: top center;
   transition: transform .45s ease;
 }
