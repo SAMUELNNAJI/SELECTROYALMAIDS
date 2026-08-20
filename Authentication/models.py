@@ -1,5 +1,34 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
+
+
+class PendingSignup(models.Model):
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=80)
+    last_name = models.CharField(max_length=80)
+    password = models.CharField(max_length=128)
+    phone = models.CharField(max_length=30, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    plan = models.CharField(max_length=20, default='standard')
+    service = models.CharField(max_length=100, blank=True)
+    how_heard = models.CharField(max_length=100, blank=True)
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        verbose_name = 'Pending Signup'
+        verbose_name_plural = 'Pending Signups'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.email} — {self.plan}'
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at
 
 
 class EmployerProfile(models.Model):

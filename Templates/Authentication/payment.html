@@ -136,7 +136,7 @@
 
       FlutterwaveCheckout({
         public_key: "{{ flw_public_key }}",
-        tx_ref:     "SRM-" + Date.now(),
+        tx_ref:     "{{ tx_ref_token }}",
         amount:     {{ amount }},
         currency:   "NGN",
         payment_options: "card,account,ussd",

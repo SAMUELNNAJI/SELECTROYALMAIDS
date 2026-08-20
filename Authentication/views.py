@@ -5,9 +5,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
+from datetime import timedelta
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
 from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email
-from .models import EmployerProfile
+from .models import EmployerProfile, PendingSignup
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -40,13 +41,14 @@ def login_view(request):
 
 def signup_view(request):
     """
-    Validates signup data and stores it in the session.
+    Validates signup data and stores it in the database as a PendingSignup.
     No user is created here — account creation happens only after payment succeeds.
     Returns JSON so the multi-step form can stay on the page.
     """
     if request.method == 'POST':
         from django.http import JsonResponse
         from django.urls import reverse
+        import secrets
 
         first_name       = request.POST.get('firstName', '').strip()
         last_name        = request.POST.get('lastName', '').strip()
@@ -74,18 +76,26 @@ def signup_view(request):
         if User.objects.filter(email__iexact=email).exists():
             return JsonResponse({'ok': False, 'error': 'An account with this email already exists.'})
 
-        # ── Store signup data in session (no DB write yet) ────────────────────
-        request.session['pending_signup'] = {
-            'first_name': first_name,
-            'last_name':  last_name,
-            'email':      email,
-            'password':   password,
-            'phone':      phone,
-            'city':       city,
-            'plan':       plan,
-            'service':    request.POST.get('service', '').strip(),
-            'how_heard':  request.POST.get('howHeard', '').strip(),
-        }
+        # ── Store signup data in database (survives cross-domain redirects) ────
+        token = secrets.token_urlsafe(32)
+        expires_at = timezone.now() + timedelta(hours=2)
+        PendingSignup.objects.filter(email__iexact=email, expires_at__lt=timezone.now()).delete()
+        pending, _ = PendingSignup.objects.update_or_create(
+            email__iexact=email,
+            defaults={
+                'first_name': first_name,
+                'last_name': last_name,
+                'password': password,
+                'phone': phone,
+                'city': city,
+                'plan': plan,
+                'service': request.POST.get('service', '').strip(),
+                'how_heard': request.POST.get('howHeard', '').strip(),
+                'token': token,
+                'expires_at': expires_at,
+            },
+        )
+        request.session['pending_signup_token'] = pending.token
         request.session.modified = True
 
         return JsonResponse({'ok': True, 'redirect': reverse('Authentication:payment_page')})
@@ -96,27 +106,31 @@ def signup_view(request):
 def payment_page(request):
     """
     Renders the Flutterwave inline payment page.
-    Requires a pending_signup in session — otherwise sends user back to signup.
+    Requires a pending_signup in session or database — otherwise sends user back to signup.
     """
     from django.conf import settings as django_settings
 
-    pending = request.session.get('pending_signup')
+    pending = None
+    token = request.session.get('pending_signup_token')
+    if token:
+        pending = PendingSignup.objects.filter(token=token).first()
     if not pending:
         return redirect('Authentication:signup')
 
-    plan        = pending.get('plan', 'standard')
+    plan        = pending.plan
     amount      = 20000 if plan == 'premium' else 10000
     plan_label  = 'Premium Plan — ₦20,000' if plan == 'premium' else 'Standard Plan — ₦10,000'
 
     context = {
         'flw_public_key': django_settings.FLUTTERWAVE_PUBLIC_KEY,
-        'email':          pending['email'],
-        'first_name':     pending['first_name'],
-        'last_name':      pending['last_name'],
-        'phone':          pending.get('phone', ''),
+        'email':          pending.email,
+        'first_name':     pending.first_name,
+        'last_name':      pending.last_name,
+        'phone':          pending.phone,
         'amount':         amount,
         'plan':           plan,
         'plan_label':     plan_label,
+        'tx_ref_token':   pending.token,
     }
     return render(request, 'Authentication/payment.html', context)
 
@@ -152,14 +166,21 @@ def payment_callback(request):
     if data.get('status') != 'success' or data.get('data', {}).get('status') != 'successful':
         return redirect('Authentication:payment_failed')
 
-    # ── Retrieve pending signup from session ──────────────────────────────────
-    pending = request.session.get('pending_signup')
+    # ── Retrieve pending signup from database (token survives redirects) ─────
+    tx_ref = request.GET.get('tx_ref', '')
+    pending = PendingSignup.objects.filter(token=tx_ref).first()
+    if not pending:
+        pending = request.session.get('pending_signup')
     if not pending:
         # Session expired — send back to start
         return redirect('Authentication:signup')
 
-    email = pending.get('email', '')
-    plan  = pending.get('plan', 'standard')
+    if hasattr(pending, 'is_expired') and pending.is_expired:
+        pending.delete()
+        return redirect('Authentication:signup')
+
+    email = pending.email if hasattr(pending, 'email') else pending.get('email', '')
+    plan  = pending.plan if hasattr(pending, 'plan') else pending.get('plan', 'standard')
     if not email:
         return redirect('Authentication:payment_failed')
 
@@ -174,15 +195,22 @@ def payment_callback(request):
 
     # ── Create the account now that payment is confirmed ──────────────────────
     # Guard against duplicate (e.g. user hitting back/refresh)
+    def _get_pending_value(p, key, default=''):
+        if hasattr(p, key):
+            return getattr(p, key) or default
+        if isinstance(p, dict):
+            return p.get(key, default)
+        return default
+
     try:
         user = User.objects.filter(email__iexact=email).first()
         if not user:
             user = User.objects.create_user(
                 username=email,
                 email=email,
-                password=pending.get('password', ''),
-                first_name=pending.get('first_name', ''),
-                last_name=pending.get('last_name', ''),
+                password=_get_pending_value(pending, 'password'),
+                first_name=_get_pending_value(pending, 'first_name'),
+                last_name=_get_pending_value(pending, 'last_name'),
                 is_active=True,
                 is_staff=False,
                 is_superuser=False,
@@ -190,10 +218,10 @@ def payment_callback(request):
 
         # Create/update employer profile
         profile, _ = EmployerProfile.objects.get_or_create(user=user)
-        profile.phone          = pending.get('phone', '')
-        profile.city           = pending.get('city', '')
-        profile.service_needed = pending.get('service', '')
-        profile.how_heard      = pending.get('how_heard', '')
+        profile.phone          = _get_pending_value(pending, 'phone')
+        profile.city           = _get_pending_value(pending, 'city')
+        profile.service_needed = _get_pending_value(pending, 'service')
+        profile.how_heard      = _get_pending_value(pending, 'how_heard')
         profile.plan           = plan
         profile.payment_status = 'paid'
         profile.payment_ref    = str(transaction_id)
@@ -201,8 +229,11 @@ def payment_callback(request):
     except Exception:
         return redirect('Authentication:payment_failed')
 
-    # Clear the pending session data
+    # Clear the pending signup data
+    if hasattr(pending, 'delete'):
+        pending.delete()
     request.session.pop('pending_signup', None)
+    request.session.pop('pending_signup_token', None)
 
     # Log the user in and go to the success page
     try:
