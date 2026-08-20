@@ -544,7 +544,7 @@
   border-color: #C5952E;
   padding: 11px 28px;
 }
-.rm-btn--next:hover { background: #A87A22; border-color: #001F3F; }
+.rm-btn--next:hover { background: #A87A22; border-color: #A87A22; }
 .rm-btn--submit {
   background: #16a34a;
   color: #fff;
