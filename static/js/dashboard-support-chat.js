@@ -99,6 +99,20 @@
     sidebarOverlay?.classList.remove('show');
   });
 
+  /* Close sidebar via X button or nav link tap on mobile */
+  document.getElementById('sidebarClose')?.addEventListener('click', () => {
+    sidebar?.classList.remove('open');
+    sidebarOverlay?.classList.remove('show');
+  });
+  sidebar?.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar?.classList.remove('open');
+        sidebarOverlay?.classList.remove('show');
+      }
+    });
+  });
+
   /* ── Tablet conv-panel drawer toggle ─────────────────── */
   convPanelToggle?.addEventListener('click', () => {
     convPanel?.classList.toggle('open');
