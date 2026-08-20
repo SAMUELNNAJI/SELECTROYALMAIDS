@@ -34,7 +34,7 @@
     }
     body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
     /* Sidebar */
-    .sidebar { width:var(--sidebar-w); min-height:100vh; background:var(--sidebar-bg); display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:200; transition:transform .25s ease; }
+    .sidebar { width:var(--sidebar-w); height:100vh; background:var(--sidebar-bg); display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:200; transition:transform .25s ease; overflow:hidden; }
     .sidebar-brand { display:flex; align-items:center; gap:10px; padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.07); }
     .sidebar-brand img { height:34px; width:auto; }
     .sidebar-brand-text { line-height:1.2; }
