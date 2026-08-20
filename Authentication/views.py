@@ -169,19 +169,23 @@ def payment_callback(request):
 
     # ── Create the account now that payment is confirmed ──────────────────────
     # Guard against duplicate (e.g. user hitting back/refresh)
-    if User.objects.filter(email__iexact=email).exists():
-        user = User.objects.get(email__iexact=email)
-    else:
-        user = User.objects.create_user(
-            username=email,
-            email=email,
-            password=pending['password'],
-            first_name=pending['first_name'],
-            last_name=pending['last_name'],
-            is_active=True,
-            is_staff=False,
-            is_superuser=False,
+    try:
+        user, _ = User.objects.get_or_create(
+            email__iexact=email,
+            defaults={
+                'username': email,
+                'password': pending['password'],
+                'first_name': pending.get('first_name', ''),
+                'last_name': pending.get('last_name', ''),
+                'is_active': True,
+                'is_staff': False,
+                'is_superuser': False,
+            },
         )
+    except Exception:
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            raise
 
     # Create/update employer profile
     profile, _ = EmployerProfile.objects.get_or_create(user=user)
@@ -316,6 +320,7 @@ def admin_dashboard(request):
         # stat cards
         'maid_count':            MaidRegistration.objects.count(),
         'employer_count':        User.objects.filter(is_superuser=False, is_active=True).count(),
+        'paid_employer_count':   EmployerProfile.objects.filter(payment_status='paid').count(),
         'support_count':         SupportMessage.objects.count(),
         # unread badge — messages sent by employers (non-staff) that admin hasn't read
         'unread_count':          SupportMessage.objects.filter(
@@ -326,6 +331,8 @@ def admin_dashboard(request):
         'maid_query':            maid_query,
         'recent_maids':          MaidRegistration.objects.order_by('-created_at')[:5],
         'all_maids':             maids_qs,
+        # employers tab
+        'employers':             EmployerProfile.objects.filter(payment_status='paid').select_related('user').order_by('-created_at'),
         # content tabs
         'faqs':                  FAQ.objects.all(),
         'services':              Service.objects.all(),
