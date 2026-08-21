@@ -1,5 +1,6 @@
 from decimal import Decimal, InvalidOperation
 import logging
+from threading import Thread
 
 import requests as http_requests
 from django.shortcuts import render, redirect, get_object_or_404
@@ -32,6 +33,18 @@ def _payment_callback_url(request):
     if base_url:
         return f"{base_url}{reverse('Authentication:payment_callback')}"
     return request.build_absolute_uri(reverse('Authentication:payment_callback'))
+
+
+def _send_payment_confirmation_emails_in_background(user, plan):
+    """Keep slow SMTP delivery from delaying Flutterwave's browser callback."""
+    def send_emails():
+        try:
+            send_signup_welcome_email(user, plan)
+            send_payment_success_email(user, plan)
+        except Exception:
+            logger.exception('Email delivery failed after payment for %s.', user.email)
+
+    Thread(target=send_emails, name='payment-confirmation-email', daemon=True).start()
 
 
 def _send_new_blog_post_alerts(post):
@@ -403,13 +416,10 @@ def _payment_callback_inner(request):
     except Exception:
         logger.exception('login() failed after payment for %s — will redirect to login page.', user.email)
 
-    # Send welcome and receipt emails (non-blocking — failure must not break flow)
-    try:
-        plan = user.employer_profile.plan
-        send_signup_welcome_email(user, plan)
-        send_payment_success_email(user, plan)
-    except Exception:
-        logger.exception('Email delivery failed after payment for %s.', user.email)
+    # Do not make Flutterwave's browser callback wait for SMTP.  On Render a
+    # stalled mail connection can otherwise outlive the request and produce a
+    # 500 after the account/payment has already been committed.
+    _send_payment_confirmation_emails_in_background(user, user.employer_profile.plan)
 
     if logged_in:
         return redirect('Authentication:payment_success')
