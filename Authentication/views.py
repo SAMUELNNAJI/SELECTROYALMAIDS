@@ -292,6 +292,7 @@ def payment_callback(request):
         return redirect('Authentication:payment_failed')
 
     # ── Create the account now that payment is confirmed ──────────────────────
+    user = None
     try:
         with transaction.atomic():
             pending = PendingSignup.objects.select_for_update().get(pk=pending.pk)
@@ -328,17 +329,35 @@ def payment_callback(request):
     except (IntegrityError, PendingSignup.DoesNotExist):
         logger.exception('Could not finalize verified Flutterwave payment %s.', transaction_id)
         return redirect('Authentication:payment_failed')
+    except Exception:
+        logger.exception('Unexpected error finalizing payment %s.', transaction_id)
+        return redirect('Authentication:payment_failed')
 
-    # Clear the pending signup data
+    if user is None:
+        logger.error('Payment %s verified but user object is None after account creation.', transaction_id)
+        return redirect('Authentication:payment_failed')
+
+    # Clear the pending signup token from the session
     request.session.pop('pending_signup_token', None)
 
-    # Log the user in and go to the success page
+    # Log the user in — must specify backend explicitly since user was not
+    # fetched via authenticate(), which is required when multiple backends exist.
     try:
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
-        send_signup_welcome_email(user, user.employer_profile.plan)
-        send_payment_success_email(user, user.employer_profile.plan)
     except Exception:
-        logger.exception('Payment succeeded but login or receipt delivery failed.')
+        logger.exception('Login after payment failed for user %s.', user.email)
+        # Account was created and paid — don't block them, just redirect to login
+        return redirect('Authentication:login')
+
+    # Send welcome and receipt emails (non-blocking — failure must not break flow)
+    try:
+        plan = user.employer_profile.plan
+        send_signup_welcome_email(user, plan)
+        send_payment_success_email(user, plan)
+    except Exception:
+        logger.exception('Payment succeeded but email delivery failed for %s.', user.email)
+
     return redirect('Authentication:payment_success')
 
 
