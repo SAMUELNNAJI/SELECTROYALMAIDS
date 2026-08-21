@@ -239,6 +239,14 @@ def payment_callback(request):
     Query params: status, tx_ref, transaction_id
     We verify server-side, then create the account only on confirmed success.
     """
+    try:
+        return _payment_callback_inner(request)
+    except Exception:
+        logger.exception('Unhandled exception in payment_callback.')
+        return redirect('Authentication:payment_failed')
+
+
+def _payment_callback_inner(request):
     from django.conf import settings as django_settings
 
     callback_data = request.POST if request.method == 'POST' else request.GET
@@ -246,8 +254,12 @@ def payment_callback(request):
     transaction_id = callback_data.get('transaction_id', '')
     tx_ref         = callback_data.get('tx_ref', '')
 
+    logger.info('payment_callback received: status=%s tx_ref=%s transaction_id=%s',
+                status, tx_ref, transaction_id)
+
     # ── Payment not completed / cancelled ────────────────────────────────────
     if status != 'successful' or not transaction_id:
+        logger.warning('payment_callback: non-successful status=%s, redirecting to failed.', status)
         return redirect('Authentication:payment_failed')
 
     # ── Server-side verification ──────────────────────────────────────────────
@@ -261,34 +273,59 @@ def payment_callback(request):
         resp.raise_for_status()
         data = resp.json()
     except (http_requests.RequestException, ValueError):
-        logger.exception('Flutterwave transaction verification failed.')
+        logger.exception('Flutterwave transaction verification request failed.')
         return redirect('Authentication:payment_failed')
 
     transaction_data = data.get('data', {})
+    logger.info('payment_callback verify response: status=%s tx_status=%s amount=%s currency=%s tx_ref=%s',
+                data.get('status'), transaction_data.get('status'),
+                transaction_data.get('amount'), transaction_data.get('currency'),
+                transaction_data.get('tx_ref'))
+
     if data.get('status') != 'success' or transaction_data.get('status') != 'successful':
+        logger.warning('payment_callback: verification failed — data=%s', data)
         return redirect('Authentication:payment_failed')
 
-    # ── Retrieve pending signup from database (token survives redirects) ─────
+    # ── Retrieve pending signup from database ─────────────────────────────────
     pending = PendingSignup.objects.filter(token=tx_ref).first()
     if not pending:
-        # Session expired — send back to start
+        logger.warning('payment_callback: no PendingSignup for tx_ref=%s — may have already been processed.', tx_ref)
+        # Could be a duplicate callback for an already-processed payment.
+        # Try to find the created user and redirect them to success.
+        existing_user = User.objects.filter(
+            employer_profile__payment_ref=str(transaction_id)
+        ).first()
+        if existing_user:
+            try:
+                existing_user.backend = 'django.contrib.auth.backends.ModelBackend'
+                login(request, existing_user)
+            except Exception:
+                pass
+            return redirect('Authentication:payment_success')
         return redirect('Authentication:signup')
 
     if hasattr(pending, 'is_expired') and pending.is_expired:
         pending.delete()
+        logger.warning('payment_callback: PendingSignup expired for tx_ref=%s', tx_ref)
         return redirect('Authentication:signup')
 
-    # Treat the gateway response as untrusted until it agrees with our pending order.
+    # ── Amount validation (use int comparison to avoid float precision issues) ─
     if transaction_data.get('tx_ref') != pending.token:
+        logger.error('payment_callback: tx_ref mismatch flw=%s pending=%s',
+                     transaction_data.get('tx_ref'), pending.token)
         return redirect('Authentication:payment_failed')
     if transaction_data.get('currency') != 'NGN':
+        logger.error('payment_callback: currency mismatch: %s', transaction_data.get('currency'))
         return redirect('Authentication:payment_failed')
     try:
-        flw_amount = Decimal(str(transaction_data.get('amount')))
-    except (InvalidOperation, TypeError, ValueError):
+        # Round to nearest integer to handle Flutterwave returning 10000.0 vs 10000
+        flw_amount = round(float(transaction_data.get('amount', 0)))
+    except (TypeError, ValueError):
+        logger.exception('payment_callback: could not parse amount %s', transaction_data.get('amount'))
         return redirect('Authentication:payment_failed')
-    expected_amt = Decimal(EmployerProfile.PLAN_AMOUNTS[pending.plan])
+    expected_amt = int(EmployerProfile.PLAN_AMOUNTS[pending.plan])
     if flw_amount != expected_amt:
+        logger.error('payment_callback: amount mismatch flw=%s expected=%s', flw_amount, expected_amt)
         return redirect('Authentication:payment_failed')
 
     # ── Create the account now that payment is confirmed ──────────────────────
