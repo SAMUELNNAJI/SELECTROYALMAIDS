@@ -52,7 +52,7 @@
     .card-head h2 { font-size:.95rem; font-weight:700; }
     .card-body { padding:24px; }
 
-    .form-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+    .form-row { display:flex; gap:12px; align-items:stretch; flex-wrap:wrap; }
     .form-field { flex:1; min-width:240px; }
     .form-field label { display:block; margin-bottom:6px; font-size:.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
     .form-field input {
@@ -63,7 +63,7 @@
     .form-field input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.1); background:#fff; }
 
     .btn {
-      display:inline-flex; align-items:center; gap:8px; padding:10px 22px; border-radius:8px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 22px; border-radius:8px;
       font-size:.875rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer;
       border:1px solid transparent; text-decoration:none; transition:background .15s,transform .1s;
     }
@@ -76,11 +76,11 @@
     .meeting-link-box {
       display:flex; align-items:center; gap:10px; padding:12px 14px;
       background:var(--bg); border:1px solid var(--border); border-radius:8px;
-      margin-top:16px;
+      margin-top:16px; flex-wrap:wrap;
     }
     .meeting-link-box input {
       flex:1; border:none; background:transparent; font-size:.85rem; color:var(--text);
-      font-family:'Inter',sans-serif; outline:none;
+      font-family:'Inter',sans-serif; outline:none; min-width:0;
     }
     .meeting-link-box .btn { padding:8px 14px; font-size:.8rem; }
 
@@ -100,6 +100,10 @@
       .page{padding:20px 16px 60px;}
       .form-row{flex-direction:column;}
       .form-field{min-width:0;}
+      .form-row .btn{width:100%;justify-content:center;}
+      .meeting-link-box{flex-direction:column;align-items:stretch;}
+      .meeting-link-box input{width:100%;}
+      .meeting-link-box .btn{width:100%;justify-content:center;}
       .iframe-wrap{padding-bottom:75%;}
     }
   </style>

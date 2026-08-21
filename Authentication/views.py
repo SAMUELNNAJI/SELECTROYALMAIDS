@@ -16,6 +16,7 @@ from django.core.validators import validate_email
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import make_password, identify_hasher
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.views.decorators.http import require_POST
 from datetime import timedelta
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
@@ -644,10 +645,24 @@ def admin_dashboard(request):
                    maids_qs.filter(reg_number__icontains=maid_query)
         maids_qs = maids_qs.distinct()
 
+    employer_query = request.GET.get('eq', '').strip()
+    employers_qs = EmployerProfile.objects.filter(payment_status='paid').select_related('user').order_by('-created_at')
+    if employer_query:
+        employers_qs = employers_qs.filter(
+            models.Q(user__first_name__icontains=employer_query) |
+            models.Q(user__last_name__icontains=employer_query) |
+            models.Q(user__email__icontains=employer_query) |
+            models.Q(phone__icontains=employer_query)
+        )
+
+    paid_employers = EmployerProfile.objects.filter(payment_status='paid').select_related('user')
+    total_revenue = sum(ep.amount for ep in paid_employers)
+
     context = {
         # stat cards
         'maid_count':            MaidRegistration.objects.count(),
-        'paid_employer_count':   EmployerProfile.objects.filter(payment_status='paid').count(),
+        'paid_employer_count':   paid_employers.count(),
+        'total_revenue':         total_revenue,
         'support_count':         SupportMessage.objects.count(),
         # unread badge — messages sent by employers (non-staff) that admin hasn't read
         'unread_count':          SupportMessage.objects.filter(
@@ -659,7 +674,8 @@ def admin_dashboard(request):
         'recent_maids':          MaidRegistration.objects.order_by('-created_at')[:5],
         'all_maids':             maids_qs,
         # employers tab
-        'employers':             EmployerProfile.objects.filter(payment_status='paid').select_related('user').order_by('-created_at'),
+        'employer_query':        employer_query,
+        'employers':             employers_qs,
         # content tabs
         'faqs':                  FAQ.objects.all(),
         'services':              Service.objects.all(),

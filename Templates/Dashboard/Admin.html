@@ -368,8 +368,8 @@
           <div class="stat-icon amber"><i class="fa-solid fa-naira-sign"></i></div>
           <div>
             <div class="stat-label">Revenue</div>
-            <div class="stat-value">₦0</div>
-            <div class="stat-sub">Paystack transactions</div>
+            <div class="stat-value">₦{{ total_revenue|floatformat:0|default:"0" }}</div>
+            <div class="stat-sub">Paid employer signups</div>
           </div>
         </div>
         <div class="stat-card">
@@ -567,24 +567,42 @@
       </div>
     <!-- ── TAB: Employers ── -->
     <div class="tab-panel" id="tab-employers">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.05rem;font-weight:800;">Employers &amp; Payments</h2>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">{{ employers|length }} paid employer{{ employers|length|pluralize }}</p>
+        </div>
+      </div>
+      <form method="get" action="{% url 'Authentication:admin_dashboard' %}" style="display:flex;gap:10px;margin-bottom:20px;">
+        <input type="hidden" name="tab" value="employers" />
+        <input type="text" name="eq" value="{{ employer_query }}"
+               placeholder="Search by name, email or phone…"
+               style="flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;" />
+        <button type="submit" class="btn btn-primary" style="padding:9px 18px;">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+        {% if employer_query %}
+        <a href="{% url 'Authentication:admin_dashboard' %}?tab=employers" class="btn btn-ghost" style="padding:9px 14px;">Clear</a>
+        {% endif %}
+      </form>
       <div class="card">
-        <div class="card-head"><h2>Employers &amp; Payments</h2></div>
         <div class="card-body">
           <div style="overflow-x:auto;">
             <table class="data-table">
-              <thead><tr><th>Employer</th><th>Email</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+              <thead><tr><th>Employer</th><th>Email</th><th>Phone</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
               <tbody>
                 {% for ep in employers %}
                 <tr>
                   <td><strong>{{ ep.user.get_full_name|default:ep.user.username }}</strong></td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.user.email }}</td>
+                  <td style="font-size:.82rem;white-space:nowrap;">{{ ep.phone|default:"—" }}</td>
                   <td><span class="badge {% if ep.plan == 'premium' %}badge-amber{% else %}badge-blue{% endif %}">{{ ep.get_plan_display }}</span></td>
                   <td style="white-space:nowrap;">₦{{ ep.amount|floatformat:0 }}</td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.created_at|date:"d M Y" }}</td>
                   <td><span class="status-pill active">Paid</span></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No paid employers yet.</td></tr>
+                <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;">No paid employers yet.</td></tr>
                 {% endfor %}
               </tbody>
             </table>
