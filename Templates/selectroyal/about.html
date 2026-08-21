@@ -3,6 +3,17 @@
 {% block title %}About Us – SelectRoyal Maids{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/about.css' %}" />
+<style>
+  .about-auth-modal { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(3,16,38,.7); backdrop-filter:blur(5px); }
+  .about-auth-modal[hidden] { display:none; }
+  .about-auth-card { position:relative; width:min(100%,420px); padding:40px 30px 30px; border-radius:22px; background:#fff; text-align:center; box-shadow:0 24px 72px rgba(0,0,0,.32); }
+  .about-auth-close { position:absolute; top:13px; right:14px; width:34px; height:34px; border:0; border-radius:9px; background:#f1f5f9; color:#475569; cursor:pointer; }
+  .about-auth-icon { display:grid; place-items:center; width:64px; height:64px; margin:0 auto 17px; border-radius:50%; background:linear-gradient(135deg,#1e3a8a,#2563eb); color:#fff; font-size:1.55rem; }
+  .about-auth-card h2 { margin:0 0 10px; color:#0f172a; font-size:1.45rem; }
+  .about-auth-card p { margin:0 0 24px; color:#64748b; line-height:1.65; }
+  .about-auth-actions { display:flex; gap:12px; }
+  .about-auth-actions .btn { flex:1; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -144,7 +155,11 @@
       <p class="cta-sub">Join thousands of families who found their trusted domestic helper through SelectRoyal Maids.</p>
       <div class="cta-buttons">
         <a href="{% url 'MaidApp:index' %}#maids" class="cta-btn cta-btn--white"><i class="fa-solid fa-magnifying-glass"></i> FIND YOUR MAID</a>
+        {% if user.is_authenticated %}
         <a href="{% url 'MaidApp:request-maid' %}" class="cta-btn cta-btn--outline"><i class="fa-solid fa-hand-pointer"></i> REQUEST A MAID</a>
+        {% else %}
+        <button type="button" class="cta-btn cta-btn--outline" id="aboutRequestGuard"><i class="fa-solid fa-lock"></i> REQUEST A MAID</button>
+        {% endif %}
       </div>
       <div class="cta-trust-bar">
         <div class="cta-trust-item"><i class="fa-solid fa-shield-halved"></i> Background Checked</div>
@@ -155,9 +170,38 @@
     </div>
   </section>
 
+  {% if not user.is_authenticated %}
+  <div id="aboutAuthModal" class="about-auth-modal" role="dialog" aria-modal="true" aria-labelledby="aboutAuthTitle" hidden>
+    <div class="about-auth-card">
+      <button type="button" class="about-auth-close" id="aboutAuthClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <div class="about-auth-icon"><i class="fa-solid fa-lock"></i></div>
+      <h2 id="aboutAuthTitle">Login Required</h2>
+      <p>Please log in or create an account to request a maid.</p>
+      <div class="about-auth-actions">
+        <a href="{% url 'Authentication:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">Log In</a>
+        <a href="{% url 'Authentication:signup' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline">Sign Up</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- ===== FOOTER ===== -->
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/nav.js' %}"></script>
+{% if not user.is_authenticated %}
+<script>
+  (function () {
+    var trigger = document.getElementById('aboutRequestGuard');
+    var modal = document.getElementById('aboutAuthModal');
+    var close = document.getElementById('aboutAuthClose');
+    function closeModal() { modal.hidden = true; document.body.style.overflow = ''; }
+    trigger?.addEventListener('click', function () { modal.hidden = false; document.body.style.overflow = 'hidden'; });
+    close?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', function (event) { if (event.target === modal) closeModal(); });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && modal && !modal.hidden) closeModal(); });
+  }());
+</script>
+{% endif %}
 {% endblock %}
