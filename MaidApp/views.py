@@ -603,6 +603,8 @@ def employer_action_email(request):
 @require_POST
 def blog_subscribe(request):
     import json
+    from django.core.exceptions import ValidationError
+    from django.core.validators import validate_email
     try:
         data = json.loads(request.body.decode('utf-8'))
     except Exception:
@@ -611,6 +613,10 @@ def blog_subscribe(request):
     email = data.get('email', '').strip().lower()
     if not email:
         return JsonResponse({'error': 'Email is required.'}, status=400)
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({'error': 'Please enter a valid email address.'}, status=400)
 
     subscriber, created = BlogSubscriber.objects.get_or_create(
         email=email,
@@ -621,10 +627,7 @@ def blog_subscribe(request):
         subscriber.save(update_fields=['is_active'])
 
     email_sent = send_blog_subscribe_email(email)
-    if not email_sent:
-        return JsonResponse(
-            {'ok': False, 'error': 'We could not send the confirmation email. Please try again shortly.'},
-            status=502,
-        )
-
-    return JsonResponse({'ok': True, 'subscribed': created, 'email_sent': True})
+    # The subscription is already saved.  Do not make the visitor repeat it if
+    # a mail provider is temporarily unavailable; the UI can show an honest
+    # delivery warning while staff investigate the email service.
+    return JsonResponse({'ok': True, 'subscribed': created, 'email_sent': email_sent})

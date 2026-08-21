@@ -22,15 +22,15 @@ class BlogSubscriptionTests(TestCase):
         send_email.assert_called_once_with('reader@example.com')
 
     @patch('MaidApp.views.send_blog_subscribe_email', return_value=False)
-    def test_subscription_reports_delivery_failure(self, _send_email):
+    def test_subscription_succeeds_when_confirmation_delivery_is_delayed(self, _send_email):
         response = self.client.post(
             reverse('MaidApp:blog-subscribe'),
             data=json.dumps({'email': 'reader@example.com'}),
             content_type='application/json',
         )
 
-        self.assertEqual(response.status_code, 502)
+        self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
-            {'ok': False, 'error': 'We could not send the confirmation email. Please try again shortly.'},
+            {'ok': True, 'subscribed': True, 'email_sent': False},
         )

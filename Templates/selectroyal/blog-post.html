@@ -231,9 +231,11 @@
         <h2 class="blog-nl-title">Get the Latest Tips in Your Inbox</h2>
         <p class="blog-nl-sub">Join 5,000+ Nigerian families and domestic professionals who get our weekly hiring and career tips.</p>
         <form class="blog-nl-form" id="blogSubscribeForm">
+          {% csrf_token %}
           <input type="email" id="blogSubscribeEmail" placeholder="Enter your email address" class="blog-nl-input" required />
           <button type="submit" class="btn btn-primary">Subscribe <i class="fa-solid fa-arrow-right"></i></button>
         </form>
+        <p id="blogSubscribeFeedback" role="status" aria-live="polite" hidden></p>
         <p class="blog-nl-note"><i class="fa-solid fa-lock"></i> No spam. Unsubscribe at any time.</p>
       </div>
     </div>
@@ -249,7 +251,7 @@
         <i class="fa-solid fa-circle-check"></i>
       </div>
       <h2 class="vp-modal-title" id="blogSubscribeModalTitle">Subscribed!</h2>
-      <p class="vp-modal-body">
+      <p class="vp-modal-body" id="blogSubscribeModalBody">
         You have successfully subscribed to the SelectRoyal Maids blog. Check your inbox for a confirmation email.
       </p>
       <div class="vp-modal-actions">
@@ -300,6 +302,8 @@
     var modal = document.getElementById('blogSubscribeModal');
     var closeBtn = document.getElementById('blogSubscribeModalClose');
     var okBtn = document.getElementById('blogSubscribeModalOk');
+    var feedback = document.getElementById('blogSubscribeFeedback');
+    var modalBody = document.getElementById('blogSubscribeModalBody');
 
     function openModal() {
       modal.hidden = false;
@@ -315,6 +319,13 @@
       return match ? match[2] : null;
     }
 
+    function showFeedback(message, isError) {
+      if (!feedback) return;
+      feedback.hidden = false;
+      feedback.textContent = message;
+      feedback.style.color = isError ? '#fecaca' : '#bbf7d0';
+    }
+
     if (form) {
       form.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -325,19 +336,27 @@
         fetch("{% url 'MaidApp:blog-subscribe' %}", {
           method: 'POST',
           headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value || getCookie('csrftoken'),
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({email: email}),
         }).then(function (resp) {
-          return resp.json();
-        }).then(function (data) {
-          if (data.ok) {
+          return resp.json().then(function (data) { return { ok: resp.ok, data: data }; });
+        }).then(function (result) {
+          var data = result.data;
+          if (result.ok && data.ok) {
             emailInput.value = '';
+            if (modalBody) {
+              modalBody.textContent = data.email_sent
+                ? 'You have successfully subscribed to the SelectRoyal Maids blog. Check your inbox for a confirmation email.'
+                : 'You have successfully subscribed. Our confirmation email is temporarily delayed, but your subscription is saved.';
+            }
             openModal();
+          } else {
+            showFeedback(data.error || 'We could not process your subscription. Please try again.', true);
           }
         }).catch(function () {
-          // silently fail
+          showFeedback('Network error. Please check your connection and try again.', true);
         });
       });
     }
