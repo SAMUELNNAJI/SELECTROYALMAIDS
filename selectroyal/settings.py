@@ -7,9 +7,13 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Always read this project's environment file when developing locally.  The
+# override makes a corrected value in .env take precedence over an old value
+# inherited by the VS Code/PowerShell process.  Render has no project .env, so
+# its configured service environment variables continue to be used there.
+load_dotenv(BASE_DIR / '.env', override=True)
 
 # ── Security ──────────────────────────────────────────────────────────────────
 SECRET_KEY = os.environ.get(
