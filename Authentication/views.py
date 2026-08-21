@@ -447,7 +447,6 @@ def admin_dashboard(request):
     context = {
         # stat cards
         'maid_count':            MaidRegistration.objects.count(),
-        'employer_count':        User.objects.filter(is_superuser=False, is_active=True).count(),
         'paid_employer_count':   EmployerProfile.objects.filter(payment_status='paid').count(),
         'support_count':         SupportMessage.objects.count(),
         # unread badge — messages sent by employers (non-staff) that admin hasn't read
