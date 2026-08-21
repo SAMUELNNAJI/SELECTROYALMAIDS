@@ -42,6 +42,29 @@ class SignupAndPaymentTests(TestCase):
         self.assertNotEqual(pending.password, 'Strong-password-123')
         self.assertTrue(check_password('Strong-password-123', pending.password))
 
+    @override_settings(PAYMENT_CALLBACK_URL='https://selectroyalmaids.com.ng')
+    @patch('Authentication.views.http_requests.post')
+    def test_payment_redirect_uses_configured_public_callback_url(self, mock_post):
+        pending = self._pending_signup()
+        session = self.client.session
+        session['pending_signup_token'] = pending.token
+        session.save()
+        gateway_response = Mock()
+        gateway_response.raise_for_status.return_value = None
+        gateway_response.json.return_value = {
+            'status': 'success',
+            'data': {'link': 'https://checkout.flutterwave.com/pay/example'},
+        }
+        mock_post.return_value = gateway_response
+
+        response = self.client.post(reverse('Authentication:payment_redirect'))
+
+        self.assertRedirects(response, 'https://checkout.flutterwave.com/pay/example', fetch_redirect_response=False)
+        self.assertEqual(
+            mock_post.call_args.kwargs['json']['redirect_url'],
+            'https://selectroyalmaids.com.ng/payment/callback/',
+        )
+
     @patch('Authentication.views.send_payment_success_email')
     @patch('Authentication.views.send_signup_welcome_email')
     @patch('Authentication.views.http_requests.get')

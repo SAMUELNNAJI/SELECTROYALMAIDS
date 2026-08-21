@@ -180,6 +180,12 @@ else:
 
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
 
+# Flutterwave must return the customer to the public HTTPS address of this
+# application.  Set this explicitly in production when the service sits behind
+# a proxy or has more than one hostname.  Leaving it blank keeps local
+# development convenient by deriving the address from the incoming request.
+PAYMENT_CALLBACK_URL = os.environ.get('PAYMENT_CALLBACK_URL', '').rstrip('/')
+
 
 
 # WhatsApp Business Cloud API. Set these in the deployment environment to have

@@ -24,6 +24,16 @@ from .models import EmployerProfile, PendingSignup
 logger = logging.getLogger(__name__)
 
 
+def _payment_callback_url(request):
+    """Return the one canonical public URL Flutterwave should redirect to."""
+    from django.conf import settings as django_settings
+
+    base_url = django_settings.PAYMENT_CALLBACK_URL
+    if base_url:
+        return f"{base_url}{reverse('Authentication:payment_callback')}"
+    return request.build_absolute_uri(reverse('Authentication:payment_callback'))
+
+
 def _send_new_blog_post_alerts(post):
     """Notify each active employer once a post is made public."""
     for user in User.objects.filter(is_active=True, is_staff=False).exclude(email=''):
@@ -190,7 +200,7 @@ def payment_redirect(request):
     amount = EmployerProfile.PLAN_AMOUNTS[plan]
     tx_ref = pending.token
 
-    callback_url = request.scheme + '://' + request.get_host() + reverse('Authentication:payment_callback')
+    callback_url = _payment_callback_url(request)
 
     payload = {
         "tx_ref": tx_ref,

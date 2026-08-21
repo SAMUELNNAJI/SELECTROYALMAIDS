@@ -22,6 +22,8 @@ services:
         sync: false                  # fill in manually in the Render dashboard
       - key: FLUTTERWAVE_SECRET_KEY
         sync: false                  # fill in manually in the Render dashboard
+      - key: PAYMENT_CALLBACK_URL
+        sync: false                  # e.g. https://your-domain.com (no trailing slash)
       - key: EMAIL_BACKEND
         value: "django.core.mail.backends.smtp.EmailBackend"
       - key: EMAIL_HOST_PASSWORD
