@@ -173,7 +173,9 @@ if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
     if EMAIL_USE_TLS and EMAIL_USE_SSL:
         raise ValueError('Set only one of EMAIL_USE_TLS or EMAIL_USE_SSL.')
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'emailapikey')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+  # Fetches the password and safely removes wrapping spaces or quotes
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '').strip("'\" ")
+
     # Never allow an unavailable SMTP server to hold a web request indefinitely.
     EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '10'))
     DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'info@selectroyalmaids.com.ng')
