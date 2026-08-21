@@ -649,10 +649,10 @@ def admin_dashboard(request):
     employers_qs = EmployerProfile.objects.filter(payment_status='paid').select_related('user').order_by('-created_at')
     if employer_query:
         employers_qs = employers_qs.filter(
-            models.Q(user__first_name__icontains=employer_query) |
-            models.Q(user__last_name__icontains=employer_query) |
-            models.Q(user__email__icontains=employer_query) |
-            models.Q(phone__icontains=employer_query)
+            Q(user__first_name__icontains=employer_query) |
+            Q(user__last_name__icontains=employer_query) |
+            Q(user__email__icontains=employer_query) |
+            Q(phone__icontains=employer_query)
         )
 
     paid_employers = EmployerProfile.objects.filter(payment_status='paid').select_related('user')
