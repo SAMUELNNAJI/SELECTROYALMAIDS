@@ -1,0 +1,186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Conferencing — SelectRoyalMaids</title>
+<link rel="icon" href="{% static 'image/logo (1).png' %}" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #f1f5f9;
+      --card:      #ffffff;
+      --border:    #e2e8f0;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --accent:    #2563eb;
+      --accent-lt: #eff6ff;
+      --accent-dk: #1d4ed8;
+      --green:     #16a34a;
+      --green-lt:  #dcfce7;
+      --red:       #dc2626;
+      --red-lt:    #fee2e2;
+      --radius:    12px;
+      --shadow:    0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+    }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    .topbar {
+      position:sticky; top:0; z-index:100;
+      background:var(--card); border-bottom:1px solid var(--border);
+      height:64px; padding:0 32px;
+      display:flex; align-items:center; gap:16px;
+    }
+    .back-link {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:8px 16px; border:1px solid var(--border); border-radius:8px;
+      font-size:.85rem; font-weight:600; color:var(--muted);
+      text-decoration:none; transition:background .15s,color .15s; white-space:nowrap;
+    }
+    .back-link:hover { background:var(--bg); color:var(--text); }
+    .topbar-title { font-size:1rem; font-weight:800; color:var(--text); }
+
+    .page { max-width:1200px; margin:0 auto; padding:28px 24px 80px; }
+
+    .card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:24px; overflow:hidden; }
+    .card-head { padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+    .card-head h2 { font-size:.95rem; font-weight:700; }
+    .card-body { padding:24px; }
+
+    .form-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+    .form-field { flex:1; min-width:240px; }
+    .form-field label { display:block; margin-bottom:6px; font-size:.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+    .form-field input {
+      width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px;
+      font-size:.9rem; font-family:'Inter',sans-serif; color:var(--text); background:var(--bg);
+      transition:border-color .15s,box-shadow .15s;
+    }
+    .form-field input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.1); background:#fff; }
+
+    .btn {
+      display:inline-flex; align-items:center; gap:8px; padding:10px 22px; border-radius:8px;
+      font-size:.875rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer;
+      border:1px solid transparent; text-decoration:none; transition:background .15s,transform .1s;
+    }
+    .btn:active { transform:scale(.98); }
+    .btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .btn-primary:hover { background:var(--accent-dk); }
+    .btn-ghost { background:transparent; color:var(--muted); border-color:var(--border); }
+    .btn-ghost:hover { background:var(--bg); color:var(--text); }
+
+    .meeting-link-box {
+      display:flex; align-items:center; gap:10px; padding:12px 14px;
+      background:var(--bg); border:1px solid var(--border); border-radius:8px;
+      margin-top:16px;
+    }
+    .meeting-link-box input {
+      flex:1; border:none; background:transparent; font-size:.85rem; color:var(--text);
+      font-family:'Inter',sans-serif; outline:none;
+    }
+    .meeting-link-box .btn { padding:8px 14px; font-size:.8rem; }
+
+    .iframe-wrap {
+      position:relative; width:100%; padding-bottom:56.25%; height:0; overflow:hidden;
+      border-radius:var(--radius); border:1px solid var(--border); background:#000;
+    }
+    .iframe-wrap iframe {
+      position:absolute; inset:0; width:100%; height:100%; border:none;
+    }
+
+    .info-row { display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted); margin-top:10px; }
+    .info-row i { color:var(--accent); }
+
+    @media(max-width:640px){
+      .topbar{padding:0 16px;}
+      .page{padding:20px 16px 60px;}
+      .form-row{flex-direction:column;}
+      .form-field{min-width:0;}
+      .iframe-wrap{padding-bottom:75%;}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="{% url 'Authentication:admin_dashboard' %}" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+    <span class="topbar-title">Video Conferencing</span>
+  </div>
+
+  <div class="page">
+    <div class="card">
+      <div class="card-head">
+        <i class="fa-solid fa-video" style="color:var(--accent);"></i>
+        <h2>Create or Join a Meeting</h2>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.9rem;color:var(--muted);margin-bottom:18px;">
+          Generate a secure Jitsi Meet room and start a video conference instantly. Copy the link to invite participants.
+        </p>
+        <form method="get" action="{% url 'Authentication:video_conferencing' %}" id="meetingForm">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="room">Meeting Room Name</label>
+              <input type="text" id="room" name="room" value="{{ room_name }}"
+                     placeholder="e.g. SelectRoyalMaids_Interview_01"
+                     pattern="[A-Za-z0-9_.-]+"
+                     title="Letters, numbers, dots, hyphens and underscores only" />
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-link"></i> Create / Join Meeting
+            </button>
+          </div>
+        </form>
+        <div class="meeting-link-box">
+          <i class="fa-solid fa-link" style="color:var(--muted);font-size:.8rem;"></i>
+          <input type="text" id="meetingLink" value="{{ jitsi_url }}" readonly />
+          <button type="button" class="btn btn-ghost" onclick="copyLink()">
+            <i class="fa-solid fa-copy"></i> Copy
+          </button>
+        </div>
+        <div class="info-row">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Powered by Jitsi Meet — end-to-end encrypted, no account required.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="iframe-wrap">
+        <iframe src="{{ jitsi_url }}?interfaceDefaultTab=toolbar&hideIntro=1&hideConferenceTimer=0&hideParticipants=0"
+                allow="camera; microphone; fullscreen; display-capture; autoplay"
+                allowfullscreen
+                title="Jitsi Meet Video Conference">
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copyLink() {
+      const input = document.getElementById('meetingLink');
+      input.select();
+      input.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(input.value).then(() => {
+        const btn = document.querySelector('.meeting-link-box .btn');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+        btn.style.color = 'var(--green)';
+        btn.style.borderColor = 'var(--green)';
+        setTimeout(() => { btn.innerHTML = original; btn.style.color = ''; btn.style.borderColor = ''; }, 1500);
+      }).catch(() => {
+        document.execCommand('copy');
+      });
+    }
+
+    document.getElementById('room').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('meetingForm').submit(); }
+    });
+  </script>
+</body>
+</html>

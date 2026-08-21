@@ -986,3 +986,18 @@ def blog_delete(request, post_id):
             post.delete()
             messages.success(request, f'Post "{title}" deleted.')
     return redirect('/admin/dashboard/?tab=blog')
+
+
+@login_required
+def video_conferencing(request):
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    room_name = request.GET.get('room', '').strip()
+    if not room_name:
+        import secrets, time
+        room_name = f'SelectRoyalMaids_{int(time.time())}_{secrets.token_hex(3)}'
+    jitsi_url = f'https://meet.jit.si/{room_name}'
+    return render(request, 'Dashboard/video_conferencing.html', {
+        'room_name': room_name,
+        'jitsi_url': jitsi_url,
+    })

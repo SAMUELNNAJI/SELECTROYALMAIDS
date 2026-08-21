@@ -40,4 +40,5 @@ urlpatterns = [
     path('admin/blog/create/',                     views.blog_create,         name='blog_create'),
     path('admin/blog/<int:post_id>/edit/',         views.blog_edit,           name='blog_edit'),
     path('admin/blog/<int:post_id>/delete/',       views.blog_delete,         name='blog_delete'),
+    path('admin/video-conferencing/',               views.video_conferencing,  name='video_conferencing'),
 ]

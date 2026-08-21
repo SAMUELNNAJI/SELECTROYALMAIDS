@@ -304,6 +304,7 @@
     <a href="#" data-tab="services"><i class="fa-solid fa-sliders icon"></i> Services</a>
     <div class="sidebar-label">Support</div>
     <a href="{% url 'MaidApp:support-chat' %}" class="nav-badge-wrap"><i class="fa-solid fa-comments icon"></i> Support Chat{% if unread_count %}<span class="nav-badge">{{ unread_count }}</span>{% endif %}</a>
+    <a href="{% url 'Authentication:video_conferencing' %}"><i class="fa-solid fa-video icon"></i> Video Conferencing</a>
     <a href="{% url 'MaidApp:index' %}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square icon"></i> View Website</a>
     <a href="{% url 'Authentication:logout' %}" class="danger"><i class="fa-solid fa-right-from-bracket icon"></i> Log Out</a>
   </nav>
