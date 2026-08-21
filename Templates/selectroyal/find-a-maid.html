@@ -367,7 +367,11 @@
       <p class="cta-sub">Tell us your exact requirements and our placement advisors will personally match you with the perfect candidate — fast.</p>
       <div class="cta-buttons">
         <a href="{% url 'MaidApp:contact' %}" class="cta-btn cta-btn--white"><i class="fa-solid fa-phone"></i> CONTACT</a>
+        {% if user.is_authenticated %}
         <a href="{% url 'MaidApp:request-maid' %}" class="cta-btn cta-btn--outline"><i class="fa-solid fa-paper-plane"></i> REQUEST A MAID</a>
+        {% else %}
+        <button type="button" class="cta-btn cta-btn--outline fam-auth-guard"><i class="fa-solid fa-lock"></i> REQUEST A MAID</button>
+        {% endif %}
       </div>
       <div class="cta-trust-bar">
         <div class="cta-trust-item"><i class="fa-solid fa-shield-halved"></i> Background Checked</div>

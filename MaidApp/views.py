@@ -78,49 +78,72 @@ def _maid_application_pdf(application):
 
 
 def _send_maid_application_to_whatsapp(application):
-    """Upload the PDF to Meta and send it to the team WhatsApp number."""
+    """Send a maid application as readable multiline WhatsApp text."""
     if not settings.WHATSAPP_ACCESS_TOKEN or not settings.WHATSAPP_PHONE_NUMBER_ID:
         return False
 
     import json
-    import uuid
     from urllib.request import Request, urlopen
 
-    boundary = f'----SelectRoyal{uuid.uuid4().hex}'
-    filename = f'maid-application-{application.pk}.pdf'
-    pdf = _maid_application_pdf(application)
-    body = (
-        f'--{boundary}\r\nContent-Disposition: form-data; name="messaging_product"\r\n\r\nwhatsapp\r\n'
-        f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{filename}"\r\n'
-        'Content-Type: application/pdf\r\n\r\n'
-    ).encode() + pdf + f'\r\n--{boundary}--\r\n'.encode()
+    fields = [
+        ('Application ID', application.pk),
+        ('Submitted', application.created_at.strftime('%d %B %Y, %H:%M')),
+        ('Full Name', f'{application.first_name} {application.last_name}'),
+        ('Email', application.email),
+        ('Phone', application.phone),
+        ('Date of Birth', application.date_of_birth.strftime('%d %B %Y')),
+        ('Gender', application.gender),
+        ('State', application.state),
+        ('City / Area', application.city),
+        ('Role', application.get_role_display()),
+        ('Work Type', application.get_work_type_display()),
+        ('Years of Experience', application.years_experience),
+        ('Availability', application.availability),
+        ('Expected Salary', application.expected_salary),
+        ('Languages', application.languages),
+        ('Skills', application.skills),
+        ('About', application.bio),
+        ('NIN', application.nin),
+        ('Reference Name', application.reference_name),
+        ('Reference Phone', application.reference_phone),
+    ]
+    text = '📋 *NEW MAID APPLICATION*\n\n' + '\n'.join(
+        f'*{label}:* {value or "—"}' for label, value in fields
+    )
+    message_url = f'https://graph.facebook.com/v22.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages'
+
+    # WhatsApp permits at most 4,096 characters in a text message. Keep each
+    # field on its own line and split only between lines when needed.
+    chunks, current = [], ''
+    for line in text.splitlines(keepends=True):
+        while line:
+            remaining = 4000 - len(current)
+            if remaining == 0:
+                chunks.append(current.rstrip())
+                current = ''
+                remaining = 4000
+            current += line[:remaining]
+            line = line[remaining:]
+            if len(current) == 4000:
+                chunks.append(current.rstrip())
+                current = ''
+    if current:
+        chunks.append(current.rstrip())
+
     headers = {
         'Authorization': f'Bearer {settings.WHATSAPP_ACCESS_TOKEN}',
-        'Content-Type': f'multipart/form-data; boundary={boundary}',
+        'Content-Type': 'application/json',
     }
-    media_url = f'https://graph.facebook.com/v22.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/media'
-    media_request = Request(media_url, data=body, headers=headers, method='POST')
-    with urlopen(media_request, timeout=15) as response:
-        media_id = json.loads(response.read().decode())['id']
-
-    message = {
-        'messaging_product': 'whatsapp',
-        'to': settings.WHATSAPP_APPLICATION_RECIPIENT,
-        'type': 'document',
-        'document': {
-            'id': media_id,
-            'filename': filename,
-            'caption': f'New maid application: {application.first_name} {application.last_name}',
-        },
-    }
-    message_url = f'https://graph.facebook.com/v22.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages'
-    message_request = Request(
-        message_url, data=json.dumps(message).encode(),
-        headers={'Authorization': f'Bearer {settings.WHATSAPP_ACCESS_TOKEN}', 'Content-Type': 'application/json'},
-        method='POST',
-    )
-    with urlopen(message_request, timeout=15):
-        pass
+    for chunk in chunks:
+        message = {
+            'messaging_product': 'whatsapp',
+            'to': settings.WHATSAPP_APPLICATION_RECIPIENT,
+            'type': 'text',
+            'text': {'preview_url': False, 'body': chunk},
+        }
+        message_request = Request(message_url, data=json.dumps(message).encode(), headers=headers, method='POST')
+        with urlopen(message_request, timeout=15):
+            pass
     return True
 
 
