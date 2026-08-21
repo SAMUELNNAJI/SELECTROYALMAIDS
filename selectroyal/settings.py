@@ -163,37 +163,30 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 EMAIL_BACKEND = os.environ.get(
     'EMAIL_BACKEND',
     'django.core.mail.backends.smtp.EmailBackend',
-)
+).strip("'\" ")
+
+# Common Defaults
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'info@selectroyalmaids.com.ng').strip("'\" ")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '10').strip("'\" "))
 
 if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
-    EMAIL_HOST      = os.environ.get('EMAIL_HOST', 'smtp.zeptomail.com')
-    EMAIL_PORT      = int(os.environ.get('EMAIL_PORT', '587'))
-    EMAIL_USE_TLS   = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
-    EMAIL_USE_SSL   = os.environ.get('EMAIL_USE_SSL', 'False').lower() == 'true'
+    EMAIL_HOST      = os.environ.get('EMAIL_HOST', 'smtp.zeptomail.com').strip("'\" ")
+    EMAIL_PORT      = int(os.environ.get('EMAIL_PORT', '587').strip("'\" "))
+    EMAIL_USE_TLS   = os.environ.get('EMAIL_USE_TLS', 'True').strip("'\" ").lower() == 'true'
+    EMAIL_USE_SSL   = os.environ.get('EMAIL_USE_SSL', 'False').strip("'\" ").lower() == 'true'
+    
     if EMAIL_USE_TLS and EMAIL_USE_SSL:
         raise ValueError('Set only one of EMAIL_USE_TLS or EMAIL_USE_SSL.')
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'emailapikey')
-  # Fetches the password and safely removes wrapping spaces or quotes
+        
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'emailapikey').strip("'\" ")
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '').strip("'\" ")
-
-    # Never allow an unavailable SMTP server to hold a web request indefinitely.
-    EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '10'))
-    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'info@selectroyalmaids.com.ng')
-    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 else:
     EMAIL_HOST_USER = ''
-    EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '10'))
     EMAIL_HOST_PASSWORD = ''
-    DEFAULT_FROM_EMAIL = 'info@selectroyalmaids.com.ng'
-    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
-SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
-
-# Flutterwave must return the customer to the public HTTPS address of this
-# application.  Set this explicitly in production when the service sits behind
-# a proxy or has more than one hostname.  Leaving it blank keeps local
-# development convenient by deriving the address from the incoming request.
-PAYMENT_CALLBACK_URL = os.environ.get('PAYMENT_CALLBACK_URL', '').rstrip('/')
+SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000').strip("'\" ").rstrip('/')
+PAYMENT_CALLBACK_URL = os.environ.get('PAYMENT_CALLBACK_URL', '').strip("'\" ").rstrip('/')
 
 
 
