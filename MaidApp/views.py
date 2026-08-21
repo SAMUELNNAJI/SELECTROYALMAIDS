@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from .models import BlogPost, BlogSubscriber, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
-from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email
+from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email
 
 
 def _pdf_escape(value):
@@ -188,6 +188,41 @@ def blog_post(request, slug):
 
 def contact(request):
     return render(request, 'selectroyal/contact.html')
+
+
+@require_POST
+def contact_submit(request):
+    """Receive the contact form via AJAX and forward it to the company inbox."""
+    import json
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+    first_name = data.get('first_name', '').strip()
+    last_name  = data.get('last_name',  '').strip()
+    email      = data.get('email',      '').strip()
+    phone      = data.get('phone',      '').strip()
+    city       = data.get('city',       '').strip()
+    source     = data.get('source',     '').strip()
+    subject    = data.get('subject',    'General Enquiry').strip()
+    message    = data.get('message',    '').strip()
+
+    if not first_name:
+        return JsonResponse({'error': 'Please enter your first name.'}, status=400)
+    if not last_name:
+        return JsonResponse({'error': 'Please enter your last name.'}, status=400)
+    if not email or '@' not in email:
+        return JsonResponse({'error': 'Please enter a valid email address.'}, status=400)
+    if not message:
+        return JsonResponse({'error': 'Please enter your message.'}, status=400)
+
+    sent = send_contact_email(first_name, last_name, email, phone, city, source, subject, message)
+    if not sent:
+        return JsonResponse({'error': 'Unable to send your message right now. Please try again or email us directly.'}, status=502)
+
+    return JsonResponse({'ok': True})
 
 
 def find_a_maid(request):

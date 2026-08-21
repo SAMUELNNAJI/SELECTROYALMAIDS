@@ -115,3 +115,23 @@ def send_blog_subscribe_email(email):
         'emails/blog_subscribe.html',
         {'email': email},
     )
+
+
+def send_contact_email(first_name, last_name, email, phone, city, source, subject, message):
+    """Forward a contact-form submission to the company inbox."""
+    return send_email(
+        f"New Contact Message: {subject} — {first_name} {last_name}",
+        settings.DEFAULT_FROM_EMAIL,          # sent TO the company inbox
+        'emails/contact_message.html',
+        {
+            'first_name': first_name,
+            'last_name':  last_name,
+            'email':      email,
+            'phone':      phone or '—',
+            'city':       city or '—',
+            'source':     source or '—',
+            'subject':    subject,
+            'message':    message,
+        },
+        from_email=settings.DEFAULT_FROM_EMAIL,
+    )

@@ -3,6 +3,72 @@
 {% block title %}Find a Maid – SelectRoyal Maids{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/find-a-maid.css' %}" />
+<style>
+/* ── Auth Guard Modal ───────────────────────────────────── */
+.fam-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: famFadeIn .18s ease;
+}
+.fam-modal-backdrop[hidden] { display: none; }
+@keyframes famFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.fam-modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 40px 32px 32px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  animation: famSlideUp .22s ease;
+}
+@keyframes famSlideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.fam-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+}
+.fam-modal-close:hover { background: #f1f5f9; color: #1e293b; }
+
+.fam-modal-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg,#1e3a8a,#2563eb);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+.fam-modal-title  { font-size: 1.3rem; font-weight: 700; color: #0f172a; margin: 0 0 10px; }
+.fam-modal-body   { font-size: .93rem; color: #64748b; line-height: 1.6; margin: 0 0 24px; }
+.fam-modal-actions { display: flex; gap: 12px; }
+.fam-modal-btn    { flex: 1; min-width: 130px; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -211,10 +277,14 @@
               {% endif %}
               <div class="mc-actions">
                 <a href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" class="mc-btn mc-btn--ghost">View Profile</a>
+                {% if user.is_authenticated %}
                 {% with profile_url=request.scheme|add:"://"|add:request.get_host|add:"/view-profile/?slug="|add:maid.slug %}
                 {% with wa_text="Hello SelectRoyalMaids, I want to hire this maid:%0AName: "|add:maid.full_name|add:"%0AReg Number: "|add:maid.reg_number|add:"%0AProfile: "|add:profile_url %}
                 <a href="https://wa.me/2349137894958?text={{ wa_text }}" target="_blank" rel="noopener noreferrer" class="mc-btn mc-btn--primary"><i class="fa-brands fa-whatsapp"></i> Request</a>
                 {% endwith %}{% endwith %}
+                {% else %}
+                <button type="button" class="mc-btn mc-btn--primary fam-auth-guard"><i class="fa-brands fa-whatsapp"></i> Request</button>
+                {% endif %}
               </div>
             </div>
           </article>
@@ -308,6 +378,31 @@
     </div>
   </section>
 
+  <!-- ===== AUTH GUARD MODAL ===== -->
+  <div id="famAuthModal" class="fam-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="famAuthModalTitle" hidden>
+    <div class="fam-modal">
+      <button class="fam-modal-close" id="famAuthModalClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="fam-modal-icon">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <h2 class="fam-modal-title" id="famAuthModalTitle">Login Required</h2>
+      <p class="fam-modal-body">
+        You need to be logged in to request or contact a maid.<br>
+        Please log in or create an account to continue.
+      </p>
+      <div class="fam-modal-actions">
+        <a href="{% url 'Authentication:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary fam-modal-btn">
+          <i class="fa-solid fa-right-to-bracket"></i> Log In
+        </a>
+        <a href="{% url 'Authentication:signup' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline fam-modal-btn">
+          <i class="fa-solid fa-user-plus"></i> Sign Up
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== FOOTER ===== -->
 {% endblock %}
 
@@ -332,6 +427,30 @@
     backdrop?.addEventListener('click', close);
     document.getElementById('viewGrid')?.addEventListener('click', () => document.getElementById('maidGrid')?.classList.remove('list-view'));
     document.getElementById('viewList')?.addEventListener('click', () => document.getElementById('maidGrid')?.classList.add('list-view'));
+
+    /* ── Auth Guard Modal ── */
+    var authModal   = document.getElementById('famAuthModal');
+    var authClose   = document.getElementById('famAuthModalClose');
+
+    function openAuthModal()  { authModal.hidden = false; document.body.style.overflow = 'hidden'; }
+    function closeAuthModal() { authModal.hidden = true;  document.body.style.overflow = ''; }
+
+    document.querySelectorAll('.fam-auth-guard').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        openAuthModal();
+      });
+    });
+
+    authClose?.addEventListener('click', closeAuthModal);
+    document.getElementById('famAuthModalCancel')?.addEventListener('click', closeAuthModal);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && authModal && !authModal.hidden) closeAuthModal();
+    });
+    authModal?.addEventListener('click', function (e) {
+      if (e.target === authModal) closeAuthModal();
+    });
   })();
 </script>
 {% endblock %}

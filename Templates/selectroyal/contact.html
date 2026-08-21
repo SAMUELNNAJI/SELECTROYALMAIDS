@@ -340,7 +340,11 @@
       var first   = document.getElementById('cfFirstName').value.trim();
       var last    = document.getElementById('cfLastName').value.trim();
       var email   = document.getElementById('cfEmail').value.trim();
+      var phone   = document.getElementById('cfPhone').value.trim();
+      var city    = document.getElementById('cfCity').value.trim();
+      var source  = document.getElementById('cfSource').value.trim();
       var message = document.getElementById('cfMessage').value.trim();
+      var subject = (document.querySelector('.cf-chip.active') || {}).dataset.val || 'General Enquiry';
       var errBox  = document.getElementById('cfError');
       var errTxt  = document.getElementById('cfErrorText');
 
@@ -362,10 +366,43 @@
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending…';
       btn.disabled = true;
 
-      setTimeout(function () {
-        document.getElementById('contactForm').style.display = 'none';
-        document.getElementById('cfSuccess').style.display = 'block';
-      }, 1400);
-    });
+      function getCookie(name) {
+        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+      }
+
+      fetch("{% url 'MaidApp:contact-submit' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+          first_name: first,
+          last_name:  last,
+          email:      email,
+          phone:      phone,
+          city:       city,
+          source:     source,
+          subject:    subject,
+          message:    message,
+        }),
+      })
+      .then(function (resp) { return resp.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          document.getElementById('contactForm').style.display = 'none';
+          document.getElementById('cfSuccess').style.display = 'block';
+        } else {
+          showErr(data.error || 'Something went wrong. Please try again.');
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Message';
+          btn.disabled = false;
+        }
+      })
+      .catch(function () {
+        showErr('Network error. Please check your connection and try again.');
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Message';
+        btn.disabled = false;
+      });
 </script>
 {% endblock %}
