@@ -8,6 +8,10 @@ urlpatterns = [
     path('signup/',                                views.signup_view,         name='signup'),
     path('logout/',                                views.logout_view,         name='logout'),
 
+    # ── Password reset ────────────────────────────────────────────────────────
+    path('password-reset/',                        views.password_reset_request,  name='password_reset_request'),
+    path('password-reset/<uidb64>/<token>/',       views.password_reset_confirm,  name='password_reset_confirm'),
+
     # ── Payment flow ──────────────────────────────────────────────────────────
     path('payment/',                               views.payment_page,        name='payment_page'),
     path('payment/redirect/',                      views.payment_redirect,    name='payment_redirect'),

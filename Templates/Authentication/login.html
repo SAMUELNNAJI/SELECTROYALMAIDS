@@ -273,10 +273,36 @@
       var btn = this;
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending…';
       btn.disabled = true;
-      setTimeout(function () {
-        document.getElementById('forgotForm').style.display = 'none';
-        document.getElementById('forgotSuccess').style.display = 'block';
-      }, 1400);
+
+      function getCookie(name) {
+        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+      }
+
+      fetch("{% url 'Authentication:password_reset_request' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ email: em }),
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          document.getElementById('forgotForm').style.display = 'none';
+          document.getElementById('forgotSuccess').style.display = 'block';
+        } else {
+          showErr('forgotError', 'forgotErrorText', data.error || 'Something went wrong. Please try again.');
+          btn.innerHTML = '<i class="fa-regular fa-paper-plane"></i> Send Reset Link';
+          btn.disabled = false;
+        }
+      })
+      .catch(function () {
+        showErr('forgotError', 'forgotErrorText', 'Network error. Please try again.');
+        btn.innerHTML = '<i class="fa-regular fa-paper-plane"></i> Send Reset Link';
+        btn.disabled = false;
+      });
     });
 
   })();

@@ -135,3 +135,23 @@ def send_contact_email(first_name, last_name, email, phone, city, source, subjec
         },
         from_email=settings.DEFAULT_FROM_EMAIL,
     )
+
+
+def send_password_reset_email(user, reset_url):
+    """Send the one-time password reset link to the user."""
+    return send_email(
+        "Reset Your Password – SelectRoyal Maids",
+        user.email,
+        'emails/password_reset_link.html',
+        {'user': user, 'reset_url': reset_url},
+    )
+
+
+def send_password_changed_email(user):
+    """Notify the user that their password was successfully changed."""
+    return send_email(
+        "Your Password Has Been Changed – SelectRoyal Maids",
+        user.email,
+        'emails/password_changed.html',
+        {'user': user},
+    )

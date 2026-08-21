@@ -18,7 +18,7 @@ from django.db import IntegrityError, transaction
 from django.views.decorators.http import require_POST
 from datetime import timedelta
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
-from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email
+from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email
 from .models import EmployerProfile, PendingSignup
 
 logger = logging.getLogger(__name__)
@@ -367,6 +367,113 @@ def payment_failed(request):
 def logout_view(request):
     logout(request)
     return redirect('MaidApp:index')
+
+
+# ── Password Reset ────────────────────────────────────────────────────────────
+
+@require_POST
+def password_reset_request(request):
+    """
+    AJAX endpoint: validate email, generate a signed reset token, send the link.
+    Always returns ok=True for valid-looking emails (prevents user enumeration).
+    """
+    from django.http import JsonResponse
+    import json, secrets
+    from django.contrib.auth.tokens import default_token_generator
+    from django.utils.http import urlsafe_base64_encode
+    from django.utils.encoding import force_bytes
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+    email = data.get('email', '').strip().lower()
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({'error': 'Please enter a valid email address.'}, status=400)
+
+    # Look up the user silently — don't reveal whether the email exists
+    user = User.objects.filter(email__iexact=email, is_active=True).first()
+    if user:
+        uid   = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        reset_url = (
+            request.scheme + '://' + request.get_host()
+            + reverse('Authentication:password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+        )
+        try:
+            send_password_reset_email(user, reset_url)
+        except Exception:
+            logger.exception('Failed to send password reset email to %s', email)
+
+    # Always return success to prevent email enumeration
+    return JsonResponse({'ok': True})
+
+
+def password_reset_confirm(request, uidb64, token):
+    """
+    GET  — show the set-new-password form (validates token first).
+    POST — save the new password, send confirmation email, redirect to login.
+    """
+    from django.contrib.auth.tokens import default_token_generator
+    from django.utils.http import urlsafe_base64_decode
+    from django.utils.encoding import force_str
+
+    # Decode the user
+    try:
+        uid  = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    # Validate the token
+    token_valid = user is not None and default_token_generator.check_token(user, token)
+
+    if request.method == 'GET':
+        return render(request, 'Authentication/password_reset_confirm.html', {
+            'token_valid': token_valid,
+            'uidb64': uidb64,
+            'token': token,
+        })
+
+    # POST — process the new password
+    from django.http import JsonResponse
+    import json
+
+    if not token_valid:
+        return JsonResponse({'error': 'This reset link is invalid or has expired. Please request a new one.'}, status=400)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
+    password  = data.get('password', '')
+    password2 = data.get('password2', '')
+
+    if not password:
+        return JsonResponse({'error': 'Please enter a new password.'}, status=400)
+    if len(password) < 8:
+        return JsonResponse({'error': 'Password must be at least 8 characters.'}, status=400)
+    if password != password2:
+        return JsonResponse({'error': 'Passwords do not match.'}, status=400)
+    try:
+        validate_password(password, user=user)
+    except ValidationError as exc:
+        return JsonResponse({'error': ' '.join(exc.messages)}, status=400)
+
+    user.set_password(password)
+    user.save()
+
+    # Send confirmation email (non-blocking — failure must not break the flow)
+    try:
+        send_password_changed_email(user)
+    except Exception:
+        logger.exception('Failed to send password-changed email to %s', user.email)
+
+    return JsonResponse({'ok': True})
 
 
 # ── Dashboards ────────────────────────────────────────────────────────────────
