@@ -119,12 +119,20 @@
       <i class="fa-solid fa-house-chimney"></i> Go to My Dashboard
     </a>
 
+    {% if needs_login %}
+    <p class="redirect-note" style="color:#f59e0b;font-weight:600;margin-top:16px;">
+      <i class="fa-solid fa-circle-info"></i>
+      Your account is active! Please <a href="{% url 'Authentication:login' %}" style="color:#2563eb;">log in</a> to access your dashboard.
+    </p>
+    {% else %}
     <p class="redirect-note">
       Redirecting automatically in <span id="countdown">5</span>s…
     </p>
+    {% endif %}
 
   </div>
 
+  {% if not needs_login %}
   <script>
     var secs = 5;
     var el   = document.getElementById('countdown');
@@ -137,6 +145,7 @@
       }
     }, 1000);
   </script>
+  {% endif %}
 
 </body>
 </html>

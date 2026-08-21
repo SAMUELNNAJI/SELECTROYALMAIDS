@@ -375,17 +375,23 @@ def _payment_callback_inner(request):
         return redirect('Authentication:payment_failed')
 
     # Clear the pending signup token from the session
-    request.session.pop('pending_signup_token', None)
+    try:
+        request.session.pop('pending_signup_token', None)
+    except Exception:
+        pass  # session may not be available in all contexts
 
-    # Log the user in — must specify backend explicitly since user was not
-    # fetched via authenticate(), which is required when multiple backends exist.
+    # Log the user in. We set the backend directly — this is the correct approach
+    # when a user object was not fetched via authenticate(). Django's login()
+    # calls session.cycle_key() which requires a real session middleware — on
+    # production this is always present.
+    logged_in = False
     try:
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
+        logged_in = True
+        logger.info('User %s logged in after payment.', user.email)
     except Exception:
-        logger.exception('Login after payment failed for user %s.', user.email)
-        # Account was created and paid — don't block them, just redirect to login
-        return redirect('Authentication:login')
+        logger.exception('login() failed after payment for %s — will redirect to login page.', user.email)
 
     # Send welcome and receipt emails (non-blocking — failure must not break flow)
     try:
@@ -393,16 +399,27 @@ def _payment_callback_inner(request):
         send_signup_welcome_email(user, plan)
         send_payment_success_email(user, plan)
     except Exception:
-        logger.exception('Payment succeeded but email delivery failed for %s.', user.email)
+        logger.exception('Email delivery failed after payment for %s.', user.email)
 
-    return redirect('Authentication:payment_success')
+    if logged_in:
+        return redirect('Authentication:payment_success')
+
+    # Login failed (rare session edge case) — redirect to login with a message
+    # so the user can log in manually. Their account IS created and paid.
+    logger.warning('Redirecting %s to login after payment because session login failed.', user.email)
+    return redirect(f"{reverse('Authentication:login')}?payment=done")
 
 
 def payment_success(request):
     """Success landing page shown after a confirmed payment."""
+    # Accept authenticated users OR users arriving directly from a payment
+    # (payment=done param) to handle the rare case where session login failed.
     if not request.user.is_authenticated:
+        if request.GET.get('payment') == 'done':
+            # Show a minimal success message — they are paid, just need to log in
+            return render(request, 'Authentication/payment_success.html', {'needs_login': True})
         return redirect('Authentication:login')
-    return render(request, 'Authentication/payment_success.html')
+    return render(request, 'Authentication/payment_success.html', {'needs_login': False})
 
 
 def payment_failed(request):
