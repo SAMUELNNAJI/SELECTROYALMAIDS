@@ -109,7 +109,7 @@ def send_blog_alert_email(user, post):
 
 
 def send_blog_subscribe_email(email):
-    send_email(
+    return send_email(
         "Successfully Subscribed to SelectRoyal Maids Blog",
         email,
         'emails/blog_subscribe.html',

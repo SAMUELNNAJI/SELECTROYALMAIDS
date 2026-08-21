@@ -3,44 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Request Form Submitted</title>
+  <title>Placement Request Received – SelectRoyal Maids</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <table role="presentation" width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
           <tr>
-            <td style="background-color:#1e3a8a;padding:32px 40px;text-align:center;">
-              <h1 style="margin:0;font-size:1.5rem;color:#ffffff;font-weight:700;">SelectRoyal Maids</h1>
-              <p style="margin:8px 0 0;color:#93c5fd;font-size:0.9rem;">Request Received</p>
+            <td style="background-color:#1e3a8a;padding:28px 40px;text-align:center;border-radius:12px 12px 0 0;">
+              <h1 style="margin:0;font-size:1.4rem;color:#ffffff;font-weight:700;letter-spacing:.3px;">SelectRoyal Maids</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:.85rem;">Placement Request Received</p>
             </td>
           </tr>
+
+          <!-- Hero received -->
           <tr>
-            <td style="padding:32px 40px;">
-              <h2 style="margin:0 0 16px;font-size:1.25rem;color:#0f172a;">Hi {{ employer.get_full_name|default:employer.username }},</h2>
-              <p style="margin:0 0 16px;color:#334155;font-size:1rem;line-height:1.6;">
-                Thank you for submitting your placement request. Our team has received your request and will get back to you on your support chat in the dashboard or via email.
+            <td style="background-color:#0891b2;padding:20px;text-align:center;">
+              <p style="margin:0;font-size:1.8rem;">&#128203;</p>
+              <p style="margin:8px 0 0;color:#ffffff;font-weight:700;font-size:1.05rem;">We have your request!</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="background-color:#ffffff;padding:32px 40px;">
+              <h2 style="margin:0 0 14px;font-size:1.1rem;color:#0f172a;">Hi {{ employer.get_full_name|default:employer.username }},</h2>
+              <p style="margin:0 0 16px;color:#334155;font-size:.95rem;line-height:1.65;">
+                Thank you for submitting your placement request. Our team has received it and will review it carefully. We will get back to you on your <strong>support chat in your dashboard</strong> or at this email address.
               </p>
-              <p style="margin:0 0 24px;color:#334155;font-size:1rem;line-height:1.6;">
-                Request ID: <strong>#{{ placement.id }}</strong><br>
-                Role: <strong>{{ placement.get_role_display }}</strong><br>
-                Plan: <strong>{{ placement.get_plan_display }}</strong>
-              </p>
+
+              <!-- Request details -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 10px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Request Details</p>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;width:40%;">Request ID</td>
+                        <td style="padding:5px 0;color:#1e3a8a;font-weight:700;font-size:.88rem;">#{{ placement.id }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;">Role</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ placement.role|title }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;">Plan</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ placement.get_plan_display }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;">Status</td>
+                        <td style="padding:5px 0;color:#f59e0b;font-weight:600;font-size:.88rem;">Under Review</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- What happens next -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:14px 20px;">
+                    <p style="margin:0 0 6px;font-size:.85rem;color:#065f46;font-weight:700;">What happens next?</p>
+                    <ol style="margin:0;padding-left:18px;color:#064e3b;font-size:.88rem;line-height:1.75;">
+                      <li>Our team reviews your requirements (within 24 hours)</li>
+                      <li>We shortlist matching candidates from our verified pool</li>
+                      <li>We send you candidate profiles via your support chat</li>
+                      <li>You confirm, and we arrange the placement</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background-color:#1e3a8a;border-radius:8px;padding:12px 24px;">
-                    <a href="{{ request.build_absolute_uri|default:'#' }}{% url 'MaidApp:support-chat' %}" style="color:#ffffff;text-decoration:none;font-weight:600;font-size:1rem;">Open Support Chat</a>
+                  <td style="background-color:#1e3a8a;border-radius:8px;">
+                    <a href="{{ site_url }}/support-chat/" style="display:inline-block;padding:13px 28px;color:#ffffff;text-decoration:none;font-weight:600;font-size:.95rem;">Open Support Chat &rarr;</a>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
+
+          <!-- Footer -->
           <tr>
-            <td style="padding:24px 40px;border-top:1px solid #e2e8f0;text-align:center;">
-              <p style="margin:0;color:#64748b;font-size:0.85rem;">&copy; 2026 SelectRoyal Maids. All rights reserved.</p>
+            <td style="background-color:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0 0 6px;color:#64748b;font-size:.82rem;">
+                Need to modify your request? Contact us via
+                <a href="{{ site_url }}/support-chat/" style="color:#1e3a8a;text-decoration:underline;">support chat</a>
+                or email <a href="mailto:info@selectroyalmaids.com.ng" style="color:#1e3a8a;text-decoration:underline;">info@selectroyalmaids.com.ng</a>
+              </p>
+              <p style="margin:0;color:#94a3b8;font-size:.78rem;">&copy; 2025 SelectRoyal Maids &mdash; selectroyalmaids.com.ng</p>
             </td>
           </tr>
+
         </table>
       </td>
     </tr>

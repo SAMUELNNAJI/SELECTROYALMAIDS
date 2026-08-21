@@ -142,8 +142,8 @@
         <div class="blog-nl-icon"><i class="fa-regular fa-envelope"></i></div>
         <h2 class="blog-nl-title">Get the Latest Tips in Your Inbox</h2>
         <p class="blog-nl-sub">Join 5,000+ Nigerian families and domestic professionals who get our weekly hiring and career tips.</p>
-        <form class="blog-nl-form" onsubmit="return false;">
-          <input type="email" placeholder="Enter your email address" class="blog-nl-input" />
+        <form class="blog-nl-form" id="blogSubscribeForm">
+          <input type="email" id="blogSubscribeEmail" placeholder="Enter your email address" class="blog-nl-input" required />
           <button type="submit" class="btn btn-primary">Subscribe <i class="fa-solid fa-arrow-right"></i></button>
         </form>
         <p class="blog-nl-note"><i class="fa-solid fa-lock"></i> No spam. Unsubscribe at any time.</p>
@@ -151,9 +151,84 @@
     </div>
   </section>
 
+  <!-- ===== SUBSCRIBE MODAL ===== -->
+  <div id="blogSubscribeModal" class="vp-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="blogSubscribeModalTitle" hidden>
+    <div class="vp-modal">
+      <button class="vp-modal-close" id="blogSubscribeModalClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="vp-modal-icon" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h2 class="vp-modal-title" id="blogSubscribeModalTitle">Subscribed!</h2>
+      <p class="vp-modal-body">
+        You have successfully subscribed to the SelectRoyal Maids blog. Check your inbox for a confirmation email.
+      </p>
+      <div class="vp-modal-actions">
+        <button type="button" class="btn btn-primary vp-modal-btn" id="blogSubscribeModalOk">Got it</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== FOOTER ===== -->
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/nav.js' %}"></script>
+<script>
+  (function () {
+    var form     = document.getElementById('blogSubscribeForm');
+    var modal    = document.getElementById('blogSubscribeModal');
+    var closeBtn = document.getElementById('blogSubscribeModalClose');
+    var okBtn    = document.getElementById('blogSubscribeModalOk');
+
+    function openModal()  { modal.hidden = false; document.body.style.overflow = 'hidden'; }
+    function closeModal() { modal.hidden = true;  document.body.style.overflow = ''; }
+
+    function getCookie(name) {
+      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? match[2] : null;
+    }
+
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var emailInput = document.getElementById('blogSubscribeEmail');
+        var email = emailInput.value.trim();
+        if (!email) return;
+
+        fetch("{% url 'MaidApp:blog-subscribe' %}", {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: email }),
+        }).then(function (resp) {
+          return resp.json();
+        }).then(function (data) {
+          if (data.ok) {
+            emailInput.value = '';
+            openModal();
+          }
+        }).catch(function () {
+          // silently fail — email validation happens server-side
+        });
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (okBtn)    okBtn.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal && !modal.hidden) closeModal();
+    });
+
+    if (modal) {
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+    }
+  }());
+</script>
 {% endblock %}

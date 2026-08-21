@@ -6,39 +6,98 @@
   <title>Welcome to SelectRoyal Maids</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <table role="presentation" width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
           <tr>
-            <td style="background-color:#1e3a8a;padding:32px 40px;text-align:center;">
-              <h1 style="margin:0;font-size:1.5rem;color:#ffffff;font-weight:700;">SelectRoyal Maids</h1>
-              <p style="margin:8px 0 0;color:#93c5fd;font-size:0.9rem;">Welcome Aboard</p>
+            <td style="background-color:#1e3a8a;padding:28px 40px;text-align:center;border-radius:12px 12px 0 0;">
+              <h1 style="margin:0;font-size:1.4rem;color:#ffffff;font-weight:700;letter-spacing:.3px;">SelectRoyal Maids</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:.85rem;">Welcome to the Family</p>
             </td>
           </tr>
+
+          <!-- Hero welcome -->
           <tr>
-            <td style="padding:32px 40px;">
-              <h2 style="margin:0 0 16px;font-size:1.25rem;color:#0f172a;">Welcome, {{ user.get_full_name|default:user.username }}!</h2>
-              <p style="margin:0 0 16px;color:#334155;font-size:1rem;line-height:1.6;">
-                Thank you for joining SelectRoyal Maids. Your <strong>{{ plan|title }}</strong> plan is now active and you can start browsing verified domestic professionals right away.
+            <td style="background-color:#1d4ed8;padding:24px 40px;text-align:center;">
+              <p style="margin:0;color:#ffffff;font-size:2rem;">&#127881;</p>
+              <p style="margin:8px 0 0;color:#ffffff;font-weight:700;font-size:1.15rem;">
+                Welcome, {{ user.first_name|default:user.username }}!
               </p>
-              <p style="margin:0 0 24px;color:#334155;font-size:1rem;line-height:1.6;">
-                Need help? Our support team is here for you. Log in to your dashboard to send us a message or call us directly.
+              <p style="margin:6px 0 0;color:#bfdbfe;font-size:.9rem;">Your <strong>{{ plan|title }} Plan</strong> is now active</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="background-color:#ffffff;padding:32px 40px;">
+              <p style="margin:0 0 16px;color:#334155;font-size:.95rem;line-height:1.65;">
+                Thank you for joining SelectRoyal Maids. You now have full access to Nigeria's most trusted domestic staffing platform — background-checked, trained, and ready professionals at your fingertips.
               </p>
+
+              <!-- What you can do -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 10px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">With your {{ plan|title }} Plan you can</p>
+                    {% if plan == 'premium' %}
+                    <ul style="margin:0;padding-left:18px;color:#374151;font-size:.9rem;line-height:1.8;">
+                      <li>Browse &amp; shortlist verified maids, cooks, nannies and more</li>
+                      <li>Submit unlimited placement requests</li>
+                      <li>Get a <strong>free replacement within 1 year</strong> if needed</li>
+                      <li>Priority support via dashboard chat</li>
+                    </ul>
+                    {% else %}
+                    <ul style="margin:0;padding-left:18px;color:#374151;font-size:.9rem;line-height:1.8;">
+                      <li>Browse &amp; shortlist verified domestic professionals</li>
+                      <li>Submit a placement request</li>
+                      <li>Chat with our support team in your dashboard</li>
+                    </ul>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 24px;color:#334155;font-size:.95rem;line-height:1.65;">
+                Head to your dashboard to get started. Our team is ready to match you with the perfect candidate.
+              </p>
+
+              <!-- CTA -->
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background-color:#1e3a8a;border-radius:8px;padding:12px 24px;">
-                    <a href="{{ request.build_absolute_uri|default:'#' }}{% url 'Authentication:employer_dashboard' %}" style="color:#ffffff;text-decoration:none;font-weight:600;font-size:1rem;">Go to Dashboard</a>
+                  <td style="background-color:#1e3a8a;border-radius:8px;">
+                    <a href="{{ site_url }}/employer/dashboard/" style="display:inline-block;padding:13px 28px;color:#ffffff;text-decoration:none;font-weight:600;font-size:.95rem;">Go to My Dashboard &rarr;</a>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
+
+          <!-- Quick links -->
           <tr>
-            <td style="padding:24px 40px;border-top:1px solid #e2e8f0;text-align:center;">
-              <p style="margin:0;color:#64748b;font-size:0.85rem;">&copy; 2026 SelectRoyal Maids. All rights reserved.</p>
+            <td style="background-color:#eff6ff;padding:18px 40px;border-top:1px solid #dbeafe;">
+              <p style="margin:0 0 8px;font-size:.83rem;color:#1e3a8a;font-weight:700;">Quick Links</p>
+              <p style="margin:0;font-size:.85rem;line-height:1.8;">
+                <a href="{{ site_url }}/Maids/" style="color:#1e3a8a;text-decoration:underline;">Browse Maids</a> &nbsp;&bull;&nbsp;
+                <a href="{{ site_url }}/request-maid/" style="color:#1e3a8a;text-decoration:underline;">Submit a Request</a> &nbsp;&bull;&nbsp;
+                <a href="{{ site_url }}/support-chat/" style="color:#1e3a8a;text-decoration:underline;">Support Chat</a>
+              </p>
             </td>
           </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0 0 6px;color:#64748b;font-size:.82rem;">
+                Questions? We are here 24/7 —
+                <a href="{{ site_url }}/support-chat/" style="color:#1e3a8a;text-decoration:underline;">open your support chat</a>
+              </p>
+              <p style="margin:0;color:#94a3b8;font-size:.78rem;">&copy; 2025 SelectRoyal Maids &mdash; selectroyalmaids.com.ng</p>
+            </td>
+          </tr>
+
         </table>
       </td>
     </tr>

@@ -3,42 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Failed</title>
+  <title>Payment Failed – SelectRoyal Maids</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <table role="presentation" width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
           <tr>
-            <td style="background-color:#b91c1c;padding:32px 40px;text-align:center;">
-              <h1 style="margin:0;font-size:1.5rem;color:#ffffff;font-weight:700;">SelectRoyal Maids</h1>
-              <p style="margin:8px 0 0;color:#fecaca;font-size:0.9rem;">Payment Failed</p>
+            <td style="background-color:#1e3a8a;padding:28px 40px;text-align:center;border-radius:12px 12px 0 0;">
+              <h1 style="margin:0;font-size:1.4rem;color:#ffffff;font-weight:700;letter-spacing:.3px;">SelectRoyal Maids</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:.85rem;">Payment Update</p>
             </td>
           </tr>
+
+          <!-- Hero error -->
           <tr>
-            <td style="padding:32px 40px;">
-              <h2 style="margin:0 0 16px;font-size:1.25rem;color:#0f172a;">Hi {{ user.get_full_name|default:user.username }},</h2>
-              <p style="margin:0 0 16px;color:#334155;font-size:1rem;line-height:1.6;">
-                Unfortunately, your payment could not be processed. This may be due to insufficient funds, cancelled transaction, or a verification issue.
+            <td style="background-color:#b91c1c;padding:20px;text-align:center;">
+              <div style="display:inline-block;background-color:#ffffff;border-radius:50%;width:56px;height:56px;line-height:56px;font-size:28px;text-align:center;color:#b91c1c;">&#10007;</div>
+              <p style="margin:10px 0 0;color:#ffffff;font-weight:700;font-size:1.1rem;">Payment Unsuccessful</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="background-color:#ffffff;padding:32px 40px;">
+              <h2 style="margin:0 0 14px;font-size:1.15rem;color:#0f172a;">Hi {{ user.get_full_name|default:user.email }},</h2>
+              <p style="margin:0 0 14px;color:#334155;font-size:.95rem;line-height:1.65;">
+                Unfortunately your payment could not be completed. No charge has been made to your account.
               </p>
-              <p style="margin:0 0 24px;color:#334155;font-size:1rem;line-height:1.6;">
-                You can try again by visiting our signup page. If you believe this is an error, please contact our support team.
+
+              <!-- Reasons box -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 8px;font-size:.85rem;color:#991b1b;font-weight:700;">Common reasons for failure</p>
+                    <ul style="margin:0;padding-left:18px;color:#7f1d1d;font-size:.88rem;line-height:1.7;">
+                      <li>Insufficient funds on the card/account</li>
+                      <li>Transaction was cancelled or timed out</li>
+                      <li>Card not enabled for online payments</li>
+                      <li>Bank declined the transaction</li>
+                    </ul>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 24px;color:#334155;font-size:.95rem;line-height:1.65;">
+                You can try again at any time — your signup details are saved for 2 hours. If the problem persists, contact your bank or reach out to our support team.
               </p>
+
+              <!-- CTAs -->
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background-color:#1e3a8a;border-radius:8px;padding:12px 24px;">
-                    <a href="{{ request.build_absolute_uri|default:'#' }}{% url 'Authentication:signup' %}" style="color:#ffffff;text-decoration:none;font-weight:600;font-size:1rem;">Try Again</a>
+                  <td style="background-color:#1e3a8a;border-radius:8px;margin-right:12px;">
+                    <a href="{{ site_url }}/signup/" style="display:inline-block;padding:13px 28px;color:#ffffff;text-decoration:none;font-weight:600;font-size:.95rem;">Try Again &rarr;</a>
+                  </td>
+                  <td style="width:12px;"></td>
+                  <td style="border:1px solid #1e3a8a;border-radius:8px;">
+                    <a href="{{ site_url }}/support-chat/" style="display:inline-block;padding:12px 24px;color:#1e3a8a;text-decoration:none;font-weight:600;font-size:.95rem;">Contact Support</a>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
+
+          <!-- Footer -->
           <tr>
-            <td style="padding:24px 40px;border-top:1px solid #e2e8f0;text-align:center;">
-              <p style="margin:0;color:#64748b;font-size:0.85rem;">&copy; 2026 SelectRoyal Maids. All rights reserved.</p>
+            <td style="background-color:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0 0 6px;color:#64748b;font-size:.82rem;">
+                Need help? Email us at
+                <a href="mailto:info@selectroyalmaids.com.ng" style="color:#1e3a8a;text-decoration:underline;">info@selectroyalmaids.com.ng</a>
+              </p>
+              <p style="margin:0;color:#94a3b8;font-size:.78rem;">&copy; 2025 SelectRoyal Maids &mdash; selectroyalmaids.com.ng</p>
             </td>
           </tr>
+
         </table>
       </td>
     </tr>
