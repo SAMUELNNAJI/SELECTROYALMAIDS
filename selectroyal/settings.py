@@ -80,7 +80,7 @@ if DATABASE_URL:
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=DATABASE_URL.startswith(('postgres://', 'postgresql://')),
         )
     }
 else:
@@ -164,14 +164,21 @@ EMAIL_BACKEND = os.environ.get(
 if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
     EMAIL_HOST      = os.environ.get('EMAIL_HOST', 'smtp.zeptomail.com')
     EMAIL_PORT      = int(os.environ.get('EMAIL_PORT', '587'))
-    EMAIL_USE_TLS   = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+    EMAIL_USE_TLS   = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+    EMAIL_USE_SSL   = os.environ.get('EMAIL_USE_SSL', 'False').lower() == 'true'
+    if EMAIL_USE_TLS and EMAIL_USE_SSL:
+        raise ValueError('Set only one of EMAIL_USE_TLS or EMAIL_USE_SSL.')
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'emailapikey')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
     DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'info@selectroyalmaids.com.ng')
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 else:
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
     DEFAULT_FROM_EMAIL = 'info@selectroyalmaids.com.ng'
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
 
 
 

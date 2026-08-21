@@ -293,10 +293,7 @@ def request_maid(request):
         requires_payment=requires_payment,
     )
     SupportMessage.objects.create(sender=request.user, employer=request.user, body=body)
-    try:
-        send_request_form_email(request.user, placement)
-    except Exception:
-        pass
+    send_request_form_email(request.user, placement)
     return JsonResponse({
         'success': True,
         'placement_id': placement.pk,
@@ -396,10 +393,7 @@ def support_messages(request):
             employer=employer,
             is_read=False,
         ).exclude(sender=employer).count()
-        try:
-            send_unread_support_email(employer, unread_count=unread_count)
-        except Exception:
-            pass
+        send_unread_support_email(employer, unread_count=unread_count)
     return JsonResponse({'message': _support_message_data(message, request.user)}, status=201)
 
 
@@ -566,10 +560,7 @@ def employer_action_email(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Authentication required.'}, status=401)
 
-    try:
-        send_employer_action_email(request.user, action, maid=maid)
-    except Exception:
-        pass
+    send_employer_action_email(request.user, action, maid=maid)
 
     return JsonResponse({'ok': True})
 
@@ -582,7 +573,7 @@ def blog_subscribe(request):
     except Exception:
         return JsonResponse({'error': 'Invalid JSON.'}, status=400)
 
-    email = data.get('email', '').strip()
+    email = data.get('email', '').strip().lower()
     if not email:
         return JsonResponse({'error': 'Email is required.'}, status=400)
 
@@ -594,9 +585,11 @@ def blog_subscribe(request):
         subscriber.is_active = True
         subscriber.save(update_fields=['is_active'])
 
-    try:
-        send_blog_subscribe_email(email)
-    except Exception:
-        pass
+    email_sent = send_blog_subscribe_email(email)
+    if not email_sent:
+        return JsonResponse(
+            {'ok': False, 'error': 'We could not send the confirmation email. Please try again shortly.'},
+            status=502,
+        )
 
-    return JsonResponse({'ok': True, 'subscribed': created})
+    return JsonResponse({'ok': True, 'subscribed': created, 'email_sent': True})

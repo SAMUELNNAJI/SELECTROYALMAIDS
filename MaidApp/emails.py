@@ -1,10 +1,14 @@
+import logging
 import re
 from django.core.mail import EmailMultiAlternatives
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 def _html_to_text(html):
@@ -14,17 +18,31 @@ def _html_to_text(html):
 
 
 def send_email(subject, to_email, template_name, context=None, from_email=None):
+    """Send one transactional message through the configured email backend."""
     if context is None:
         context = {}
+    context.setdefault('site_url', settings.SITE_URL)
     if from_email is None:
         from_email = settings.DEFAULT_FROM_EMAIL
+
+    try:
+        validate_email(to_email)
+    except ValidationError:
+        logger.warning('Refusing to send %r to an invalid recipient.', subject)
+        return False
 
     html_content = render_to_string(template_name, context)
     text_content = _html_to_text(html_content)
 
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=False)
+    try:
+        sent = msg.send(fail_silently=False)
+    except Exception:
+        # Email must not roll back a confirmed payment, but failures must be visible.
+        logger.exception('Unable to send transactional email %r to %s.', subject, to_email)
+        return False
+    return sent == 1
 
 
 def send_payment_success_email(user, plan):

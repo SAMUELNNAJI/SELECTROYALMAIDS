@@ -111,9 +111,12 @@
       </div>
     </div>
 
-    <button class="pay-btn" id="payBtn" onclick="launchPayment()">
-      <i class="fa-solid fa-lock"></i> Pay ₦{{ amount|floatformat:"0" }} Securely
-    </button>
+    <form method="post" action="{% url 'Authentication:payment_redirect' %}">
+      {% csrf_token %}
+      <button class="pay-btn" id="payBtn" type="submit">
+        <i class="fa-solid fa-lock"></i> Pay ₦{{ amount|floatformat:"0" }} Securely
+      </button>
+    </form>
 
     <div class="pay-secure">
       <i class="fa-solid fa-shield-halved"></i>
@@ -126,45 +129,12 @@
 
   </div>
 
-  <!-- Flutterwave inline JS SDK -->
-  <script src="https://checkout.flutterwave.com/v3.js"></script>
   <script>
-    function launchPayment() {
+    document.querySelector('form[action]').addEventListener('submit', function () {
       var btn = document.getElementById('payBtn');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Opening payment…';
-
-      FlutterwaveCheckout({
-        public_key: "{{ flw_public_key }}",
-        tx_ref:     "{{ tx_ref_token }}",
-        amount:     {{ amount }},
-        currency:   "NGN",
-        payment_options: "card,account,ussd",
-        redirect_url: "{{ request.scheme }}://{{ request.get_host }}{% url 'Authentication:payment_callback' %}",
-        customer: {
-          email:        "{{ email }}",
-          phone_number: "{{ phone }}",
-          name:         "{{ first_name }} {{ last_name }}",
-        },
-        customizations: {
-          title:       "SelectRoyalMaids",
-          description: "{{ plan_label }}",
-          logo:        "{{ request.scheme }}://{{ request.get_host }}{% static 'image/logo (1).png' %}",
-        },
-        callback: function(data) {
-          // Inline success — redirect to callback with params
-          if (data.status === "successful") {
-            window.location.href = "{% url 'Authentication:payment_callback' %}?status=successful&transaction_id=" + data.transaction_id + "&tx_ref=" + data.tx_ref;
-          } else {
-            window.location.href = "{% url 'Authentication:payment_failed' %}";
-          }
-        },
-        onclose: function() {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-lock"></i> Pay ₦{{ amount|floatformat:"0" }} Securely';
-        },
-      });
-    }
+    });
   </script>
 
 </body>

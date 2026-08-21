@@ -1,14 +1,33 @@
+from decimal import Decimal, InvalidOperation
+import logging
+
+import requests as http_requests
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import make_password, identify_hasher
+from django.db import IntegrityError, transaction
+from django.views.decorators.http import require_POST
 from datetime import timedelta
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
 from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email
 from .models import EmployerProfile, PendingSignup
+
+logger = logging.getLogger(__name__)
+
+
+def _send_new_blog_post_alerts(post):
+    """Notify each active employer once a post is made public."""
+    for user in User.objects.filter(is_active=True, is_staff=False).exclude(email=''):
+        send_blog_alert_email(user, post)
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -52,7 +71,7 @@ def signup_view(request):
 
         first_name       = request.POST.get('firstName', '').strip()
         last_name        = request.POST.get('lastName', '').strip()
-        email            = request.POST.get('email', '').strip()
+        email            = request.POST.get('email', '').strip().lower()
         password         = request.POST.get('password', '')
         confirm_password = request.POST.get('confirmPassword', '')
         phone            = request.POST.get('phone', '').strip()
@@ -67,12 +86,20 @@ def signup_view(request):
             return JsonResponse({'ok': False, 'error': 'Please enter your last name.'})
         if not email:
             return JsonResponse({'ok': False, 'error': 'Please enter your email address.'})
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({'ok': False, 'error': 'Please enter a valid email address.'})
         if not password:
             return JsonResponse({'ok': False, 'error': 'Please enter a password.'})
         if len(password) < 8:
             return JsonResponse({'ok': False, 'error': 'Password must be at least 8 characters.'})
         if password != confirm_password:
             return JsonResponse({'ok': False, 'error': 'Passwords do not match.'})
+        try:
+            validate_password(password)
+        except ValidationError as error:
+            return JsonResponse({'ok': False, 'error': ' '.join(error.messages)})
         if User.objects.filter(email__iexact=email).exists():
             return JsonResponse({'ok': False, 'error': 'An account with this email already exists.'})
 
@@ -81,11 +108,13 @@ def signup_view(request):
         expires_at = timezone.now() + timedelta(hours=2)
         PendingSignup.objects.filter(email__iexact=email, expires_at__lt=timezone.now()).delete()
         pending, _ = PendingSignup.objects.update_or_create(
-            email__iexact=email,
+            email=email,
             defaults={
                 'first_name': first_name,
                 'last_name': last_name,
-                'password': password,
+                # A pending signup can exist briefly before checkout; never store its
+                # password in plain text during that interval.
+                'password': make_password(password),
                 'phone': phone,
                 'city': city,
                 'plan': plan,
@@ -116,9 +145,12 @@ def payment_page(request):
         pending = PendingSignup.objects.filter(token=token).first()
     if not pending:
         return redirect('Authentication:signup')
+    if pending.is_expired:
+        pending.delete()
+        return redirect('Authentication:signup')
 
     plan        = pending.plan
-    amount      = 20000 if plan == 'premium' else 10000
+    amount      = EmployerProfile.PLAN_AMOUNTS[plan]
     plan_label  = 'Premium Plan — ₦20,000' if plan == 'premium' else 'Standard Plan — ₦10,000'
 
     context = {
@@ -135,17 +167,84 @@ def payment_page(request):
     return render(request, 'Authentication/payment.html', context)
 
 
+@require_POST
+def payment_redirect(request):
+    """
+    Server-side redirect to Flutterwave hosted payment page.
+    This avoids the unreliable inline checkout JS modal.
+    """
+    from django.conf import settings as django_settings
+
+    pending = None
+    token = request.session.get('pending_signup_token')
+    if token:
+        pending = PendingSignup.objects.filter(token=token).first()
+    if not pending:
+        return redirect('Authentication:signup')
+
+    if pending.is_expired:
+        pending.delete()
+        return redirect('Authentication:signup')
+
+    plan = pending.plan
+    amount = EmployerProfile.PLAN_AMOUNTS[plan]
+    tx_ref = pending.token
+
+    callback_url = request.scheme + '://' + request.get_host() + reverse('Authentication:payment_callback')
+
+    payload = {
+        "tx_ref": tx_ref,
+        "amount": str(amount),
+        "currency": "NGN",
+        "redirect_url": callback_url,
+        "payment_options": "card,account,ussd",
+        "customer": {
+            "email": pending.email,
+            "phone_number": pending.phone,
+            "name": pending.first_name + ' ' + pending.last_name,
+        },
+        "customizations": {
+            "title": "SelectRoyalMaids",
+            "description": 'Premium Plan — ₦20,000' if plan == 'premium' else 'Standard Plan — ₦10,000',
+        },
+    }
+
+    try:
+        resp = http_requests.post(
+            'https://api.flutterwave.com/v3/payments',
+            headers={
+                'Authorization': 'Bearer ' + django_settings.FLUTTERWAVE_SECRET_KEY,
+                'Content-Type': 'application/json',
+            },
+            json=payload,
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except (http_requests.RequestException, ValueError):
+        logger.exception('Flutterwave checkout initialization failed.')
+        messages.error(request, 'Unable to connect to payment gateway. Please try again.')
+        return redirect('Authentication:payment_page')
+
+    if data.get('status') == 'success' and data.get('data', {}).get('link'):
+        return redirect(data['data']['link'])
+
+    messages.error(request, 'Payment initialization failed. Please try again or contact support.')
+    return redirect('Authentication:payment_page')
+
+
 def payment_callback(request):
     """
     Flutterwave redirects here after the customer completes (or cancels) payment.
     Query params: status, tx_ref, transaction_id
     We verify server-side, then create the account only on confirmed success.
     """
-    import uuid, requests as http_requests
     from django.conf import settings as django_settings
 
-    status         = request.GET.get('status', '')
-    transaction_id = request.GET.get('transaction_id', '')
+    callback_data = request.POST if request.method == 'POST' else request.GET
+    status         = callback_data.get('status', '')
+    transaction_id = callback_data.get('transaction_id', '')
+    tx_ref         = callback_data.get('tx_ref', '')
 
     # ── Payment not completed / cancelled ────────────────────────────────────
     if status != 'successful' or not transaction_id:
@@ -159,18 +258,18 @@ def payment_callback(request):
             headers={'Authorization': f'Bearer {django_settings.FLUTTERWAVE_SECRET_KEY}'},
             timeout=15,
         )
+        resp.raise_for_status()
         data = resp.json()
-    except Exception:
+    except (http_requests.RequestException, ValueError):
+        logger.exception('Flutterwave transaction verification failed.')
         return redirect('Authentication:payment_failed')
 
-    if data.get('status') != 'success' or data.get('data', {}).get('status') != 'successful':
+    transaction_data = data.get('data', {})
+    if data.get('status') != 'success' or transaction_data.get('status') != 'successful':
         return redirect('Authentication:payment_failed')
 
     # ── Retrieve pending signup from database (token survives redirects) ─────
-    tx_ref = request.GET.get('tx_ref', '')
     pending = PendingSignup.objects.filter(token=tx_ref).first()
-    if not pending:
-        pending = request.session.get('pending_signup')
     if not pending:
         # Session expired — send back to start
         return redirect('Authentication:signup')
@@ -179,75 +278,67 @@ def payment_callback(request):
         pending.delete()
         return redirect('Authentication:signup')
 
-    email = pending.email if hasattr(pending, 'email') else pending.get('email', '')
-    plan  = pending.plan if hasattr(pending, 'plan') else pending.get('plan', 'standard')
-    if not email:
+    # Treat the gateway response as untrusted until it agrees with our pending order.
+    if transaction_data.get('tx_ref') != pending.token:
         return redirect('Authentication:payment_failed')
-
-    # Verify amount matches what we expect
+    if transaction_data.get('currency') != 'NGN':
+        return redirect('Authentication:payment_failed')
     try:
-        flw_amount = float(data['data'].get('amount', 0))
-    except (TypeError, ValueError):
-        flw_amount = 0
-    expected_amt = 20000 if plan == 'premium' else 10000
-    if flw_amount < expected_amt:
+        flw_amount = Decimal(str(transaction_data.get('amount')))
+    except (InvalidOperation, TypeError, ValueError):
+        return redirect('Authentication:payment_failed')
+    expected_amt = Decimal(EmployerProfile.PLAN_AMOUNTS[pending.plan])
+    if flw_amount != expected_amt:
         return redirect('Authentication:payment_failed')
 
     # ── Create the account now that payment is confirmed ──────────────────────
-    # Guard against duplicate (e.g. user hitting back/refresh)
-    def _get_pending_value(p, key, default=''):
-        if hasattr(p, key):
-            return getattr(p, key) or default
-        if isinstance(p, dict):
-            return p.get(key, default)
-        return default
-
     try:
-        user = User.objects.filter(email__iexact=email).first()
-        if not user:
-            user = User.objects.create_user(
-                username=email,
-                email=email,
-                password=_get_pending_value(pending, 'password'),
-                first_name=_get_pending_value(pending, 'first_name'),
-                last_name=_get_pending_value(pending, 'last_name'),
-                is_active=True,
-                is_staff=False,
-                is_superuser=False,
-            )
+        with transaction.atomic():
+            pending = PendingSignup.objects.select_for_update().get(pk=pending.pk)
+            user = User.objects.filter(email__iexact=pending.email).first()
+            if not user:
+                user = User(
+                    username=pending.email,
+                    email=pending.email,
+                    first_name=pending.first_name,
+                    last_name=pending.last_name,
+                    is_active=True,
+                )
+                try:
+                    identify_hasher(pending.password)
+                    user.password = pending.password
+                except ValueError:
+                    # Supports pending records created before password hashing was added.
+                    user.password = make_password(pending.password)
+                user.save()
 
-        # Create/update employer profile
-        profile, _ = EmployerProfile.objects.get_or_create(user=user)
-        profile.phone          = _get_pending_value(pending, 'phone')
-        profile.city           = _get_pending_value(pending, 'city')
-        profile.service_needed = _get_pending_value(pending, 'service')
-        profile.how_heard      = _get_pending_value(pending, 'how_heard')
-        profile.plan           = plan
-        profile.payment_status = 'paid'
-        profile.payment_ref    = str(transaction_id)
-        profile.save()
-    except Exception:
+            EmployerProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    'phone': pending.phone,
+                    'city': pending.city,
+                    'service_needed': pending.service,
+                    'how_heard': pending.how_heard,
+                    'plan': pending.plan,
+                    'payment_status': 'paid',
+                    'payment_ref': str(transaction_id),
+                },
+            )
+            pending.delete()
+    except (IntegrityError, PendingSignup.DoesNotExist):
+        logger.exception('Could not finalize verified Flutterwave payment %s.', transaction_id)
         return redirect('Authentication:payment_failed')
 
     # Clear the pending signup data
-    if hasattr(pending, 'delete'):
-        pending.delete()
-    request.session.pop('pending_signup', None)
     request.session.pop('pending_signup_token', None)
 
     # Log the user in and go to the success page
     try:
         login(request, user)
-        try:
-            send_signup_welcome_email(user, plan)
-        except Exception:
-            pass
-        try:
-            send_payment_success_email(user, plan)
-        except Exception:
-            pass
+        send_signup_welcome_email(user, user.employer_profile.plan)
+        send_payment_success_email(user, user.employer_profile.plan)
     except Exception:
-        pass
+        logger.exception('Payment succeeded but login or receipt delivery failed.')
     return redirect('Authentication:payment_success')
 
 
@@ -260,16 +351,16 @@ def payment_success(request):
 
 def payment_failed(request):
     """Shown when payment is cancelled or verification fails."""
-    pending = request.session.get('pending_signup')
+    pending = None
+    token = request.session.get('pending_signup_token')
+    if token:
+        pending = PendingSignup.objects.filter(token=token).first()
     if pending:
-        email = pending.get('email', '')
-        if email:
-            try:
-                user = User.objects.filter(email__iexact=email).first()
-                if user:
-                    send_payment_failed_email(user)
-            except Exception:
-                pass
+        try:
+            # Failed payments occur before an account is created.
+            send_payment_failed_email(User(email=pending.email, username=pending.email))
+        except Exception:
+            logger.exception('Unable to send payment-failed email.')
     return render(request, 'Authentication/payment_failed.html')
 
 
@@ -622,7 +713,7 @@ def blog_create(request):
         slug  = request.POST.get('slug', '').strip()
         title = request.POST.get('title', '').strip()
         if slug and title:
-            BlogPost.objects.create(
+            post = BlogPost.objects.create(
                 slug=slug, title=title,
                 excerpt=request.POST.get('excerpt', '').strip(),
                 category=request.POST.get('category', 'general'),
@@ -636,17 +727,9 @@ def blog_create(request):
                 is_published=request.POST.get('is_published') == 'on',
                 published_at=timezone.now(),
             )
-            messages.success(request, f'Post "{title}" published.')
-            try:
-                post = BlogPost.objects.filter(slug=slug).first()
-                if post:
-                    for user in User.objects.filter(is_active=True, is_staff=False):
-                        try:
-                            send_blog_alert_email(user, post)
-                        except Exception:
-                            pass
-            except Exception:
-                pass
+            messages.success(request, f'Post "{title}" created.')
+            if post.is_published:
+                _send_new_blog_post_alerts(post)
             return redirect('/admin/dashboard/?tab=blog')
         else:
             messages.error(request, 'Slug and title are required.')
@@ -661,6 +744,7 @@ def blog_edit(request, post_id):
         return redirect('Authentication:employer_dashboard')
     post = get_object_or_404(BlogPost, pk=post_id)
     if request.method == 'POST':
+        was_published = post.is_published
         post.slug         = request.POST.get('slug',         post.slug).strip()
         post.title        = request.POST.get('title',        post.title).strip()
         post.excerpt      = request.POST.get('excerpt',      post.excerpt).strip()
@@ -683,6 +767,8 @@ def blog_edit(request, post_id):
         post.is_published = request.POST.get('is_published') == 'on'
         post.save()
         messages.success(request, f'Post "{post.title}" updated.')
+        if post.is_published and not was_published:
+            _send_new_blog_post_alerts(post)
         return redirect('/admin/dashboard/?tab=blog')
     return render(request, 'Dashboard/blog_edit.html', {
         'post': post,

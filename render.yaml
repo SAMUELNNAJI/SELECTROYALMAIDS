@@ -18,14 +18,16 @@ services:
         fromDatabase:
           name: selectroyal-db
           property: connectionString
-      - key: PAYSTACK_PUBLIC_KEY
+      - key: FLUTTERWAVE_PUBLIC_KEY
         sync: false                  # fill in manually in the Render dashboard
-      - key: PAYSTACK_SECRET_KEY
+      - key: FLUTTERWAVE_SECRET_KEY
         sync: false                  # fill in manually in the Render dashboard
       - key: EMAIL_BACKEND
         value: "django.core.mail.backends.smtp.EmailBackend"
       - key: EMAIL_HOST_PASSWORD
         sync: false                  # fill in manually in the Render dashboard
+      - key: DEFAULT_FROM_EMAIL
+        sync: false                  # must be a verified ZeptoMail sender
 
   # ── Postgres database ────────────────────────────────────────────────────────
 databases:
