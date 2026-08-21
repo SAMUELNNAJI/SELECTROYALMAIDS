@@ -553,7 +553,16 @@
         headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/x-www-form-urlencoded' },
         body:    body.toString(),
       })
-      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        return res.json().catch(function () {
+          throw new Error('Signup could not be completed (HTTP ' + res.status + ').');
+        }).then(function (data) {
+          if (!res.ok) {
+            throw new Error(data.error || 'Signup could not be completed (HTTP ' + res.status + ').');
+          }
+          return data;
+        });
+      })
       .then(function (data) {
         if (data.ok) {
           /* Go straight to the payment page — no fake "account created" screen */
@@ -564,8 +573,8 @@
           btn.disabled  = false;
         }
       })
-      .catch(function () {
-        showError('Network error — please check your connection and try again.');
+      .catch(function (error) {
+        showError(error.message || 'Signup could not be completed. Please try again.');
         btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Pay &amp; Create Account';
         btn.disabled  = false;
       });
