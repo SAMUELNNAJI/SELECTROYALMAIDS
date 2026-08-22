@@ -207,10 +207,11 @@ cat <<NEXT
      sudo vi ${ENV_FILE}
    (SECRET_KEY, ALLOWED_HOSTS, DATABASE_URL, SMTP credentials…)
 
-2) First-time DB + static files:
-     sudo -u ${SITE_NAME} ${VENV_DIR}/bin/python ${APP_DIR}/manage.py migrate --noinput
-     sudo -u ${SITE_NAME} ${VENV_DIR}/bin/python ${APP_DIR}/manage.py collectstatic --noinput
-     sudo -u ${SITE_NAME} ${VENV_DIR}/bin/python ${APP_DIR}/manage.py createsuperuser
+2) First-time DB + static files (each command sources your env file first,
+   so Django sees DATABASE_URL / SECRET_KEY etc.):
+     sudo -u ${SITE_NAME} bash -c 'set -a; source ${ENV_FILE}; cd ${APP_DIR} && venv/bin/python manage.py migrate --noinput'
+     sudo -u ${SITE_NAME} bash -c 'set -a; source ${ENV_FILE}; cd ${APP_DIR} && venv/bin/python manage.py collectstatic --noinput'
+     sudo -u ${SITE_NAME} bash -c 'set -a; source ${ENV_FILE}; cd ${APP_DIR} && venv/bin/python manage.py createsuperuser'
      sudo systemctl restart ${UNIT_NAME}.service
 
 3) HTTPS:
