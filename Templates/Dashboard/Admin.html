@@ -759,7 +759,7 @@
       <div class="service-grid">
         {% for svc in services %}
         <div class="service-card">
-           {% if svc.get_image_url %}<img src="{{ svc.get_image_url }}" alt="{{ svc.title }}" class="service-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><div class="service-card-img-placeholder" style="display:none;"><i class="fa-solid {{ svc.icon }}"></i></div>
+           {% if svc.get_image_url %}<img src="{{ svc.get_image_url }}" alt="{{ svc.title }}" class="service-card-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><div class="service-card-img-placeholder" style="display:none;"><i class="fa-solid {{ svc.icon }}"></i></div>
           {% else %}<div class="service-card-img-placeholder"><i class="fa-solid {{ svc.icon }}"></i></div>{% endif %}
           <div class="service-card-body">
             <div class="service-card-top">

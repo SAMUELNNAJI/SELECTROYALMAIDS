@@ -170,16 +170,17 @@ class Service(models.Model):
         return [f.strip() for f in self.features.splitlines() if f.strip()]
 
     def get_image_url(self):
+        # Render the remote URL the admin configured. The previous behaviour
+        # preferred a locally downloaded copy, but those live on Render's
+        # ephemeral disk and vanish on every redeploy — leaving the database
+        # pointing at /media/... files that no longer exist, which triggers the
+        # card's icon fallback. Hot-linking the configured CDN URL works on
+        # every host and survives redeploys.
+        if self.image_url:
+            return self.image_url
         if self.image_file:
             return self.image_file.url
-        return self.image_url or ''
-
-    def save(self, *args, **kwargs):
-        if self.image_url and not self.image_file:
-            downloaded = download_external_image(self.image_url, 'services')
-            if downloaded:
-                self.image_file = downloaded
-        super().save(*args, **kwargs)
+        return ''
 
     def __str__(self):
         return self.title
