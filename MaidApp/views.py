@@ -164,9 +164,13 @@ def index(request):
             )[:4 - len(top_maids)]
         )
 
+    # Services grid — latest 3 active services (id tie-breaker keeps newest additions first)
+    service_list = Service.objects.filter(is_active=True).order_by('-created_at', '-id')[:3]
+
     return render(request, 'selectroyal/index.html', {
         'hero_maids': hero_maids,
         'top_maids':  top_maids,
+        'service_list': service_list,
     })
 
 

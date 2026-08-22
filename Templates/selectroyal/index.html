@@ -367,43 +367,28 @@
         <a href="{% url 'MaidApp:services' %}" class="btn btn-outline">View All Services</a>
       </div>
       <div class="services-grid" data-stagger="120">
-
+        {% for svc in service_list %}
         <div class="service-card">
           <div class="service-img-wrap">
-            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Nigerian maid cleaning home" loading="lazy" />
-            <span class="service-tag">Most Popular</span>
+            {% if svc.get_image_url %}
+            <img src="{{ svc.get_image_url }}" alt="{{ svc.title }}" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';" />
+            <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;font-size:3rem;"><i class="fa-solid {{ svc.icon }}"></i></div>
+            {% else %}
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;font-size:3rem;"><i class="fa-solid {{ svc.icon }}"></i></div>
+            {% endif %}
+            {% if svc.badge_label %}<span class="service-tag">{{ svc.badge_label }}</span>{% endif %}
           </div>
           <div class="service-body">
-            <h3>Maid / House Help</h3>
-            <p>Reliable daily or live-in maids for full household management including cleaning, laundry and more.</p>
+            <h3>{{ svc.title }}</h3>
+            <p>{{ svc.description }}</p>
             <a href="{% url 'MaidApp:services' %}" class="service-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
           </div>
         </div>
-
-        <div class="service-card">
-          <div class="service-img-wrap">
-            <img src="https://images.unsplash.com/photo-1507048331197-7d4ac70811cf?w=400&q=80" alt="Nigerian cook in kitchen" />
-          </div>
-          <div class="service-body">
-            <h3>Cook / Chef</h3>
-            <p>Experienced cooks specialising in desi, continental and fusion cuisines for families of all sizes.</p>
-            <a href="{% url 'MaidApp:services' %}" class="service-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
-          </div>
+        {% empty %}
+        <div class="service-card" style="grid-column:1/-1;text-align:center;justify-content:center;align-items:center;padding:40px 20px;color:#64748b;">
+          <p>Our services catalogue is being updated. Please check back soon.</p>
         </div>
-
-        <div class="service-card">
-          <div class="service-img-wrap">
-            <img src="https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&q=80" alt="Baby sitter with child" />
-          </div>
-          <div class="service-body">
-            <h3>Baby Sitter</h3>
-            <p>Caring and trained babysitters who keep your children safe, engaged and happy while you are away.</p>
-            <a href="{% url 'MaidApp:services' %}" class="service-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
-          </div>
-        </div>
-
-
-
+        {% endfor %}
       </div>
     </div>
   </section>
