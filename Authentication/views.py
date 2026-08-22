@@ -20,6 +20,7 @@ from django.db.models import Q
 from django.views.decorators.http import require_POST
 from datetime import timedelta
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
+from MaidApp.image_utils import resolve_image_url
 from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email
 from .models import EmployerProfile, PendingSignup
 
@@ -862,13 +863,16 @@ def service_create(request):
         desc  = request.POST.get('description', '').strip()
         feats = request.POST.get('features', '').strip()
         if slug and title and desc and feats:
+            raw_image_url = request.POST.get('image_url', '').strip()
             Service.objects.create(
                 slug=slug, title=title,
                 badge_label=request.POST.get('badge_label', '').strip(),
                 badge_color=request.POST.get('badge_color', 'blue'),
                 icon=request.POST.get('icon', 'fa-star'),
                 description=desc, features=feats,
-                image_url=request.POST.get('image_url', '').strip(),
+                # Resolve share/page links (e.g. share.google, unsplash.com
+                # pages) to the actual image URL so they render in <img>.
+                image_url=resolve_image_url(raw_image_url) if raw_image_url else '',
                 available_count=request.POST.get('available_count', '0+').strip(),
                 avg_rating=request.POST.get('avg_rating', '4.9★').strip(),
                 guarantee_days=int(request.POST.get('guarantee_days', 30) or 30),
@@ -894,8 +898,17 @@ def service_edit(request, service_id):
         svc.icon            = request.POST.get('icon',            svc.icon)
         svc.description     = request.POST.get('description',     svc.description).strip()
         svc.features        = request.POST.get('features',        svc.features).strip()
-        new_image_url       = request.POST.get('image_url',       '').strip()
-        if new_image_url and new_image_url != svc.image_url:
+        raw_image_url   = request.POST.get('image_url', '').strip()
+        if raw_image_url:
+            new_image_url = resolve_image_url(raw_image_url)
+            if new_image_url != svc.image_url:
+                if svc.image_file:
+                    svc.image_file.delete(save=False)
+                svc.image_file = None
+        else:
+            # Clear request: remove both the URL and any stale local file so
+            # the card degrades to the icon placeholder instead of an old image.
+            new_image_url = ''
             if svc.image_file:
                 svc.image_file.delete(save=False)
             svc.image_file = None

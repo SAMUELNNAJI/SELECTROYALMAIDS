@@ -95,6 +95,69 @@ def _looks_like_image_url(url):
     return any(path.endswith(ext) for ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.avif'))
 
 
+def resolve_image_url(url, timeout=15):
+    """
+    Turn any URL an admin pastes into an Image URL that is directly usable as
+    an <img> src.
+
+    A lot of share links are NOT image files:
+      - https://share.google/...          -> redirects to a Google *page*
+      - https://unsplash.com/photos/...   -> an HTML page
+      - https://photos.app.goo.gl/...     -> a Google Photos page
+    Browsers cannot render HTML inside an <img>, so these all "fall back".
+    The resolved HTML page still embeds an og:image tag, so we can follow
+    redirects and extract the real image URL.
+
+    Returns the resolved direct image URL; if nothing can be found the
+    original URL is returned unchanged (the template then degrades to the
+    icon fallback rather than erroring).
+    """
+    if not url or not url.strip():
+        return (url or '').strip()
+
+    url = url.strip()
+    seen = set()
+
+    for _ in range(3):
+        if url in seen:
+            break
+        seen.add(url)
+        try:
+            resp = requests.get(
+                url,
+                headers={
+                    'User-Agent': USER_AGENTS[0],
+                    'Accept': ACCEPT_HEADERS[0],
+                    'Accept-Language': 'en-US,en;q=0.9',
+                },
+                timeout=timeout,
+                allow_redirects=True,
+            )
+        except Exception:
+            break
+
+        content_type = resp.headers.get('Content-Type', '').split(';')[0].strip().lower()
+
+        if content_type.startswith('image/'):
+            return resp.url or url
+
+        # Some CDNs serve images with a generic/empty Content-Type but an
+        # image-looking path (e.g. .jpg). Trust that and use the final URL.
+        if not content_type and _looks_like_image_url(url):
+            return resp.url or url
+
+        if content_type.startswith('text/html'):
+            target = _extract_meta_image(resp.text, url)
+            if target and target not in seen:
+                url = target
+                continue
+
+        # content-type exists but is not an image and not HTML
+        break
+
+    return url
+
+
 def _ext_from_content_type(content_type):
     mapping = {
         'image/jpeg': '.jpg',
