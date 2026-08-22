@@ -35,7 +35,7 @@
       {% if featured %}
       <div class="blog-featured-card" data-reveal="up">
         <div class="blog-featured-img-wrap">
-          <img src="{{ featured.cover_url }}" alt="{{ featured.title }}" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#1e3a8a,#2563eb)';" />
+          <img src="{{ featured.cover_url }}" alt="{{ featured.title }}" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#1e3a8a,#2563eb)';" />
           <span class="blog-cat-tag">{{ featured.get_category_display }}</span>
         </div>
         <div class="blog-featured-content">
@@ -95,7 +95,7 @@
         <article class="blog-card">
           <div class="blog-card-img-wrap">
             {% if post.cover_url %}
-            <img src="{{ post.cover_url }}" alt="{{ post.title }}" loading="lazy" onerror="this.style.display='none';" />
+            <img src="{{ post.cover_url }}" alt="{{ post.title }}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';" />
             {% endif %}
             <span class="blog-card-tag">{{ post.get_category_display }}</span>
           </div>

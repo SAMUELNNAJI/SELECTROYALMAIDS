@@ -951,7 +951,7 @@ def blog_create(request):
                 excerpt=request.POST.get('excerpt', '').strip(),
                 category=request.POST.get('category', 'general'),
                 author_name='SelectRoyal Maids Admin',
-                cover_image=request.POST.get('cover_image', '').strip(),
+                cover_image=resolve_image_url(request.POST.get('cover_image', '').strip()),
                 cover_image_file=request.FILES.get('cover_image_file'),
                 content=request.POST.get('content', '').strip(),
                 tags=request.POST.get('tags', '').strip(),
@@ -992,7 +992,7 @@ def blog_edit(request, post_id):
             if post.cover_image_file:
                 post.cover_image_file.delete(save=False)
             post.cover_image_file = None
-            post.cover_image = cover_url
+            post.cover_image = resolve_image_url(cover_url)
         post.content      = request.POST.get('content',      post.content).strip()
         post.tags         = request.POST.get('tags',         post.tags).strip()
         post.read_time    = int(request.POST.get('read_time', post.read_time) or post.read_time)
