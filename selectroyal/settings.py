@@ -83,11 +83,17 @@ DATABASE_URL = os.environ.get(
 
 if DATABASE_URL:
     import dj_database_url
+    # Force TLS only for REMOTE Postgres (Neon / Render / managed hosts).
+    # Local databases (localhost / 127.0.0.1 / ::1) typically have no SSL
+    # certificates, so requiring it would break every connection.
+    _remote_pg = DATABASE_URL.startswith(('postgres://', 'postgresql://')) and not any(
+        host in DATABASE_URL for host in ('localhost', '127.0.0.1', '::1')
+    )
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=DATABASE_URL.startswith(('postgres://', 'postgresql://')),
+            ssl_require=_remote_pg,
         )
     }
 else:
