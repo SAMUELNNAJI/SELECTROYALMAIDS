@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Placement Request – SelectRoyal Maids</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#1e3a8a;padding:28px 40px;text-align:center;border-radius:12px 12px 0 0;">
+              <img src="{{ site_url }}/static/image/logo%20(1).png" width="112" alt="SelectRoyal Maids" style="display:block;width:112px;height:auto;margin:0 auto 12px;border:0;">
+              <h1 style="margin:0;font-size:1.4rem;color:#ffffff;font-weight:700;letter-spacing:.3px;">SelectRoyal Maids</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:.85rem;">New Placement Request</p>
+            </td>
+          </tr>
+
+          <!-- Hero -->
+          <tr>
+            <td style="background-color:#0891b2;padding:18px 40px;text-align:center;">
+              <p style="margin:0;font-size:1.6rem;">&#128203;</p>
+              <p style="margin:6px 0 0;color:#ffffff;font-weight:700;font-size:1rem;">
+                Request #{{ placement.id }} — from {{ employer.get_full_name|default:employer.username }}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Employer details -->
+          <tr>
+            <td style="background-color:#ffffff;padding:28px 40px 0;">
+              <p style="margin:0 0 14px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Employer</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:24px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;width:38%;vertical-align:top;">Employer</td>
+                        <td style="padding:5px 0;color:#0f172a;font-weight:600;font-size:.88rem;">{{ employer.get_full_name|default:employer.username }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Email</td>
+                        <td style="padding:5px 0;font-size:.88rem;">
+                          <a href="mailto:{{ employer.email }}" style="color:#1e3a8a;text-decoration:underline;">{{ employer.email }}</a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Plan</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ placement.get_plan_display }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Status</td>
+                        <td style="padding:5px 0;color:#f59e0b;font-weight:600;font-size:.88rem;">{{ placement.get_status_display }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Request details -->
+          <tr>
+            <td style="background-color:#ffffff;padding:0 40px 28px;">
+              <p style="margin:0 0 10px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Request Details</p>
+              <div style="border:1px solid #e2e8f0;border-left:4px solid #1e3a8a;border-radius:0 8px 8px 0;overflow:hidden;">
+                {{ request_details|safe }}
+              </div>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td style="background-color:#ffffff;padding:0 40px 32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background-color:#1e3a8a;border-radius:8px;">
+                    <a href="{{ site_url }}/admin/dashboard/" style="display:inline-block;padding:13px 28px;color:#ffffff;text-decoration:none;font-weight:600;font-size:.95rem;">Open Admin Dashboard &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0;color:#94a3b8;font-size:.78rem;">Submitted via the Request a Maid form at selectroyalmaids.com.ng</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

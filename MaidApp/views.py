@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from .models import BlogPost, BlogSubscriber, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
-from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email
+from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_maid_application_email
 
 
 def _pdf_escape(value):
@@ -355,7 +355,7 @@ def request_maid(request):
         requires_payment=requires_payment,
     )
     SupportMessage.objects.create(sender=request.user, employer=request.user, body=body)
-    send_request_form_email(request.user, placement)
+    send_request_form_email(request.user, placement, request_details_html=body)
     return JsonResponse({
         'success': True,
         'placement_id': placement.pk,
@@ -380,7 +380,10 @@ def register_as_maid(request):
             sent_to_whatsapp = _send_maid_application_to_whatsapp(application)
         except Exception:
             sent_to_whatsapp = False
-        if sent_to_whatsapp:
+        sent_to_email = send_maid_application_email(application)
+        if sent_to_whatsapp and sent_to_email:
+            messages.success(request, 'Your application has been received and sent to our verification team by email and WhatsApp.')
+        elif sent_to_whatsapp or sent_to_email:
             messages.success(request, 'Your application has been received and sent to our verification team.')
         else:
             messages.success(request, 'Your application has been received. Our verification team will contact you shortly.')

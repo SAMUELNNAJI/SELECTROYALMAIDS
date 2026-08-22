@@ -23,7 +23,10 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1 selectroyalmaids.onrender.com').split()
+ALLOWED_HOSTS = os.environ.get(
+    'ALLOWED_HOSTS',
+    'localhost 127.0.0.1 selectroyalmaids.onrender.com selectroyalmaids.com.ng www.selectroyalmaids.com.ng',
+).split()
 
 # ── Applications ──────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -187,6 +190,12 @@ else:
 
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000').strip("'\" ").rstrip('/')
 PAYMENT_CALLBACK_URL = os.environ.get('PAYMENT_CALLBACK_URL', '').strip("'\" ").rstrip('/')
+
+# Company inbox that receives internal notifications and form submissions
+# (e.g. new "Request a Maid" placement requests).
+NOTIFICATION_EMAIL = os.environ.get(
+    'NOTIFICATION_EMAIL', 'info@selectroyalmaids.com.ng'
+).strip("'\" ")
 
 
 

@@ -1,0 +1,13 @@
+[Unit]
+Description=gunicorn socket for SelectRoyal Maids
+PartOf=gunicorn.service
+
+[Socket]
+ListenStream=/run/gunicorn.sock
+# Let the nginx worker processes both read and write the socket.
+SocketUser=nginx
+SocketGroup=nginx
+SocketMode=0660
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,32 @@
+[Unit]
+Description=SelectRoyal Maids gunicorn daemon (Django WSGI)
+Requires=gunicorn.socket
+After=network.target gunicorn.socket
+
+[Service]
+User=selectroyal
+Group=selectroyal
+WorkingDirectory=/srv/selectroyal
+EnvironmentFile=/etc/selectroyal/selectroyal.env
+# Standard growth pattern: 2 x CPU cores + 1 workers.
+ExecStart=/srv/selectroyal/venv/bin/gunicorn \
+    --workers 3 \
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile - \
+    --capture-output \
+    selectroyal.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGQUIT
+
+# Hardening
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/srv/selectroyal
+
+[Install]
+WantedBy=multi-user.target

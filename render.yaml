@@ -24,6 +24,14 @@ services:
         sync: false                  # fill in manually in the Render dashboard
       - key: PAYMENT_CALLBACK_URL
         sync: false                  # e.g. https://your-domain.com (no trailing slash)
+      - key: NOTIFICATION_EMAIL
+        value: "info@selectroyalmaids.com.ng"   # inbox that receives new placement requests + maid applications
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false                  # fill in manually — required to deliver maid applications via WhatsApp
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false                  # fill in manually
+      - key: WHATSAPP_APPLICATION_RECIPIENT
+        value: "2349137894958"       # +234 913 789 4958 — maid applications are sent here
       - key: EMAIL_BACKEND
         value: "django.core.mail.backends.smtp.EmailBackend"
       - key: EMAIL_HOST_PASSWORD

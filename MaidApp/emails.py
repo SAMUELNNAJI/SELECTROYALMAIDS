@@ -1,5 +1,8 @@
 import logging
+import mimetypes
 import re
+from pathlib import Path
+
 from django.core.mail import EmailMultiAlternatives
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -17,8 +20,11 @@ def _html_to_text(html):
     return text
 
 
-def send_email(subject, to_email, template_name, context=None, from_email=None):
-    """Send one transactional message through the configured email backend."""
+def send_email(subject, to_email, template_name, context=None, from_email=None, attachments=None):
+    """Send one transactional message through the configured email backend.
+
+    ``attachments`` is an optional list of ``(filename, content, mimetype)`` tuples.
+    """
     if context is None:
         context = {}
     context.setdefault('site_url', settings.SITE_URL)
@@ -36,6 +42,8 @@ def send_email(subject, to_email, template_name, context=None, from_email=None):
 
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
     msg.attach_alternative(html_content, "text/html")
+    for filename, content, mime_type in (attachments or []):
+        msg.attach(filename, content, mime_type)
     try:
         sent = msg.send(fail_silently=False)
     except Exception:
@@ -81,12 +89,49 @@ def send_unread_support_email(employer, unread_count=1):
     )
 
 
-def send_request_form_email(employer, placement):
+def send_request_form_email(employer, placement, request_details_html=None):
+    """Send a placement request receipt to the employer and notify the company inbox."""
+    # 1) Receipt / confirmation to the employer who submitted the request
     send_email(
         "Placement Request Received - SelectRoyal Maids",
         employer.email,
         'emails/request_form_submitted.html',
         {'employer': employer, 'placement': placement},
+    )
+    # 2) New placement-request notification to the company inbox
+    send_email(
+        f"New Placement Request #{placement.id} - {employer.get_full_name() or employer.username}",
+        settings.NOTIFICATION_EMAIL,
+        'emails/placement_request_notification.html',
+        {
+            'employer': employer,
+            'placement': placement,
+            'request_details': request_details_html,
+        },
+    )
+
+
+def send_maid_application_email(application):
+    """Send a new maid registration to the company inbox, photo attached when present."""
+    attachments = []
+    if application.profile_photo and application.profile_photo.name:
+        try:
+            content_type = mimetypes.guess_type(application.profile_photo.name)[0] or 'application/octet-stream'
+            with application.profile_photo.open('rb') as photo:
+                attachments.append((
+                    f'maid-application-{application.pk}-photo{Path(application.profile_photo.name).suffix}',
+                    photo.read(),
+                    content_type,
+                ))
+        except Exception:
+            logger.exception('Could not attach applicant photo for application %s.', application.pk)
+
+    return send_email(
+        f"New Maid Application #{application.pk} - {application.first_name} {application.last_name}",
+        settings.NOTIFICATION_EMAIL,
+        'emails/maid_application_notification.html',
+        {'application': application},
+        attachments=attachments,
     )
 
 

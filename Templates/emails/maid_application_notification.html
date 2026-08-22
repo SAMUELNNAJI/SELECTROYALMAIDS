@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Maid Application – SelectRoyal Maids</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#1e3a8a;padding:28px 40px;text-align:center;border-radius:12px 12px 0 0;">
+              <img src="{{ site_url }}/static/image/logo%20(1).png" width="112" alt="SelectRoyal Maids" style="display:block;width:112px;height:auto;margin:0 auto 12px;border:0;">
+              <h1 style="margin:0;font-size:1.4rem;color:#ffffff;font-weight:700;letter-spacing:.3px;">SelectRoyal Maids</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:.85rem;">New Maid Application</p>
+            </td>
+          </tr>
+
+          <!-- Hero -->
+          <tr>
+            <td style="background-color:#0891b2;padding:18px 40px;text-align:center;">
+              <p style="margin:0;font-size:1.6rem;">&#128105;</p>
+              <p style="margin:6px 0 0;color:#ffffff;font-weight:700;font-size:1rem;">
+                {{ application.first_name }} {{ application.last_name }} — {{ application.get_role_display }}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Applicant photo -->
+          {% if application.profile_photo %}
+          <tr>
+            <td style="background-color:#ffffff;padding:24px 40px 0;text-align:center;">
+              <img src="{{ site_url }}/media/{{ application.profile_photo }}" alt="Applicant photo" width="140"
+                   style="display:inline-block;width:140px;height:auto;border:3px solid #e2e8f0;border-radius:10px;">
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- Applicant details -->
+          <tr>
+            <td style="background-color:#ffffff;padding:28px 40px 0;">
+              <p style="margin:0 0 14px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Applicant Details</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+                <tr>
+                  <td style="padding:12px 20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      {% if application.pk %}
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;width:38%;vertical-align:top;">Application ID</td>
+                        <td style="padding:5px 0;color:#0f172a;font-weight:600;font-size:.88rem;">#{{ application.pk }}</td>
+                      </tr>
+                      {% endif %}
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Submitted</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.created_at|date:"d F Y, H:i" }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Full Name</td>
+                        <td style="padding:5px 0;color:#0f172a;font-weight:600;font-size:.88rem;">{{ application.first_name }} {{ application.last_name }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Email</td>
+                        <td style="padding:5px 0;font-size:.88rem;">
+                          <a href="mailto:{{ application.email }}" style="color:#1e3a8a;text-decoration:underline;">{{ application.email }}</a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Phone</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">
+                          <a href="tel:{{ application.phone }}" style="color:#1e3a8a;text-decoration:underline;">{{ application.phone }}</a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Date of Birth</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.date_of_birth|date:"d F Y" }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Gender</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.gender }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">State</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.state }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">City / Area</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.city }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Role</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.get_role_display }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Work Type</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.get_work_type_display }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Years of Experience</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.years_experience }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Availability</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.availability }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Expected Salary</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.expected_salary }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Languages</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.languages }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Skills</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.skills }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">NIN</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.nin }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Reference Name</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.reference_name }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Reference Phone</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.reference_phone }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- About / Bio -->
+          <tr>
+            <td style="background-color:#ffffff;padding:0 40px 28px;">
+              <p style="margin:0 0 10px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">About the Applicant</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border-left:4px solid #1e3a8a;border-radius:0 8px 8px 0;">
+                <tr>
+                  <td style="padding:16px 20px;color:#1f2937;font-size:.95rem;line-height:1.7;white-space:pre-wrap;">{{ application.bio }}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0;color:#94a3b8;font-size:.78rem;">Submitted via the Register as a Maid form at selectroyalmaids.com.ng</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
