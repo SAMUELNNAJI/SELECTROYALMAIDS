@@ -85,9 +85,9 @@ class BlogPost(models.Model):
     excerpt       = models.TextField(help_text='Short summary shown on the listing page')
     category      = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='general')
     author_name   = models.CharField(max_length=120)
-    author_avatar = models.URLField(blank=True, help_text='URL to author profile photo')
+    author_avatar = models.URLField(max_length=500, blank=True, help_text='URL to author profile photo')
     author_bio    = models.TextField(blank=True)
-    cover_image      = models.URLField(blank=True)
+    cover_image      = models.URLField(max_length=500, blank=True)
     cover_image_file = models.ImageField(upload_to='blog/covers/', blank=True, null=True,
                                          help_text='Upload a cover image (used instead of URL if provided)')
     content       = models.TextField(help_text='Full article HTML or plain text')
@@ -151,7 +151,7 @@ class Service(models.Model):
     icon        = models.CharField(max_length=40, choices=ICON_CHOICES, default='fa-star')
     description = models.TextField()
     features    = models.TextField(help_text='One feature per line')
-    image_url   = models.URLField(blank=True)
+    image_url   = models.URLField(max_length=500, blank=True)
     image_file  = models.ImageField(upload_to='services/', blank=True, null=True,
                                     help_text='Downloaded from image_url if provided')
     available_count = models.CharField(max_length=20, default='0+')
