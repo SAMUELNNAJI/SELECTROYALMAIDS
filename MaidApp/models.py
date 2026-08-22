@@ -113,7 +113,7 @@ class BlogPost(models.Model):
     @property
     def cover_url(self):
         """Returns the best available cover image URL — uploaded file takes priority over the URL field."""
-        if self.cover_image_file and default_storage.exists(self.cover_image_file.name):
+        if self.cover_image_file:
             return self.cover_image_file.url
         return self.cover_image or ''
 
@@ -170,7 +170,7 @@ class Service(models.Model):
         return [f.strip() for f in self.features.splitlines() if f.strip()]
 
     def get_image_url(self):
-        if self.image_file and default_storage.exists(self.image_file.name):
+        if self.image_file:
             return self.image_file.url
         return self.image_url or ''
 

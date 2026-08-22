@@ -45,10 +45,12 @@ def download_external_image(url, upload_to):
         if content_type.startswith('image/'):
             ext = _ext_from_content_type(content_type) or _ext_from_url(url)
             filename = _generate_filename(url, ext)
-            return default_storage.save(
+            saved_path = default_storage.save(
                 os.path.join(upload_to, filename),
                 ContentFile(resp.content),
             )
+            logger.info('Downloaded image from %s to %s', url, saved_path)
+            return saved_path
 
         if content_type.startswith('text/html'):
             image_url = _extract_meta_image(resp.text, url)

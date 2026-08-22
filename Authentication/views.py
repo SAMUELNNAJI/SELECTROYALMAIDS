@@ -894,7 +894,12 @@ def service_edit(request, service_id):
         svc.icon            = request.POST.get('icon',            svc.icon)
         svc.description     = request.POST.get('description',     svc.description).strip()
         svc.features        = request.POST.get('features',        svc.features).strip()
-        svc.image_url       = request.POST.get('image_url',       svc.image_url).strip()
+        new_image_url       = request.POST.get('image_url',       '').strip()
+        if new_image_url and new_image_url != svc.image_url:
+            if svc.image_file:
+                svc.image_file.delete(save=False)
+            svc.image_file = None
+        svc.image_url       = new_image_url
         svc.available_count = request.POST.get('available_count', svc.available_count).strip()
         svc.avg_rating      = request.POST.get('avg_rating',      svc.avg_rating).strip()
         svc.guarantee_days  = int(request.POST.get('guarantee_days', svc.guarantee_days) or svc.guarantee_days)
