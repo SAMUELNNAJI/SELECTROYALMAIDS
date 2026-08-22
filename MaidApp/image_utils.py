@@ -37,7 +37,7 @@ def download_external_image(url, upload_to):
             ),
         }
 
-        resp = requests.get(url, headers=headers, timeout=20, allow_redirects=True)
+        resp = requests.get(url, headers=headers, timeout=10, allow_redirects=True)
         resp.raise_for_status()
 
         content_type = resp.headers.get('Content-Type', '').split(';')[0].strip()

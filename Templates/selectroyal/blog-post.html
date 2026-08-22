@@ -77,7 +77,7 @@
   <!-- ===== COVER IMAGE ===== -->
   {% if post.cover_url %}
   <div class="post-cover-wrap container">
-    <img src="{{ post.cover_url }}" alt="{{ post.title }}" class="post-cover-img" />
+    <img src="{{ post.cover_url }}" alt="{{ post.title }}" class="post-cover-img" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#1e3a8a,#2563eb)';" />
   </div>
   {% endif %}
 
@@ -173,9 +173,9 @@
           <div class="post-sidebar-related">
             {% for rel in related %}
             <a href="{% url 'MaidApp:blog-post' rel.slug %}" class="post-sidebar-rel-item">
-              {% if rel.cover_url %}
-              <img src="{{ rel.cover_url }}" alt="{{ rel.title }}" />
-              {% endif %}
+               {% if rel.cover_url %}
+               <img src="{{ rel.cover_url }}" alt="{{ rel.title }}" onerror="this.style.display='none';" />
+               {% endif %}
               <div>
                 <p>{{ rel.title|truncatechars:60 }}</p>
                 <span>{{ rel.read_time }} min read</span>
@@ -207,18 +207,18 @@
         {% for rel in related %}
         <article class="blog-card">
           <div class="blog-card-img-wrap">
-            {% if rel.cover_url %}
-            <img src="{{ rel.cover_url }}" alt="{{ rel.title }}" loading="lazy" />
-            {% endif %}
+             {% if rel.cover_url %}
+             <img src="{{ rel.cover_url }}" alt="{{ rel.title }}" loading="lazy" onerror="this.style.display='none';" />
+             {% endif %}
             <span class="blog-card-tag">{{ rel.get_category_display }}</span>
           </div>
           <div class="blog-card-body">
             <h3 class="blog-card-title">{{ rel.title }}</h3>
             <p class="blog-card-excerpt">{{ rel.excerpt|truncatechars:120 }}</p>
             <div class="blog-card-meta">
-              {% if rel.author_avatar %}
-              <img src="{{ rel.author_avatar }}" alt="{{ rel.author_name }}" />
-              {% endif %}
+               {% if rel.author_avatar %}
+               <img src="{{ rel.author_avatar }}" alt="{{ rel.author_name }}" onerror="this.style.display='none';" />
+               {% endif %}
               <div>
                 <p class="blog-card-author">{{ rel.author_name }}</p>
                 <p class="blog-card-date">{{ rel.published_at|date:"d M Y" }} · {{ rel.read_time }} min read</p>

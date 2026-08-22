@@ -99,7 +99,8 @@
           </div>
           <div class="srv-panel-visual">
              {% if svc.get_image_url %}
-             <img src="{{ svc.get_image_url }}" alt="{{ svc.title }}" class="srv-panel-img" />
+             <img src="{{ svc.get_image_url }}" alt="{{ svc.title }}" class="srv-panel-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+             <div style="display:none;width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#1e3a8a,#2563eb);align-items:center;justify-content:center;color:#fff;font-size:2rem;border-radius:12px;"><i class="fa-solid {{ svc.icon }}"></i></div>
              {% endif %}
             <div class="srv-panel-stat-cards">
               <div class="srv-mini-stat">

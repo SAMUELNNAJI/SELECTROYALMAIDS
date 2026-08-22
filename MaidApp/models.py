@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
+from django.core.files.storage import default_storage
 from .image_utils import download_external_image
 
 
@@ -112,7 +113,7 @@ class BlogPost(models.Model):
     @property
     def cover_url(self):
         """Returns the best available cover image URL — uploaded file takes priority over the URL field."""
-        if self.cover_image_file:
+        if self.cover_image_file and default_storage.exists(self.cover_image_file.name):
             return self.cover_image_file.url
         return self.cover_image or ''
 
@@ -169,7 +170,7 @@ class Service(models.Model):
         return [f.strip() for f in self.features.splitlines() if f.strip()]
 
     def get_image_url(self):
-        if self.image_file:
+        if self.image_file and default_storage.exists(self.image_file.name):
             return self.image_file.url
         return self.image_url or ''
 
