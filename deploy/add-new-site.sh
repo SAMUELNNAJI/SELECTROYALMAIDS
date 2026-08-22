@@ -50,7 +50,16 @@ if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
 fi
 
 echo "▶ 1/8 System user + checkout of ${GIT_URL}"
-adduser --system --create-home --home-dir "${APP_DIR}" --shell /sbin/nologin "${SITE_NAME}"
+# Create the system user WITHOUT a home skeleton. On AlmaLinux, `adduser --create-home`
+# populates the new folder with /etc/skel dotfiles (.bashrc, .bash_profile…), which would
+# make the git clone target NON-EMPTY and cause `git clone` to refuse.
+# So we create the app folder ourselves (empty), verify it, then clone into it.
+adduser --system --no-create-home --home-dir "${APP_DIR}" --shell /sbin/nologin "${SITE_NAME}"
+mkdir -p "${APP_DIR}"
+if [[ -n "$(ls -A "${APP_DIR}")" ]]; then
+    echo "✗ ${APP_DIR} already exists and is not empty — refusing to overwrite." >&2
+    exit 1
+fi
 git clone "${GIT_URL}" "${APP_DIR}"
 chown -R "${SITE_NAME}:${SITE_NAME}" "${APP_DIR}"
 

@@ -44,7 +44,10 @@ sudo firewall-cmd --reload
 ## 3. Create the app account and directories
 
 ```bash
-sudo useradd --system --create-home --home-dir /srv/selectroyal --shell /sbin/nologin selectroyal
+# Create the app user WITHOUT a skeleton, then the (empty) folder, then clone.
+# (useradd --create-home would populate /srv/selectroyal with /etc/skel dotfiles and
+#  make `git clone` refuse because the target directory is not empty.)
+sudo useradd --system --no-create-home --home-dir /srv/selectroyal --shell /sbin/nologin selectroyal
 sudo mkdir -p /srv/selectroyal /etc/selectroyal
 sudo git clone https://github.com/SAMUELNNAJI/SELECTROYALMAIDS.git /srv/selectroyal
 sudo chown -R selectroyal:selectroyal /srv/selectroyal
@@ -174,8 +177,11 @@ certbot → verify). The script:
 ### Manual alternative (what the script does step-by-step)
 
 ```bash
-# 1) App account, folder, clone — SAME server, NEW folder per site
-sudo useradd --system --create-home --home-dir /srv/getmecare --shell /sbin/nologin getmecare
+# 1) App account, folder, clone — SAME server, NEW folder per site.
+#    Create the folder yourself (empty) BEFORE cloning. Do NOT use --create-home:
+#    it litters the folder with /etc/skel dotfiles, so `git clone` refuses.
+sudo useradd --system --no-create-home --home-dir /srv/getmecare --shell /sbin/nologin getmecare
+sudo mkdir -p /srv/getmecare
 sudo git clone https://github.com/YOUR-USER/GETMECARE.git /srv/getmecare
 sudo chown -R getmecare:getmecare /srv/getmecare
 
