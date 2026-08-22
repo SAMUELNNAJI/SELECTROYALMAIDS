@@ -759,7 +759,7 @@
       <div class="service-grid">
         {% for svc in services %}
         <div class="service-card">
-          {% if svc.image_url %}<img src="{{ svc.image_url }}" alt="{{ svc.title }}" class="service-card-img" loading="lazy" />
+           {% if svc.get_image_url %}<img src="{{ svc.get_image_url }}" alt="{{ svc.title }}" class="service-card-img" loading="lazy" />
           {% else %}<div class="service-card-img-placeholder"><i class="fa-solid {{ svc.icon }}"></i></div>{% endif %}
           <div class="service-card-body">
             <div class="service-card-top">
@@ -778,7 +778,7 @@
             <span style="font-size:.75rem;color:var(--muted);">Order: {{ svc.order }} · /{{ svc.slug }}</span>
             <div style="display:flex;gap:6px;">
               <button class="btn btn-ghost" style="padding:6px 12px;font-size:.78rem;"
-                onclick="openServiceEdit({{ svc.pk }},'{{ svc.slug|escapejs }}','{{ svc.title|escapejs }}','{{ svc.badge_label|escapejs }}','{{ svc.badge_color|escapejs }}','{{ svc.icon|escapejs }}','{{ svc.description|escapejs }}','{{ svc.features|escapejs }}','{{ svc.image_url|escapejs }}','{{ svc.available_count|escapejs }}','{{ svc.avg_rating|escapejs }}',{{ svc.guarantee_days }},{{ svc.order }},{{ svc.is_active|yesno:'true,false' }})">
+                onclick="openServiceEdit({{ svc.pk }},'{{ svc.slug|escapejs }}','{{ svc.title|escapejs }}','{{ svc.badge_label|escapejs }}','{{ svc.badge_color|escapejs }}','{{ svc.icon|escapejs }}','{{ svc.description|escapejs }}','{{ svc.features|escapejs }}','{{ svc.get_image_url|escapejs }}','{{ svc.available_count|escapejs }}','{{ svc.avg_rating|escapejs }}',{{ svc.guarantee_days }},{{ svc.order }},{{ svc.is_active|yesno:'true,false' }})">
                 <i class="fa-solid fa-pen"></i> Edit
               </button>
               <button class="btn btn-danger" style="padding:6px 12px;font-size:.78rem;" onclick="openServiceDelete({{ svc.pk }},'{{ svc.title|escapejs }}')">

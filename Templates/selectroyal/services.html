@@ -98,9 +98,9 @@
             </div>
           </div>
           <div class="srv-panel-visual">
-            {% if svc.image_url %}
-            <img src="{{ svc.image_url }}" alt="{{ svc.title }}" class="srv-panel-img" />
-            {% endif %}
+             {% if svc.get_image_url %}
+             <img src="{{ svc.get_image_url }}" alt="{{ svc.title }}" class="srv-panel-img" />
+             {% endif %}
             <div class="srv-panel-stat-cards">
               <div class="srv-mini-stat">
                 <strong>{{ svc.available_count }}</strong><span>Available Now</span>

@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
+from .image_utils import download_external_image
 
 
 class MaidRegistration(models.Model):
@@ -115,6 +116,13 @@ class BlogPost(models.Model):
             return self.cover_image_file.url
         return self.cover_image or ''
 
+    def save(self, *args, **kwargs):
+        if self.cover_image and not self.cover_image_file:
+            downloaded = download_external_image(self.cover_image, 'blog/covers')
+            if downloaded:
+                self.cover_image_file = downloaded
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 
@@ -144,6 +152,8 @@ class Service(models.Model):
     description = models.TextField()
     features    = models.TextField(help_text='One feature per line')
     image_url   = models.URLField(blank=True)
+    image_file  = models.ImageField(upload_to='services/', blank=True, null=True,
+                                    help_text='Downloaded from image_url if provided')
     available_count = models.CharField(max_length=20, default='0+')
     avg_rating      = models.CharField(max_length=10, default='4.9★')
     guarantee_days  = models.PositiveSmallIntegerField(default=30)
@@ -157,6 +167,18 @@ class Service(models.Model):
 
     def features_list(self):
         return [f.strip() for f in self.features.splitlines() if f.strip()]
+
+    def get_image_url(self):
+        if self.image_file:
+            return self.image_file.url
+        return self.image_url or ''
+
+    def save(self, *args, **kwargs):
+        if self.image_url and not self.image_file:
+            downloaded = download_external_image(self.image_url, 'services')
+            if downloaded:
+                self.image_file = downloaded
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
