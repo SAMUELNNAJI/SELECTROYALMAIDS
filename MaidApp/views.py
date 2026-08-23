@@ -262,14 +262,16 @@ def contact_submit(request):
         return JsonResponse({'error': 'Please enter your message.'}, status=400)
 
     sent = send_contact_email(first_name, last_name, email, phone, city, source, subject, message)
-    if not sent:
-        return JsonResponse({'error': 'Unable to send your message right now. Please try again or email us directly.'}, status=502)
 
-    # Send an acknowledgement to the visitor so they know it landed
+    # Always attempt the visitor acknowledgement, even if the company inbox
+    # email failed. This ensures the submitter still gets confirmation.
     try:
         send_contact_ack_email(first_name, email, subject)
     except Exception:
         logger.exception('Failed to send contact acknowledgement to %s', email)
+
+    if not sent:
+        return JsonResponse({'error': 'We could not send your message to our team right now. Please try again or email us directly at info@selectroyalmaids.com.ng.'}, status=502)
 
     return JsonResponse({'ok': True})
 
