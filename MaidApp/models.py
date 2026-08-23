@@ -170,17 +170,14 @@ class Service(models.Model):
         return [f.strip() for f in self.features.splitlines() if f.strip()]
 
     def get_image_url(self):
-        # Render the remote URL the admin configured. The previous behaviour
-        # preferred a locally downloaded copy, but those live on Render's
-        # ephemeral disk and vanish on every redeploy — leaving the database
-        # pointing at /media/... files that no longer exist, which triggers the
-        # card's icon fallback. Hot-linking the configured CDN URL works on
-        # every host and survives redeploys.
-        if self.image_url:
-            return self.image_url
+        """
+        Uploaded file takes priority over the remote URL. On this VPS the
+        media disk is persistent, so uploads survive redeploys — unlike the
+        old Render setup where hot-linking the CDN URL was the safer choice.
+        """
         if self.image_file:
             return self.image_file.url
-        return ''
+        return self.image_url or ''
 
     def __str__(self):
         return self.title

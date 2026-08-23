@@ -952,7 +952,7 @@
 <div class="modal-backdrop" id="addServiceModal">
   <div class="modal" style="max-width:680px;" role="dialog" aria-modal="true">
     <div class="modal-head"><h3><i class="fa-solid fa-plus" style="color:var(--accent);"></i> &nbsp;Add Service</h3><button class="modal-close" onclick="closeModal('addServiceModal')">&times;</button></div>
-    <form method="post" action="{% url 'Authentication:service_create' %}">{% csrf_token %}
+    <form method="post" action="{% url 'Authentication:service_create' %}" enctype="multipart/form-data">{% csrf_token %}
       <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
         <div class="form-grid">
           <div class="form-field"><label>Title</label><input type="text" name="title" required /></div>
@@ -962,6 +962,7 @@
           <div class="form-field"><label>Icon</label><select name="icon">{% for val,label in service_icon_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
           <div class="form-field"><label>Image URL</label><input type="url" name="image_url" id="svcImageUrl" placeholder="https://..." oninput="previewServiceImage('svcImageUrl','svcImagePreview')" /></div>
           <div class="form-field" style="align-items:flex-start;"><img id="svcImagePreview" alt="Image preview" style="max-width:200px;max-height:120px;border-radius:10px;object-fit:cover;border:1px solid #e2e8f0;background:#f1f5f9;display:none;" /></div>
+          <div class="form-field"><label>&hellip;or Upload image</label><input type="file" name="service_image" accept="image/*" /></div>
           <div class="form-field full"><label>Description</label><textarea name="description" required></textarea></div>
           <div class="form-field full"><label>Features (one per line)</label><textarea name="features" style="min-height:110px;" required></textarea></div>
           <div class="form-field"><label>Available count</label><input type="text" name="available_count" placeholder="820+" /></div>
@@ -982,7 +983,7 @@
 <div class="modal-backdrop" id="editServiceModal">
   <div class="modal" style="max-width:680px;" role="dialog" aria-modal="true">
     <div class="modal-head"><h3><i class="fa-solid fa-pen" style="color:var(--accent);"></i> &nbsp;Edit Service</h3><button class="modal-close" onclick="closeModal('editServiceModal')">&times;</button></div>
-    <form method="post" id="editServiceForm" action="">{% csrf_token %}
+    <form method="post" id="editServiceForm" action="" enctype="multipart/form-data">{% csrf_token %}
       <div class="modal-body" style="max-height:65vh;overflow-y:auto;">
         <div class="form-grid">
           <div class="form-field"><label>Title</label><input type="text" name="title" id="esTitle" required /></div>
@@ -992,6 +993,11 @@
           <div class="form-field"><label>Icon</label><select name="icon" id="esIcon">{% for val,label in service_icon_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
           <div class="form-field"><label>Image URL</label><input type="url" name="image_url" id="esImageUrl" placeholder="https://..." oninput="previewServiceImage('esImageUrl','esImagePreview')" /></div>
           <div class="form-field" style="align-items:flex-start;"><img id="esImagePreview" alt="Image preview" style="max-width:200px;max-height:120px;border-radius:10px;object-fit:cover;border:1px solid #e2e8f0;background:#f1f5f9;display:none;" /></div>
+          <div class="form-field"><label>&hellip;or Replace image by upload</label><input type="file" name="service_image" accept="image/*" /></div>
+          <div class="form-field" style="display:flex;align-items:center;gap:10px;">
+            <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="remove_service_image" /><span class="toggle-track"></span></label>
+            <span style="font-size:.85rem;font-weight:600;">Remove image entirely</span>
+          </div>
           <div class="form-field full"><label>Description</label><textarea name="description" id="esDescription" required></textarea></div>
           <div class="form-field full"><label>Features (one per line)</label><textarea name="features" id="esFeatures" style="min-height:110px;" required></textarea></div>
           <div class="form-field"><label>Available count</label><input type="text" name="available_count" id="esAvailable" /></div>

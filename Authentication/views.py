@@ -864,6 +864,7 @@ def service_create(request):
         feats = request.POST.get('features', '').strip()
         if slug and title and desc and feats:
             raw_image_url = request.POST.get('image_url', '').strip()
+            uploaded      = request.FILES.get('service_image')
             Service.objects.create(
                 slug=slug, title=title,
                 badge_label=request.POST.get('badge_label', '').strip(),
@@ -872,7 +873,8 @@ def service_create(request):
                 description=desc, features=feats,
                 # Resolve share/page links (e.g. share.google, unsplash.com
                 # pages) to the actual image URL so they render in <img>.
-                image_url=resolve_image_url(raw_image_url) if raw_image_url else '',
+                image_url=resolve_image_url(raw_image_url) if (raw_image_url and not uploaded) else '',
+                image_file=uploaded,
                 available_count=request.POST.get('available_count', '0+').strip(),
                 avg_rating=request.POST.get('avg_rating', '4.9★').strip(),
                 guarantee_days=int(request.POST.get('guarantee_days', 30) or 30),
@@ -898,21 +900,32 @@ def service_edit(request, service_id):
         svc.icon            = request.POST.get('icon',            svc.icon)
         svc.description     = request.POST.get('description',     svc.description).strip()
         svc.features        = request.POST.get('features',        svc.features).strip()
-        raw_image_url   = request.POST.get('image_url', '').strip()
-        if raw_image_url:
-            new_image_url = resolve_image_url(raw_image_url)
-            if new_image_url != svc.image_url:
-                if svc.image_file:
-                    svc.image_file.delete(save=False)
-                svc.image_file = None
-        else:
-            # Clear request: remove both the URL and any stale local file so
-            # the card degrades to the icon placeholder instead of an old image.
-            new_image_url = ''
+        # ── Image handling: upload wins, then explicit removal, then URL ──────
+        uploaded      = request.FILES.get('service_image')
+        remove_image  = request.POST.get('remove_service_image') == 'on'
+
+        if uploaded:
+            # A fresh upload replaces BOTH the old local file and any stored URL.
+            if svc.image_file:
+                svc.image_file.delete(save=False)
+            svc.image_file = uploaded
+            svc.image_url = ''
+        elif remove_image:
+            # Explicit clear request → card degrades to the icon placeholder.
             if svc.image_file:
                 svc.image_file.delete(save=False)
             svc.image_file = None
-        svc.image_url       = new_image_url
+            svc.image_url = ''
+        else:
+            raw_image_url = request.POST.get('image_url', '').strip()
+            if raw_image_url:
+                resolved = resolve_image_url(raw_image_url)
+                if resolved != svc.image_url and svc.image_file:
+                    svc.image_file.delete(save=False)
+                    svc.image_file = None
+                svc.image_url = resolved
+            # else: nothing supplied — keep whatever currently exists
+
         svc.available_count = request.POST.get('available_count', svc.available_count).strip()
         svc.avg_rating      = request.POST.get('avg_rating',      svc.avg_rating).strip()
         svc.guarantee_days  = int(request.POST.get('guarantee_days', svc.guarantee_days) or svc.guarantee_days)
