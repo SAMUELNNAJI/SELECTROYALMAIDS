@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Successful – SelectRoyal Maids</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#1e3a8a;padding:28px 40px;text-align:center;border-radius:12px 12px 0 0;">
+              <img src="{{ site_url }}/static/image/logo%20(1).png" width="112" alt="SelectRoyal Maids" style="display:block;width:112px;height:auto;margin:0 auto 12px;border:0;">
+              <h1 style="margin:0;font-size:1.4rem;color:#ffffff;font-weight:700;letter-spacing:.3px;">SelectRoyal Maids</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:.85rem;">Registration Successful</p>
+            </td>
+          </tr>
+
+          <!-- Hero -->
+          <tr>
+            <td style="background-color:#059669;padding:22px 40px;text-align:center;">
+              <p style="margin:0;font-size:1.8rem;">&#127881;</p>
+              <p style="margin:8px 0 0;color:#ffffff;font-weight:700;font-size:1.15rem;">Welcome aboard, {{ application.first_name }}!</p>
+              <p style="margin:6px 0 0;color:#d1fae5;font-size:.92rem;">Your maid registration was received successfully.</p>
+            </td>
+          </tr>
+
+          <!-- Details -->
+          <tr>
+            <td style="background-color:#ffffff;padding:28px 40px 24px;">
+              <p style="margin:0 0 14px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Your Application</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:20px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;width:38%;vertical-align:top;">Application ID</td>
+                        <td style="padding:5px 0;color:#0f172a;font-weight:600;font-size:.88rem;">#{{ application.pk }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Full Name</td>
+                        <td style="padding:5px 0;color:#0f172a;font-weight:600;font-size:.88rem;">{{ application.first_name }} {{ application.last_name }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Role Applied For</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.get_role_display }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Work Type</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.get_work_type_display }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Location</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.city }}, {{ application.state }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Submitted</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ application.created_at|date:"d F Y, H:i" }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- What happens next -->
+              <p style="margin:0 0 10px;font-size:.85rem;color:#065f46;font-weight:700;">What happens next?</p>
+              <ol style="margin:0 0 22px;padding-left:20px;color:#334155;font-size:.92rem;line-height:1.8;">
+                <li>Our verification team reviews your application (within 24&ndash;48 hours)</li>
+                <li>We verify your references and documents</li>
+                <li>We contact you on <strong>{{ application.phone }}</strong> to schedule next steps</li>
+              </ol>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fefce8;border:1px solid #fde68a;border-radius:8px;margin-bottom:22px;">
+                <tr>
+                  <td style="padding:14px 20px;">
+                    <p style="margin:0;color:#713f12;font-size:.86rem;line-height:1.6;">
+                      &#128222;&nbsp; Please keep your phone reachable. If your details change before placement,
+                      email us at <a href="mailto:info@selectroyalmaids.com.ng" style="color:#1e3a8a;">info@selectroyalmaids.com.ng</a>.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0 0 4px;color:#64748b;font-size:.82rem;">
+                Questions? Call us or email
+                <a href="mailto:info@selectroyalmaids.com.ng" style="color:#1e3a8a;text-decoration:underline;">info@selectroyalmaids.com.ng</a>
+              </p>
+              <p style="margin:0;color:#94a3b8;font-size:.78rem;">&copy; SelectRoyal Maids &mdash; selectroyalmaids.com.ng</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

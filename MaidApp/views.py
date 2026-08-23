@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from .models import BlogPost, BlogSubscriber, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
-from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_maid_application_email
+from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_maid_application_email, send_maid_registration_success_email
 
 
 def _pdf_escape(value):
@@ -373,17 +373,25 @@ def register_as_maid(request):
             'reference_phone',
         ]
         application = MaidRegistration(**{field: request.POST[field].strip() for field in fields})
-        if request.FILES.get('profile_photo'):
-            application.profile_photo = request.FILES['profile_photo']
+
+        # Profile photo is REQUIRED
+        profile_photo = request.FILES.get('profile_photo')
+        if not profile_photo:
+            messages.error(request,
+                'Please upload a clear profile photo — it is required to complete your application.')
+            return redirect('MaidApp:apply')
+        application.profile_photo = profile_photo
         application.save()
+
         try:
             sent_to_whatsapp = _send_maid_application_to_whatsapp(application)
         except Exception:
             sent_to_whatsapp = False
-        sent_to_email = send_maid_application_email(application)
-        if sent_to_whatsapp and sent_to_email:
+        sent_to_company = send_maid_application_email(application)
+        send_maid_registration_success_email(application)   # welcome email to the maid
+        if sent_to_whatsapp and sent_to_company:
             messages.success(request, 'Your application has been received and sent to our verification team by email and WhatsApp.')
-        elif sent_to_whatsapp or sent_to_email:
+        elif sent_to_whatsapp or sent_to_company:
             messages.success(request, 'Your application has been received and sent to our verification team.')
         else:
             messages.success(request, 'Your application has been received. Our verification team will contact you shortly.')

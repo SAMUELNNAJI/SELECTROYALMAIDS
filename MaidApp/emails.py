@@ -135,6 +135,16 @@ def send_maid_application_email(application):
     )
 
 
+def send_maid_registration_success_email(application):
+    """Confirm successful registration to the maid who just applied."""
+    return send_email(
+        "Registration Successful - Welcome to SelectRoyal Maids",
+        application.email,
+        'emails/maid_registration_success.html',
+        {'application': application},
+    )
+
+
 def send_employer_action_email(employer, action, maid=None):
     send_email(
         f"Action Confirmed: {action} - SelectRoyal Maids",
