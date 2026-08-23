@@ -12,6 +12,7 @@ Setup (environment variables):
                                                           # ZeptoMail sender
 """
 import base64
+import json
 import logging
 
 import requests
