@@ -201,7 +201,10 @@ def blog(request):
 
 
 def blog_post(request, slug):
-    post = get_object_or_404(BlogPost, slug=slug, is_published=True)
+    post = BlogPost.objects.filter(slug=slug, is_published=True).first()
+    if post is None:
+        # Unknown/dead blog links (incl. legacy PHP URLs) fall back to the blog listing
+        return redirect('/blog/')
     BlogPost.objects.filter(pk=post.pk).update(views=post.views + 1)
     post.views += 1
     related = BlogPost.objects.filter(
@@ -579,7 +582,10 @@ def view_profile(request):
     similar_maids = []
     whatsapp_url = ''
     if slug:
-        maid = get_object_or_404(MaidProfile, slug=slug, is_active=True)
+        maid = MaidProfile.objects.filter(slug=slug, is_active=True).first()
+        if maid is None:
+            # Unknown/dead profile links fall back to the Find-a-Maid listing
+            return redirect('/Maids/')
         similar_maids = list(
             MaidProfile.objects.filter(is_active=True)
             .exclude(pk=maid.pk)
