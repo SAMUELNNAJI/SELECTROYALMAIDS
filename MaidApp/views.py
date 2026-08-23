@@ -611,6 +611,44 @@ def view_profile(request):
     })
 
 
+def legacy_redirect(request):
+    """
+    Map old PHP-site URLs to their new equivalents.
+
+    Usage via nginx:
+        /maid-profile.php?id=7   ->  /legacy/redirect/?type=maid&id=7
+        /single-blog.php?id=3    ->  /legacy/redirect/?type=blog&id=3
+    Maids are resolved by legacy_id (or slug); blog posts by primary key
+    (or slug). Unmatched requests fall back to the relevant listing page.
+    """
+    from django.shortcuts import redirect
+
+    kind  = request.GET.get('type', '')
+    ident = (request.GET.get('id') or request.GET.get('slug') or '').strip()
+
+    if kind == 'maid':
+        maid = None
+        if ident.isdigit():
+            maid = MaidProfile.objects.filter(legacy_id=int(ident)).first()
+        if maid is None and ident:
+            maid = MaidProfile.objects.filter(slug__iexact=ident).first()
+        if maid:
+            return redirect(f'/view-profile/?slug={maid.slug}')
+        return redirect('/Maids/')
+
+    if kind == 'blog':
+        post = None
+        if ident.isdigit():
+            post = BlogPost.objects.filter(pk=int(ident), is_published=True).first()
+        if post is None and ident:
+            post = BlogPost.objects.filter(slug__iexact=ident, is_published=True).first()
+        if post:
+            return redirect(f'/blog/{post.slug}/')
+        return redirect('/blog/')
+
+    return redirect('/')
+
+
 @require_POST
 def employer_action_email(request):
     from django.middleware.csrf import get_token

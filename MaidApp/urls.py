@@ -26,4 +26,5 @@ urlpatterns = [
     path('view-profile/', views.view_profile, name='view-profile'),
     path('api/employer-action/', views.employer_action_email, name='employer-action-email'),
     path('api/blog-subscribe/', views.blog_subscribe, name='blog-subscribe'),
+    path('legacy/redirect/', views.legacy_redirect, name='legacy-redirect'),
 ]
