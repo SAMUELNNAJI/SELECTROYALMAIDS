@@ -28,6 +28,13 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost 127.0.0.1 selectroyalmaids.onrender.com selectroyalmaids.com.ng www.selectroyalmaids.com.ng',
 ).split()
 
+# ── Auth redirects ────────────────────────────────────────────────────────────
+# Where @login_required sends anonymous visitors, where users land after
+# logging in, and where they go after logging out.
+LOGIN_URL            = 'Authentication:login'              # /login/
+LOGIN_REDIRECT_URL   = 'Authentication:employer_dashboard' # /employer/dashboard/
+LOGOUT_REDIRECT_URL  = '/'                                 # homepage
+
 # ── Applications ──────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     'django.contrib.admin',
