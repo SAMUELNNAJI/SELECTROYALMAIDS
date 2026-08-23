@@ -192,6 +192,18 @@ def send_contact_email(first_name, last_name, email, phone, city, source, subjec
     )
 
 
+def send_contact_ack_email(first_name, email, subject):
+    """Send an acknowledgement to the visitor who submitted the form."""
+    if not email:
+        return False
+    return send_email(
+        "We've received your message – SelectRoyal Maids",
+        email,                                  # acknowledgement TO the submitter
+        'emails/contact_ack.html',
+        {'first_name': first_name, 'subject': subject},
+    )
+
+
 def send_password_reset_email(user, reset_url):
     """Send the one-time password reset link to the user."""
     return send_email(

@@ -7,8 +7,21 @@ from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
+import logging
+
+from django.contrib import messages
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
+from django.http import HttpResponseNotAllowed, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
 from .models import BlogPost, BlogSubscriber, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
-from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_maid_application_email, send_maid_registration_success_email
+from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_contact_ack_email, send_maid_application_email, send_maid_registration_success_email
+
+logger = logging.getLogger(__name__)
 
 
 def _pdf_escape(value):
@@ -251,6 +264,12 @@ def contact_submit(request):
     sent = send_contact_email(first_name, last_name, email, phone, city, source, subject, message)
     if not sent:
         return JsonResponse({'error': 'Unable to send your message right now. Please try again or email us directly.'}, status=502)
+
+    # Send an acknowledgement to the visitor so they know it landed
+    try:
+        send_contact_ack_email(first_name, email, subject)
+    except Exception:
+        logger.exception('Failed to send contact acknowledgement to %s', email)
 
     return JsonResponse({'ok': True})
 

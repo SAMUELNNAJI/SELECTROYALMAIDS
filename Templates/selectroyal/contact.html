@@ -72,6 +72,7 @@
         </div>
 
         <form id="contactForm" novalidate>
+          {% csrf_token %}
 
           <!-- Name row -->
           <div class="cf-row">
@@ -376,11 +377,16 @@
         return '';
       }
 
+      // Prefer the CSRF token from the rendered hidden input (always present
+      // thanks to {% csrf_token %}), falling back to the cookie.
+      var tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+      var token = tokenInput ? tokenInput.value : getCookie('csrftoken');
+
       fetch("{% url 'MaidApp:contact-submit' %}", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken'),
+          'X-CSRFToken': token,
         },
         body: JSON.stringify({
           first_name: first,
@@ -393,7 +399,12 @@
           message:    message,
         }),
       })
-      .then(function (resp) { return resp.json(); })
+      .then(function (resp) {
+        // Server may return an HTML error page (403 CSRF, 500…) — don't crash on it.
+        return resp.json().catch(function () {
+          return { ok: false, error: 'Unexpected server response (' + resp.status + '). Please try again.' };
+        });
+      })
       .then(function (data) {
         if (data.ok) {
           document.getElementById('contactForm').style.display = 'none';
