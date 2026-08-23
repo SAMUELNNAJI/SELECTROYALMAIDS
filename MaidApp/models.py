@@ -215,7 +215,7 @@ class MaidProfile(models.Model):
     created_at     = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['full_name']
+        ordering = ['-created_at', '-id']   # newest profiles first everywhere
 
     # ── Helpers ────────────────────────────────────────────────────────────────
 

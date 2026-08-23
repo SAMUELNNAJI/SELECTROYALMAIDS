@@ -256,7 +256,7 @@ def contact_submit(request):
 
 
 def find_a_maid(request):
-    qs = MaidProfile.objects.filter(is_active=True).order_by('full_name')
+    qs = MaidProfile.objects.filter(is_active=True).order_by('-created_at', '-id')
 
     query = request.GET.get('q', '').strip()
     if query:

@@ -640,7 +640,7 @@ def admin_dashboard(request):
         return redirect('Authentication:employer_dashboard')
 
     maid_query = request.GET.get('mq', '').strip()
-    maids_qs   = MaidProfile.objects.filter(is_active=True).order_by('full_name')
+    maids_qs   = MaidProfile.objects.filter(is_active=True).order_by('-created_at', '-id')
     if maid_query:
         maids_qs = maids_qs.filter(full_name__icontains=maid_query) | \
                    maids_qs.filter(reg_number__icontains=maid_query)

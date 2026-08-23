@@ -37,9 +37,10 @@ def _next_legacy_id():
 
 @admin.register(MaidProfile)
 class MaidProfileAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'reg_number', 'age', 'assign_status', 'is_featured', 'is_active')
+    list_display = ('full_name', 'reg_number', 'age', 'assign_status', 'is_featured', 'is_active', 'created_at')
     list_filter = ('assign_status', 'is_featured', 'is_active')
     search_fields = ('full_name', 'reg_number', 'email', 'phone')
+    ordering = ['-created_at']
     prepopulated_fields = {'slug': ('full_name',)}
     readonly_fields = ('reg_number', 'legacy_id')
 
