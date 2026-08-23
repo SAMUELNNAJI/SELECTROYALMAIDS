@@ -258,6 +258,22 @@
 .cf-success h3 { font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
 .cf-success p { font-size: 14px; color: #64748b; line-height: 1.6; }
 
+/* Inline error message */
+.cf-inline-error {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 600;
+}
+.cf-inline-error i { font-size: 14px; flex-shrink: 0; }
+
 /* ---- Right sidebar ---- */
 .contact-sidebar {
   display: flex;

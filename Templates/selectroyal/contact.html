@@ -163,6 +163,11 @@
           <button type="submit" class="cf-submit" id="cfSubmit">
             <i class="fa-solid fa-paper-plane"></i> Send Message
           </button>
+
+          <div id="cfError" class="cf-inline-error" style="display:none;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="cfErrorText"></span>
+          </div>
         </form>
 
         <!-- Success state -->
@@ -341,11 +346,24 @@
       var message = document.getElementById('cfMessage').value.trim();
       var subject = (document.querySelector('.cf-chip.active') || {}).dataset.val || 'General Enquiry';
 
-      if (!first)   { alert('Please enter your first name.'); return; }
-      if (!last)    { alert('Please enter your last name.'); return; }
-      if (!email)   { alert('Please enter your email address.'); return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email address.'); return; }
-      if (!message) { alert('Please enter your message.'); return; }
+      var errBox  = document.getElementById('cfError');
+      var errTxt  = document.getElementById('cfErrorText');
+
+      function showErr(msg) {
+        errTxt.textContent = msg;
+        errBox.style.display = 'flex';
+      }
+      function hideErr() {
+        errBox.style.display = 'none';
+      }
+
+      hideErr();
+
+      if (!first)   { showErr('Please enter your first name.'); return; }
+      if (!last)    { showErr('Please enter your last name.'); return; }
+      if (!email)   { showErr('Please enter your email address.'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Please enter a valid email address.'); return; }
+      if (!message) { showErr('Please enter your message.'); return; }
 
       var btn = document.getElementById('cfSubmit');
       var originalBtnHtml = btn.innerHTML;
@@ -395,17 +413,17 @@
             if (successEl) successEl.style.display = 'block';
           } catch (err) {
             console.error('Contact success handler error:', err);
-            alert('Message sent! However the page did not update correctly. Please refresh.');
+            showErr('Message sent! However the page did not update correctly. Please refresh.');
           }
         } else {
-          alert((data && data.error) || 'Something went wrong. Please try again.');
+          showErr((data && data.error) || 'Something went wrong. Please try again.');
           btn.innerHTML = originalBtnHtml;
           btn.disabled = false;
         }
       })
       .catch(function (err) {
         console.error('Contact submit network error:', err);
-        alert('Network error. Please check your connection and try again.');
+        showErr('Network error. Please check your connection and try again.');
         btn.innerHTML = originalBtnHtml;
         btn.disabled = false;
       });
