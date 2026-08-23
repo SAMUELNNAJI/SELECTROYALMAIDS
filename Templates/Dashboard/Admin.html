@@ -279,6 +279,18 @@
       .card-head,.card-body{padding:14px;}
       .maid-editor-switches{grid-template-columns:1fr;}
     }
+    /* Styled image upload dropzone (service modals) */
+    .file-drop {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 28px 20px;
+      border: 2px dashed var(--border); border-radius: 8px;
+      background: var(--bg); cursor: pointer;
+      transition: border-color .15s, background .15s, color .15s;
+      font-size: .85rem; color: var(--muted); font-weight: 600; text-align: center;
+    }
+    .file-drop:hover, .file-drop.dragging { border-color: var(--accent); background: var(--accent-lt); color: var(--accent); }
+    .file-drop i { font-size: 1.6rem; }
+    .file-drop.has-file { border-color: var(--green); background: var(--green-lt); color: var(--green); }
   </style>
 </head>
 <body>
@@ -962,7 +974,11 @@
           <div class="form-field"><label>Icon</label><select name="icon">{% for val,label in service_icon_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
           <div class="form-field"><label>Image URL</label><input type="url" name="image_url" id="svcImageUrl" placeholder="https://..." oninput="previewServiceImage('svcImageUrl','svcImagePreview')" /></div>
           <div class="form-field" style="align-items:flex-start;"><img id="svcImagePreview" alt="Image preview" style="max-width:200px;max-height:120px;border-radius:10px;object-fit:cover;border:1px solid #e2e8f0;background:#f1f5f9;display:none;" /></div>
-          <div class="form-field"><label>&hellip;or Upload image</label><input type="file" name="service_image" accept="image/*" /></div>
+          <label class="file-drop" id="svcImageDrop" for="svcImageFile">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span id="svcImageLabel">Click or drag an image here</span>
+          </label>
+          <input type="file" name="service_image" id="svcImageFile" accept="image/*" style="display:none;" />
           <div class="form-field full"><label>Description</label><textarea name="description" required></textarea></div>
           <div class="form-field full"><label>Features (one per line)</label><textarea name="features" style="min-height:110px;" required></textarea></div>
           <div class="form-field"><label>Available count</label><input type="text" name="available_count" placeholder="820+" /></div>
@@ -993,7 +1009,11 @@
           <div class="form-field"><label>Icon</label><select name="icon" id="esIcon">{% for val,label in service_icon_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
           <div class="form-field"><label>Image URL</label><input type="url" name="image_url" id="esImageUrl" placeholder="https://..." oninput="previewServiceImage('esImageUrl','esImagePreview')" /></div>
           <div class="form-field" style="align-items:flex-start;"><img id="esImagePreview" alt="Image preview" style="max-width:200px;max-height:120px;border-radius:10px;object-fit:cover;border:1px solid #e2e8f0;background:#f1f5f9;display:none;" /></div>
-          <div class="form-field"><label>&hellip;or Replace image by upload</label><input type="file" name="service_image" accept="image/*" /></div>
+          <label class="file-drop" id="esImageDrop" for="esServiceImage">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span id="esImageLabel">Click or drag an image here to replace</span>
+          </label>
+          <input type="file" name="service_image" id="esServiceImage" accept="image/*" style="display:none;" />
           <div class="form-field" style="display:flex;align-items:center;gap:10px;">
             <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="remove_service_image" /><span class="toggle-track"></span></label>
             <span style="font-size:.85rem;font-weight:600;">Remove image entirely</span>
@@ -1191,6 +1211,44 @@
     document.getElementById('deleteBlogPreview').textContent = title;
     openModal('deleteBlogModal');
   }
+</script>
+
+<script>
+// ── Styled service-image upload dropzones (add + edit modals) ─────────────
+function bindImageDrop(dropId, inputId, labelId) {
+  const drop  = document.getElementById(dropId);
+  const input = document.getElementById(inputId);
+  const label = document.getElementById(labelId);
+  if (!drop || !input || !label) return;
+
+  const refresh = () => {
+    if (input.files.length) {
+      label.textContent = input.files[0].name;
+      drop.classList.add('has-file');
+    } else {
+      label.textContent = drop.id === 'svcImageDrop'
+        ? 'Click or drag an image here'
+        : 'Click or drag an image here to replace';
+      drop.classList.remove('has-file');
+    }
+  };
+
+  input.addEventListener('change', refresh);
+
+  ['dragenter', 'dragover'].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('dragging'); }));
+  ['dragleave', 'drop'].forEach(ev =>
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('dragging'); }));
+
+  drop.addEventListener('drop', e => {
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      refresh();
+    }
+  });
+}
+bindImageDrop('svcImageDrop', 'svcImageFile', 'svcImageLabel');
+bindImageDrop('esImageDrop', 'esServiceImage', 'esImageLabel');
 </script>
 </body>
 </html>
