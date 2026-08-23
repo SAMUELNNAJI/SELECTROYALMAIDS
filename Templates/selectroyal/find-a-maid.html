@@ -268,9 +268,6 @@
                 {% if maid.age %}<span class="mc-years">Age {{ maid.age }}</span>{% endif %}
               </div>
               <div class="mc-meta-row" style="margin-top:4px;">
-                <span class="mc-location" style="font-size:.78rem;color:#64748b;">
-                  <i class="fa-solid fa-location-dot"></i> {{ maid.address|truncatechars:45 }}
-                </span>
               </div>
               {% if maid.description %}
               <p class="mc-desc">{{ maid.description|truncatechars:100 }}</p>

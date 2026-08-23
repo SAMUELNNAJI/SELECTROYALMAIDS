@@ -367,8 +367,13 @@
       btn.disabled = true;
 
       function getCookie(name) {
-        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-        return match ? match[2] : null;
+        var parts = document.cookie.split('; ');
+        for (var i = 0; i < parts.length; i++) {
+          if (parts[i].indexOf(name + '=') === 0) {
+            return decodeURIComponent(parts[i].slice(name.length + 1));
+          }
+        }
+        return '';
       }
 
       fetch("{% url 'MaidApp:contact-submit' %}", {

@@ -427,7 +427,6 @@
               <p class="vp-similar-name">{{ s.full_name }}</p>
               <p class="vp-similar-role">{{ s.reg_number }}</p>
               <div class="vp-similar-row">
-                <span style="font-size:.72rem;color:#64748b;">{{ s.address|truncatechars:30 }}</span>
                 <span class="vp-similar-avail {% if s.is_available %}vp-similar-avail--green{% endif %}">
                   {% if s.is_available %}Available{% else %}Assigned{% endif %}
                 </span>
