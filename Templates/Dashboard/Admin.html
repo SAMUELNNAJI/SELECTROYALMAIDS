@@ -463,6 +463,7 @@
                 <th>Age</th>
                 <th>Address</th>
                 <th>Phone</th>
+                <th>Date Added</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -492,6 +493,7 @@
                 <td style="font-size:.82rem;">{{ maid.age|default:"—" }}</td>
                 <td style="font-size:.78rem;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ maid.address }}</td>
                 <td style="font-size:.8rem;white-space:nowrap;">{{ maid.phone }}</td>
+                <td style="font-size:.78rem;color:var(--muted);white-space:nowrap;">{{ maid.created_at|date:"d M Y" }}</td>
                 <td>
                   {% if maid.is_available %}
                   <span class="status-pill active">Available</span>
@@ -518,7 +520,7 @@
               </tr>
               {% empty %}
               <tr>
-                <td colspan="8" style="text-align:center;color:var(--muted);padding:48px;">
+                <td colspan="9" style="text-align:center;color:var(--muted);padding:48px;">
                   <i class="fa-solid fa-users" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>
                   No maid profiles found{% if maid_query %} matching "<strong>{{ maid_query }}</strong>"{% endif %}.
                 </td>
