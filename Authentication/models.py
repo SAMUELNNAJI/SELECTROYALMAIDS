@@ -17,6 +17,8 @@ class PendingSignup(models.Model):
     token = models.CharField(max_length=64, unique=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
+    # Flutterwave v4 charge id (chg_xxx) once a card charge has been initiated.
+    flw_charge_id = models.CharField(max_length=40, blank=True, default='')
 
     class Meta:
         verbose_name = 'Pending Signup'
