@@ -1,20 +1,14 @@
-import base64
 import os
 from datetime import timedelta
 from unittest.mock import Mock, patch
 
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from . import flutterwave
 from .models import EmployerProfile, PendingSignup
-
-# A valid random 32-byte AES-256 key (base64) so encrypt_field() works in tests.
-TEST_ENCRYPTION_KEY = base64.b64encode(os.urandom(32)).decode()
 
 
 def _api_response(json_data, status_code=200):
@@ -26,19 +20,10 @@ def _api_response(json_data, status_code=200):
     return response
 
 
-_TOKEN_RESPONSE = {'access_token': 'test-access-token', 'expires_in': 600}
-
-
-@override_settings(
-    SECURE_SSL_REDIRECT=False,
-    FLUTTERWAVE_ENCRYPT_KEY=TEST_ENCRYPTION_KEY,
-    FLW_CLIENT_ID='test-client-id',
-    FLW_CLIENT_SECRET='test-client-secret',
-)
 class SignupAndPaymentTests(TestCase):
 
     def setUp(self):
-        flutterwave.reset_token_cache()
+        pass
 
     def _pending_signup(self, **overrides):
         values = {
@@ -76,47 +61,7 @@ class SignupAndPaymentTests(TestCase):
         self.assertNotEqual(pending.password, 'Strong-password-123')
         self.assertTrue(check_password('Strong-password-123', pending.password))
 
-    # ── Flutterwave client units ──────────────────────────────────────────────
-    def test_encrypt_field_roundtrip(self):
-        nonce = flutterwave.generate_nonce()
-        self.assertEqual(len(nonce), 12)
-
-        encrypted = flutterwave.encrypt_field('4111111111111111', nonce)
-        aes_key = base64.b64decode(TEST_ENCRYPTION_KEY)
-        plain = AESGCM(aes_key).decrypt(nonce.encode(), base64.b64decode(encrypted), None)
-        self.assertEqual(plain.decode(), '4111111111111111')
-
-    def test_validate_card_input(self):
-        self.assertNotEqual(flutterwave.validate_card_input('123', '1', '2030', '123'), '')
-        self.assertNotEqual(flutterwave.validate_card_input('4111111111111111', '13', '2030', '123'), '')
-        self.assertNotEqual(flutterwave.validate_card_input('4111111111111111', '1', '2030', '12'), '')
-        self.assertEqual(flutterwave.validate_card_input('4111 1111 1111 1111', '01', '30', '123'), '')
-
-    @patch('Authentication.flutterwave.requests')
-    def test_access_token_is_cached_between_calls(self, mock_requests):
-        mock_requests.post.return_value = _api_response(_TOKEN_RESPONSE)
-
-        first = flutterwave.get_access_token()
-        second = flutterwave.get_access_token()
-
-        self.assertEqual(first, 'test-access-token')
-        self.assertEqual(second, 'test-access-token')
-        self.assertEqual(mock_requests.post.call_count, 1)
-
-    @patch('Authentication.flutterwave.requests')
-    def test_api_error_raises_flutterwave_error(self, mock_requests):
-        mock_requests.post.return_value = _api_response(_TOKEN_RESPONSE)
-        mock_requests.request.return_value = _api_response(
-            {'error': {'message': 'Unable to decrypt encrypted fields provided'}}, status_code=422,
-        )
-
-        with self.assertRaises(flutterwave.FlutterwaveError):
-            flutterwave.create_card_charge(
-                reference='ref-1', amount=10000, email='a@b.com', redirect_url='https://x/cb/',
-                card_number='4111111111111111', expiry_month='12', expiry_year='30', cvv='123',
-            )
-
-    # ── Card checkout flow ────────────────────────────────────────────────────
+    # ── Hosted checkout flow (Flutterwave v3) ─────────────────────────────────
 
     @override_settings(PAYMENT_CALLBACK_URL='https://selectroyalmaids.com.ng')
     @patch('Authentication.views.http_requests.post')

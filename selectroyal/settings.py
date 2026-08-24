@@ -247,21 +247,8 @@ LOGGING = {
 # ── Misc ──────────────────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ── Flutterwave ───────────────────────────────────────────────────────────────
-# Legacy v3 variables (kept for rollback compatibility only).
+# ── Flutterwave v3 — hosted checkout (classic keys only) ──────────────────────
+# Customer pays on Flutterwave's hosted page; server verifies via transactions API.
 FLUTTERWAVE_PUBLIC_KEY  = os.environ.get('FLUTTERWAVE_PUBLIC_KEY', '').strip("'\" ")
 FLUTTERWAVE_SECRET_KEY  = os.environ.get('FLUTTERWAVE_SECRET_KEY', '').strip("'\" ")
 FLUTTERWAVE_VERIFY_URL  = 'https://api.flutterwave.com/v3/transactions/{id}/verify'
-
-# ── Flutterwave v4 — direct card charges (OAuth2 + AES-GCM) ───────────────────
-# 'test' → developersandbox-api.flutterwave.com | 'live' → f4bexperience.flutterwave.com
-FLW_ENV                 = os.environ.get('FLW_ENV', 'test').strip("'\" ").lower()
-FLW_CLIENT_ID           = os.environ.get('FLW_CLIENT_ID', '').strip("'\" ")
-FLW_CLIENT_SECRET       = os.environ.get('FLW_CLIENT_SECRET', '').strip("'\" ")
-FLUTTERWAVE_ENCRYPT_KEY = os.environ.get('FLUTTERWAVE_ENCRYPT_KEY', '').strip("'\" ")
-FLW_TOKEN_URL           = 'https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token'
-FLW_API_BASE_URL        = (
-    'https://f4bexperience.flutterwave.com'
-    if FLW_ENV == 'live'
-    else 'https://developersandbox-api.flutterwave.com'
-)
