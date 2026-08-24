@@ -2,7 +2,7 @@ from decimal import Decimal, InvalidOperation
 import logging
 from threading import Thread
 
-import requests as http_requests  # noqa: F401  (kept temporarily for rollback)
+import requests as http_requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
@@ -23,7 +23,6 @@ from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, Placeme
 from MaidApp.image_utils import resolve_image_url
 from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email
 from .models import EmployerProfile, PendingSignup
-from . import flutterwave
 
 logger = logging.getLogger(__name__)
 
@@ -195,175 +194,74 @@ def payment_page(request):
 
 def payment_redirect(request):
     """
-    Card entry page (GET) and Flutterwave v4 charge initiation (POST).
-    Card details are AES-256-GCM encrypted server-side and sent straight to
-    Flutterwave's direct-charge API — they are never stored locally.
+    Server-side redirect to Flutterwave hosted payment page.
+    This avoids the unreliable inline checkout JS modal.
     """
-    pending = _get_pending_signup(request)
+    from django.conf import settings as django_settings
+
+    pending = None
+    token = request.session.get('pending_signup_token')
+    if token:
+        pending = PendingSignup.objects.filter(token=token).first()
     if not pending:
         return redirect('Authentication:signup')
 
-    # GET, or a POST without card data, simply shows the card form.
-    card_number = request.POST.get('cardNumber', '') if request.method == 'POST' else ''
-    if not card_number:
-        return _render_card_form(request, pending)
-
-    expiry_month = (request.POST.get('expiryMonth') or '').strip()
-    expiry_year = (request.POST.get('expiryYear') or '').strip()
-    cvv = (request.POST.get('cvv') or '').strip()
-
-    validation_error = flutterwave.validate_card_input(card_number, expiry_month, expiry_year, cvv)
-    if validation_error:
-        return _render_card_form(request, pending, {'card_error': validation_error})
-
-    try:
-        charge = flutterwave.create_card_charge(
-            reference=pending.token,
-            amount=EmployerProfile.PLAN_AMOUNTS[pending.plan],
-            email=pending.email,
-            redirect_url=_payment_callback_url(request),
-            card_number=''.join(ch for ch in card_number if ch.isdigit()),
-            expiry_month=expiry_month,
-            expiry_year=expiry_year,
-            cvv=cvv,
-        )
-    except flutterwave.FlutterwaveError as exc:
-        logger.warning('Card charge initiation failed for %s: %s', pending.email, exc)
-        return _render_card_form(request, pending, {'card_error': str(exc)})
-
-    return _handle_charge_outcome(request, pending, charge)
-
-
-def _get_pending_signup(request):
-    """Return the active PendingSignup for this browser session, else None."""
-    token = request.session.get('pending_signup_token')
-    if not token:
-        return None
-    pending = PendingSignup.objects.filter(token=token).first()
-    if not pending:
-        return None
     if pending.is_expired:
         pending.delete()
-        return None
-    return pending
-
-
-def _render_card_form(request, pending, extra=None):
-    """Render the card-details page with plan summary context."""
-    context = {
-        'email': pending.email,
-        'first_name': pending.first_name,
-        'last_name': pending.last_name,
-        'plan_label': 'Premium Plan — ₦20,000' if pending.plan == 'premium' else 'Standard Plan — ₦10,000',
-        'amount': EmployerProfile.PLAN_AMOUNTS[pending.plan],
-    }
-    if extra:
-        context.update(extra)
-    return render(request, 'Authentication/card_details.html', context)
-
-
-def _save_charge_id(pending, charge):
-    """Persist the gateway charge id so callbacks can verify without params."""
-    charge_id = charge.get('id', '')
-    if charge_id and charge_id != pending.flw_charge_id:
-        pending.flw_charge_id = charge_id
-        pending.save(update_fields=['flw_charge_id'])
-    return charge_id
-
-
-def _handle_charge_outcome(request, pending, charge):
-    """
-    Route a charge response:
-      succeeded          → create the account immediately
-      pending + pin/otp  → render the authorization form
-      pending + redirect → send the browser to the 3DS/bank authorisation page
-      anything else      → back to the card form with an error
-    """
-    _save_charge_id(pending, charge)
-
-    status = (charge.get('status') or '').lower()
-    next_action = charge.get('next_action') or {}
-
-    if status == 'succeeded':
-        return _finalize_successful_payment(request, pending, charge)
-
-    if status == 'pending':
-        authorization = next_action.get('authorization') or {}
-        auth_type = authorization.get('type') or (
-            'pin' if next_action.get('type') == 'authorize' else ''
-        )
-        if auth_type in ('pin', 'otp'):
-            return render(request, 'Authentication/authorize_form.html', {
-                'email':       pending.email,
-                'amount':      EmployerProfile.PLAN_AMOUNTS[pending.plan],
-                'charge_id':   charge.get('id', ''),
-                'auth_type':   auth_type,
-                'auth_label':  'Card PIN' if auth_type == 'pin' else 'OTP code',
-            })
-        if next_action.get('type') == 'redirect_url':
-            url = (next_action.get('redirect_url') or {}).get('url')
-            if url:
-                return redirect(url)
-
-    # Declined / unknown state — offer a retry.
-    processor = charge.get('processor_response') or {}
-    detail = str(processor.get('type') or '').replace('_', ' ')
-    message = 'Payment was not successful.'
-    if detail:
-        message += ' (%s)' % detail
-    return _render_card_form(request, pending, {'card_error': message})
-
-
-def payment_authorize(request):
-    """
-    Submit the Card PIN / OTP that Flutterwave requested for a pending charge
-    (PUT /charges/{id}), then route the result like any other charge outcome.
-    """
-    if request.method != 'POST':
-        return redirect('Authentication:payment_page')
-
-    pending = _get_pending_signup(request)
-    if not pending:
         return redirect('Authentication:signup')
 
-    auth_type = (request.POST.get('auth_type') or 'pin').lower()
-    value = (request.POST.get('authorization_value') or '').strip()
+    plan = pending.plan
+    amount = EmployerProfile.PLAN_AMOUNTS[plan]
+    tx_ref = pending.token
 
-    def _retry(error):
-        return render(request, 'Authentication/authorize_form.html', {
-            'email':      pending.email,
-            'amount':     EmployerProfile.PLAN_AMOUNTS[pending.plan],
-            'charge_id':  pending.flw_charge_id,
-            'auth_type':  auth_type,
-            'auth_label': 'Card PIN' if auth_type == 'pin' else 'OTP code',
-            'card_error': error,
-        })
+    callback_url = _payment_callback_url(request)
 
-    if not pending.flw_charge_id:
-        return _render_card_form(
-            request, pending,
-            {'card_error': 'No payment in progress — please enter your card details again.'},
-        )
-    if not value:
-        return _retry('Please enter your %s.' % ('PIN' if auth_type == 'pin' else 'OTP'))
-    if auth_type == 'pin' and (not value.isdigit() or len(value) < 3 or len(value) > 7):
-        return _retry('A card PIN is 3–7 digits.')
+    payload = {
+        "tx_ref": tx_ref,
+        "amount": str(amount),
+        "currency": "NGN",
+        "redirect_url": callback_url,
+        "payment_options": "card,account,ussd",
+        "customer": {
+            "email": pending.email,
+            "phone_number": pending.phone,
+            "name": pending.first_name + ' ' + pending.last_name,
+        },
+        "customizations": {
+            "title": "SelectRoyalMaids",
+            "description": 'Premium Plan — ₦20,000' if plan == 'premium' else 'Standard Plan — ₦10,000',
+        },
+    }
 
     try:
-        charge = flutterwave.authorize_charge(pending.flw_charge_id, auth_type, value)
-    except flutterwave.FlutterwaveError as exc:
-        logger.warning('Authorization failed for charge %s: %s', pending.flw_charge_id, exc)
-        return _retry(str(exc))
+        resp = http_requests.post(
+            'https://api.flutterwave.com/v3/payments',
+            headers={
+                'Authorization': 'Bearer ' + django_settings.FLUTTERWAVE_SECRET_KEY,
+                'Content-Type': 'application/json',
+            },
+            json=payload,
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except (http_requests.RequestException, ValueError):
+        logger.exception('Flutterwave checkout initialization failed.')
+        messages.error(request, 'Unable to connect to payment gateway. Please try again.')
+        return redirect('Authentication:payment_page')
 
-    return _handle_charge_outcome(request, pending, charge)
+    if data.get('status') == 'success' and data.get('data', {}).get('link'):
+        return redirect(data['data']['link'])
+
+    messages.error(request, 'Payment initialization failed. Please try again or contact support.')
+    return redirect('Authentication:payment_page')
 
 
 def payment_callback(request):
     """
-    Flutterwave redirects here after the customer completes (or abandons)
-    authorization. The charge is always re-verified server-side against
-    GET /charges/{id} before any account is created — redirect parameters
-    are never trusted on their own.
+    Flutterwave redirects here after the customer completes (or cancels) payment.
+    Query params: status, tx_ref, transaction_id
+    We verify server-side, then create the account only on confirmed success.
     """
     try:
         return _payment_callback_inner(request)
@@ -372,70 +270,87 @@ def payment_callback(request):
         return redirect('Authentication:payment_failed')
 
 
-def _find_pending_for_callback(request):
-    """Locate the PendingSignup via callback parameters first, then session."""
-    callback_data = request.POST if request.method == 'POST' else request.GET
-    tx_ref = callback_data.get('tx_ref') or callback_data.get('reference') or ''
-    if tx_ref:
-        pending = PendingSignup.objects.filter(token=tx_ref).first()
-        if pending:
-            return pending
-    token = request.session.get('pending_signup_token')
-    if token:
-        return PendingSignup.objects.filter(token=token).first()
-    return None
-
-
 def _payment_callback_inner(request):
-    pending = _find_pending_for_callback(request)
-    if not pending:
-        logger.warning('payment_callback: no matching PendingSignup — payment may already have been processed.')
-        return redirect('Authentication:signup')
+    from django.conf import settings as django_settings
 
-    if not pending.flw_charge_id:
-        logger.warning('payment_callback: no stored Flutterwave charge id for %s.', pending.token)
+    callback_data = request.POST if request.method == 'POST' else request.GET
+    status         = callback_data.get('status', '')
+    transaction_id = callback_data.get('transaction_id', '')
+    tx_ref         = callback_data.get('tx_ref', '')
+
+    logger.info('payment_callback received: status=%s tx_ref=%s transaction_id=%s',
+                status, tx_ref, transaction_id)
+
+    # ── Payment not completed / cancelled ────────────────────────────────────
+    if status != 'successful' or not transaction_id:
+        logger.warning('payment_callback: non-successful status=%s, redirecting to failed.', status)
         return redirect('Authentication:payment_failed')
 
     # ── Server-side verification ──────────────────────────────────────────────
     try:
-        charge = flutterwave.retrieve_charge(pending.flw_charge_id)
-    except flutterwave.FlutterwaveError:
-        logger.exception('Flutterwave charge verification failed for %s.', pending.flw_charge_id)
+        verify_url = django_settings.FLUTTERWAVE_VERIFY_URL.format(id=transaction_id)
+        resp = http_requests.get(
+            verify_url,
+            headers={'Authorization': f'Bearer {django_settings.FLUTTERWAVE_SECRET_KEY}'},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except (http_requests.RequestException, ValueError):
+        logger.exception('Flutterwave transaction verification request failed.')
         return redirect('Authentication:payment_failed')
 
-    logger.info('payment_callback verify: id=%s status=%s reference=%s amount=%s currency=%s',
-                charge.get('id'), charge.get('status'), charge.get('reference'),
-                charge.get('amount'), charge.get('currency'))
+    transaction_data = data.get('data', {})
+    logger.info('payment_callback verify response: status=%s tx_status=%s amount=%s currency=%s tx_ref=%s',
+                data.get('status'), transaction_data.get('status'),
+                transaction_data.get('amount'), transaction_data.get('currency'),
+                transaction_data.get('tx_ref'))
 
+    if data.get('status') != 'success' or transaction_data.get('status') != 'successful':
+        logger.warning('payment_callback: verification failed — data=%s', data)
+        return redirect('Authentication:payment_failed')
+
+    # ── Retrieve pending signup from database ─────────────────────────────────
+    pending = PendingSignup.objects.filter(token=tx_ref).first()
+    if not pending:
+        logger.warning('payment_callback: no PendingSignup for tx_ref=%s — may have already been processed.', tx_ref)
+        # Could be a duplicate callback for an already-processed payment.
+        # Try to find the created user and redirect them to success.
+        existing_user = User.objects.filter(
+            employer_profile__payment_ref=str(transaction_id)
+        ).first()
+        if existing_user:
+            try:
+                existing_user.backend = 'django.contrib.auth.backends.ModelBackend'
+                login(request, existing_user)
+            except Exception:
+                pass
+            return redirect('Authentication:payment_success')
+        return redirect('Authentication:signup')
+
+    if hasattr(pending, 'is_expired') and pending.is_expired:
+        pending.delete()
+        logger.warning('payment_callback: PendingSignup expired for tx_ref=%s', tx_ref)
+        return redirect('Authentication:signup')
+
+    # ── Amount validation (use int comparison to avoid float precision issues) ─
+    if transaction_data.get('tx_ref') != pending.token:
+        logger.error('payment_callback: tx_ref mismatch flw=%s pending=%s',
+                     transaction_data.get('tx_ref'), pending.token)
+        return redirect('Authentication:payment_failed')
+    if transaction_data.get('currency') != 'NGN':
+        logger.error('payment_callback: currency mismatch: %s', transaction_data.get('currency'))
+        return redirect('Authentication:payment_failed')
     try:
         # Round to nearest integer to handle Flutterwave returning 10000.0 vs 10000
-        charged_amount = round(float(charge.get('amount', 0)))
+        flw_amount = round(float(transaction_data.get('amount', 0)))
     except (TypeError, ValueError):
-        logger.exception('payment_callback: could not parse amount %s', charge.get('amount'))
+        logger.exception('payment_callback: could not parse amount %s', transaction_data.get('amount'))
         return redirect('Authentication:payment_failed')
-
     expected_amt = int(EmployerProfile.PLAN_AMOUNTS[pending.plan])
-    verified_ok = (
-        charge.get('status') == 'succeeded'
-        and charge.get('reference') == pending.token
-        and charge.get('currency') == 'NGN'
-        and charged_amount == expected_amt
-    )
-    if not verified_ok:
-        logger.error(
-            'payment_callback: verification failed — status=%s reference=%r currency=%s '
-            'amount=%s (expected ref=%r NGN %s)',
-            charge.get('status'), charge.get('reference'), charge.get('currency'),
-            charged_amount, pending.token, expected_amt,
-        )
+    if flw_amount != expected_amt:
+        logger.error('payment_callback: amount mismatch flw=%s expected=%s', flw_amount, expected_amt)
         return redirect('Authentication:payment_failed')
-
-    return _finalize_successful_payment(request, pending, charge)
-
-
-def _finalize_successful_payment(request, pending, charge):
-    """Create (or reuse) the employer account after server-side verification."""
-    transaction_id = charge.get('id', '')
 
     # ── Create the account now that payment is confirmed ──────────────────────
     user = None

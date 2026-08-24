@@ -15,7 +15,6 @@ urlpatterns = [
     # ── Payment flow ──────────────────────────────────────────────────────────
     path('payment/',                               views.payment_page,        name='payment_page'),
     path('payment/redirect/',                      views.payment_redirect,    name='payment_redirect'),
-    path('payment/authorize/',                     views.payment_authorize,   name='payment_authorize'),
     path('payment/callback/',                      views.payment_callback,    name='payment_callback'),
     path('payment/success/',                       views.payment_success,     name='payment_success'),
     path('payment/failed/',                        views.payment_failed,      name='payment_failed'),
