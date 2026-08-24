@@ -118,114 +118,86 @@ class SignupAndPaymentTests(TestCase):
 
     # ── Card checkout flow ────────────────────────────────────────────────────
 
-    @patch('Authentication.views.send_payment_success_email')
-    @patch('Authentication.views.send_signup_welcome_email')
-    @patch('Authentication.flutterwave.requests')
-    def test_card_form_renders_for_pending_signup(self, mock_requests, *_mail):
+    @override_settings(PAYMENT_CALLBACK_URL='https://selectroyalmaids.com.ng')
+    @patch('Authentication.views.http_requests.post')
+    def test_payment_redirect_uses_configured_public_callback_url(self, mock_post):
         pending = self._pending_signup()
-        self._start_session(pending)
-
-        response = self.client.get(reverse('Authentication:payment_redirect'))
-
-        self.assertContains(response, 'Pay With Your Card')
-        self.assertContains(response, pending.email)
-
-    @patch('Authentication.views.send_payment_success_email')
-    @patch('Authentication.views.send_signup_welcome_email')
-    @patch('Authentication.flutterwave.requests')
-    def test_successful_card_charge_creates_account(self, mock_requests, *_mail):
-        pending = self._pending_signup()
-        self._start_session(pending)
-        mock_requests.post.return_value = _api_response(_TOKEN_RESPONSE)
-        mock_requests.request.return_value = _api_response({
-            'status': 'success', 'message': 'Charge created',
-            'data': {
-                'id': 'chg_OK1', 'status': 'succeeded',
-                'reference': pending.token, 'amount': 10000, 'currency': 'NGN',
-            },
-        })
-
-        response = self.client.post(reverse('Authentication:payment_redirect'), {
-            'cardNumber': '4111 1111 1111 1111',
-            'expiryMonth': '12', 'expiryYear': '30', 'cvv': '123',
-        })
-
-        self.assertRedirects(response, reverse('Authentication:payment_success'))
-        user = User.objects.get(email=pending.email)
-        profile = user.employer_profile
-        self.assertEqual(profile.payment_status, 'paid')
-        self.assertEqual(profile.payment_ref, 'chg_OK1')
-        self.assertFalse(PendingSignup.objects.filter(pk=pending.pk).exists())
-
-    @patch('Authentication.views.send_payment_success_email')
-    @patch('Authentication.views.send_signup_welcome_email')
-    @patch('Authentication.flutterwave.requests')
-    def test_pin_authorization_then_bank_redirect(self, mock_requests, *_mail):
-        pending = self._pending_signup()
-        self._start_session(pending)
-        pin_pending = _api_response({
-            'status': 'pending', 'message': 'Charge requires authorization',
-            'data': {'id': 'chg_PIN1', 'status': 'pending',
-                     'next_action': {'type': 'authorize', 'authorization': {'type': 'pin'}}},
-        })
-        needs_3ds = _api_response({
-            'status': 'pending', 'message': 'Charge updated',
-            'data': {'id': 'chg_PIN1', 'status': 'pending',
-                     'next_action': {'type': 'redirect_url',
-                                     'redirect_url': {'url': 'https://bank.example/3ds'}}},
-        })
-        mock_requests.post.return_value = _api_response(_TOKEN_RESPONSE)
-        charge_responses = [pin_pending, needs_3ds]  # consumed in order across calls
-        mock_requests.request.side_effect = lambda method, url, **kw: charge_responses.pop(0)
-
-        shown = self.client.post(reverse('Authentication:payment_redirect'), {
-            'cardNumber': '4111111111111111', 'expiryMonth': '12', 'expiryYear': '30', 'cvv': '123',
-        })
-        self.assertContains(shown, 'Enter Your Card PIN')
-        pending.refresh_from_db()
-        self.assertEqual(pending.flw_charge_id, 'chg_PIN1')
-
-        authorized = self.client.post(reverse('Authentication:payment_authorize'), {
-            'auth_type': 'pin', 'authorization_value': '1234',
-        })
-        self.assertRedirects(authorized, 'https://bank.example/3ds', fetch_redirect_response=False)
-
-    @patch('Authentication.views.send_payment_success_email')
-    @patch('Authentication.views.send_signup_welcome_email')
-    @patch('Authentication.flutterwave.requests')
-    def test_callback_verifies_charge_and_creates_account(self, mock_requests, *_mail):
-        pending = self._pending_signup()
-        pending.flw_charge_id = 'chg_CB1'
-        pending.save()
-        self._start_session(pending)
-        mock_requests.post.return_value = _api_response(_TOKEN_RESPONSE)
-        mock_requests.request.return_value = _api_response({
-            'status': 'success', 'message': 'Charge retrieved',
-            'data': {'id': 'chg_CB1', 'status': 'succeeded', 'reference': pending.token,
-                     'amount': 10000, 'currency': 'NGN'},
-        })
-
-        response = self.client.get(reverse('Authentication:payment_callback'), {'tx_ref': pending.token})
-
-        self.assertRedirects(response, reverse('Authentication:payment_success'))
-        user = User.objects.get(email=pending.email)
-        self.assertTrue(user.employer_profile.is_paid)
-        self.assertFalse(PendingSignup.objects.filter(pk=pending.pk).exists())
-
-    @patch('Authentication.flutterwave.requests')
-    def test_callback_rejects_a_mismatched_gateway_reference(self, mock_requests):
-        pending = self._pending_signup()
-        pending.flw_charge_id = 'chg_CB2'
-        pending.save()
-        self._start_session(pending)
-        mock_requests.post.return_value = _api_response(_TOKEN_RESPONSE)
-        mock_requests.request.return_value = _api_response({
+        session = self.client.session
+        session['pending_signup_token'] = pending.token
+        session.save()
+        gateway_response = Mock()
+        gateway_response.raise_for_status.return_value = None
+        gateway_response.json.return_value = {
             'status': 'success',
-            'data': {'id': 'chg_CB2', 'status': 'succeeded', 'reference': 'another-reference',
-                     'amount': 10000, 'currency': 'NGN'},
+            'data': {'link': 'https://checkout.flutterwave.com/pay/example'},
+        }
+        mock_post.return_value = gateway_response
+
+        response = self.client.post(reverse('Authentication:payment_redirect'))
+
+        self.assertRedirects(response, 'https://checkout.flutterwave.com/pay/example', fetch_redirect_response=False)
+        self.assertEqual(
+            mock_post.call_args.kwargs['json']['redirect_url'],
+            'https://selectroyalmaids.com.ng/payment/callback/',
+        )
+
+    @patch('Authentication.views.send_payment_success_email')
+    @patch('Authentication.views.send_signup_welcome_email')
+    @patch('Authentication.views.http_requests.get')
+    def test_verified_flutterwave_payment_creates_account_and_redirects_to_success(
+        self, mock_get, _welcome, _receipt,
+    ):
+        pending = self._pending_signup()
+        gateway_response = Mock()
+        gateway_response.raise_for_status.return_value = None
+        gateway_response.json.return_value = {
+            'status': 'success',
+            'data': {
+                'status': 'successful',
+                'tx_ref': pending.token,
+                'amount': 10000,
+                'currency': 'NGN',
+                # Flutterwave test checkout can return its own test customer email.
+                'customer': {'email': 'gateway-test-customer@example.com'},
+            },
+        }
+        mock_get.return_value = gateway_response
+
+        response = self.client.get(reverse('Authentication:payment_callback'), {
+            'status': 'successful',
+            'tx_ref': pending.token,
+            'transaction_id': '123456789',
         })
 
-        response = self.client.get(reverse('Authentication:payment_callback'), {'tx_ref': pending.token})
+        self.assertRedirects(response, reverse('Authentication:payment_success'))
+        user = User.objects.get(email=pending.email)
+        self.assertTrue(check_password('Strong-password-123', user.password))
+        self.assertEqual(user.employer_profile.payment_status, 'paid')
+        self.assertEqual(user.employer_profile.payment_ref, '123456789')
+        self.assertFalse(PendingSignup.objects.filter(pk=pending.pk).exists())
+
+    @patch('Authentication.views.http_requests.get')
+    def test_callback_rejects_a_mismatched_gateway_reference(self, mock_get):
+        pending = self._pending_signup()
+        gateway_response = Mock()
+        gateway_response.raise_for_status.return_value = None
+        gateway_response.json.return_value = {
+            'status': 'success',
+            'data': {
+                'status': 'successful',
+                'tx_ref': 'another-reference',
+                'amount': 10000,
+                'currency': 'NGN',
+                'customer': {'email': pending.email},
+            },
+        }
+        mock_get.return_value = gateway_response
+
+        response = self.client.get(reverse('Authentication:payment_callback'), {
+            'status': 'successful',
+            'tx_ref': pending.token,
+            'transaction_id': '123456789',
+        })
 
         self.assertRedirects(response, reverse('Authentication:payment_failed'))
         self.assertFalse(User.objects.filter(email=pending.email).exists())
