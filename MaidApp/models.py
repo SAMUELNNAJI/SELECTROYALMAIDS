@@ -183,6 +183,25 @@ class Service(models.Model):
         return self.title
 
 
+def _next_reg_number():
+    """Return the next unique SRM-XXXXX reg number based on the highest existing number."""
+    max_num = 0
+    for rn in MaidProfile.objects.filter(reg_number__startswith='SRM-').values_list('reg_number', flat=True):
+        try:
+            num = int(rn.split('-', 1)[1])
+            if num > max_num:
+                max_num = num
+        except (IndexError, ValueError):
+            pass
+    return f'SRM-{max_num + 1}'
+
+
+def _next_legacy_id():
+    """Return max(legacy_id) + 1 so the unique constraint is always satisfied."""
+    from django.db.models import Max
+    return (MaidProfile.objects.aggregate(m=Max('legacy_id'))['m'] or 0) + 1
+
+
 class MaidProfile(models.Model):
     """Imported maid profiles from the old selectroyalmaids.com.ng database."""
 
@@ -213,6 +232,15 @@ class MaidProfile(models.Model):
 
     class Meta:
         ordering = ['-created_at', '-id']   # newest profiles first everywhere
+
+    def save(self, *args, **kwargs):
+        """Auto-generate a unique SRM-XXXXX reg_number and legacy_id on creation."""
+        if not self.pk:
+            if not self.reg_number:
+                self.reg_number = _next_reg_number()
+            if not self.legacy_id:
+                self.legacy_id = _next_legacy_id()
+        return super().save(*args, **kwargs)
 
     # ── Helpers ────────────────────────────────────────────────────────────────
 

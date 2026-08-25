@@ -4,7 +4,7 @@ from unittest.mock import patch
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .models import BlogSubscriber
+from .models import BlogSubscriber, MaidProfile
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
@@ -34,3 +34,21 @@ class BlogSubscriptionTests(TestCase):
             response.content,
             {'ok': True, 'subscribed': True, 'email_sent': False},
         )
+
+
+class MaidProfileRegNumberAutoTests(TestCase):
+    def test_reg_number_auto_generated_on_create(self):
+        m = MaidProfile.objects.create(full_name='Ada Test', slug='ada-test-auto')
+        self.assertTrue(m.reg_number.startswith('SRM-'))
+        self.assertTrue(m.legacy_id)
+        m2 = MaidProfile.objects.create(full_name='Bob Test', slug='bob-test-auto')
+        self.assertTrue(m2.reg_number.startswith('SRM-'))
+        self.assertNotEqual(m.reg_number, m2.reg_number)
+
+    def test_explicit_reg_number_is_respected(self):
+        m = MaidProfile.objects.create(
+            full_name='Cara Test', slug='cara-test-auto', reg_number='SRM-9999'
+        )
+        self.assertEqual(m.reg_number, 'SRM-9999')
+        self.assertEqual(m.legacy_id, m.legacy_id)  # auto-filled, not None
+

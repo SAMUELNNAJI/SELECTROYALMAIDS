@@ -891,7 +891,6 @@ def maid_edit(request, maid_id):
     maid = get_object_or_404(MaidProfile, pk=maid_id)
     if request.method == 'POST':
         maid.full_name      = request.POST.get('full_name',   maid.full_name).strip()
-        maid.reg_number     = request.POST.get('reg_number',  maid.reg_number).strip()
         maid.address        = request.POST.get('address',     maid.address).strip()
         maid.age            = request.POST.get('age',         maid.age).strip()
         maid.phone          = request.POST.get('phone',       maid.phone).strip()
@@ -941,8 +940,7 @@ def maid_create(request):
         return redirect('Authentication:employer_dashboard')
     if request.method == 'POST':
         full_name = request.POST.get('full_name', '').strip()
-        reg_number = request.POST.get('reg_number', '').strip()
-        if full_name and reg_number:
+        if full_name:
             import re
             slug_base = re.sub(r'[^a-z0-9]+', '-', full_name.lower()).strip('-')
             slug = slug_base
@@ -951,8 +949,6 @@ def maid_create(request):
                 slug = f'{slug_base}-{counter}'
                 counter += 1
             MaidProfile.objects.create(
-                legacy_id=MaidProfile.objects.order_by('-legacy_id').values_list('legacy_id', flat=True).first() + 1,
-                reg_number=reg_number,
                 slug=slug,
                 full_name=full_name,
                 address=request.POST.get('address', '').strip(),
@@ -967,7 +963,7 @@ def maid_create(request):
             )
             messages.success(request, f'Maid "{full_name}" added.')
         else:
-            messages.error(request, 'Full name and registration number are required.')
+            messages.error(request, 'Full name is required.')
     return redirect('/admin/dashboard/?tab=maids')
 
 @login_required
