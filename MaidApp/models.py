@@ -303,6 +303,51 @@ class PlacementRequest(models.Model):
         )
 
 
+class MaidRecommendation(models.Model):
+    """A maid recommended to a specific employer."""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    ]
+
+    employer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='maid_recommendations'
+    )
+    maid = models.ForeignKey(MaidProfile, on_delete=models.CASCADE, related_name='recommendations')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    recommended_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='recommendations_made'
+    )
+    recommended_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, help_text='Optional notes from admin')
+
+    class Meta:
+        ordering = ['-recommended_at']
+        unique_together = ['employer', 'maid']  # Prevent duplicate recommendations
+
+    def __str__(self):
+        return f'{self.maid} → {self.employer} ({self.status})'
+
+    def accept(self):
+        """Accept the recommendation."""
+        self.status = 'accepted'
+        self.responded_at = timezone.now()
+        self.save(update_fields=['status', 'responded_at'])
+
+    def decline(self):
+        """Decline the recommendation."""
+        self.status = 'declined'
+        self.responded_at = timezone.now()
+        self.save(update_fields=['status', 'responded_at'])
+
+
 class FAQ(models.Model):
     question = models.CharField(max_length=300)
     answer = models.TextField()

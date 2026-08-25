@@ -11,17 +11,18 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.http import HttpResponseNotAllowed, JsonResponse
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import make_password, identify_hasher
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import Q, Count, Sum, Case, When, Value, IntegerField
 from django.views.decorators.http import require_POST
 from datetime import timedelta
-from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
+from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, MaidRecommendation, PlacementRequest, Service, SupportMessage
 from MaidApp.image_utils import resolve_image_url
-from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email
+from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email, send_maid_recommended_email
 from .models import EmployerProfile, PendingSignup
 
 logger = logging.getLogger(__name__)
@@ -145,6 +146,7 @@ def signup_view(request):
                 'plan': plan,
                 'service': request.POST.get('service', '').strip(),
                 'how_heard': request.POST.get('howHeard', '').strip(),
+                'request_details': request.POST.get('requestDetails', '').strip(),
                 'token': token,
                 'expires_at': expires_at,
             },
@@ -174,6 +176,12 @@ def payment_page(request):
         pending.delete()
         return redirect('Authentication:signup')
 
+    # Allow the employer to save/adjust their request details right on the
+    # payment screen before completing the subscription.
+    if request.method == 'POST':
+        pending.request_details = request.POST.get('requestDetails', '').strip()
+        pending.save(update_fields=['request_details'])
+
     plan        = pending.plan
     amount      = EmployerProfile.PLAN_AMOUNTS[plan]
     plan_label  = 'Premium Plan — ₦20,000' if plan == 'premium' else 'Standard Plan — ₦10,000'
@@ -184,6 +192,7 @@ def payment_page(request):
         'first_name':     pending.first_name,
         'last_name':      pending.last_name,
         'phone':          pending.phone,
+        'request_details': pending.request_details,
         'amount':         amount,
         'plan':           plan,
         'plan_label':     plan_label,
@@ -381,6 +390,7 @@ def _payment_callback_inner(request):
                     'city': pending.city,
                     'service_needed': pending.service,
                     'how_heard': pending.how_heard,
+                    'request_details': pending.request_details,
                     'plan': pending.plan,
                     'payment_status': 'paid',
                     'payment_ref': str(transaction_id),
@@ -624,12 +634,20 @@ def employer_dashboard(request):
     ).count()
     maids_available = MaidProfile.objects.filter(is_active=True, assign_status='unassigned').count()
 
+    # Maid recommendations from admin (pending only — declined/responded ones are hidden)
+    recommendations = MaidRecommendation.objects.filter(
+        employer=request.user,
+        status='pending',
+    ).select_related('maid')
+
     return render(request, 'Dashboard/Employer.html', {
         'unread_count':    unread_count,
         'recent_requests': recent_requests,
         'profile':         profile,
         'total_requests':  total_requests,
         'maids_available': maids_available,
+        'recommendations': recommendations,
+        'recommendation_count': recommendations.count(),
     })
 
 
@@ -639,11 +657,17 @@ def admin_dashboard(request):
         return redirect('Authentication:employer_dashboard')
 
     maid_query = request.GET.get('mq', '').strip()
-    maids_qs   = MaidProfile.objects.filter(is_active=True).order_by('-created_at', '-id')
+    maids_qs = MaidProfile.objects.filter(is_active=True).order_by('-created_at', '-id')
     if maid_query:
-        maids_qs = maids_qs.filter(full_name__icontains=maid_query) | \
-                   maids_qs.filter(reg_number__icontains=maid_query)
-        maids_qs = maids_qs.distinct()
+        maids_qs = maids_qs.filter(
+            Q(full_name__icontains=maid_query) |
+            Q(reg_number__icontains=maid_query)
+        ).distinct()
+
+    # Paginate the maids table — rendering every profile inline made the page
+    # multi-megabyte. 50 per page keeps the dashboard snappy; search still
+    # covers the whole table.
+    maids_page = Paginator(maids_qs, 50).get_page(request.GET.get('page', 1))
 
     employer_query = request.GET.get('eq', '').strip()
     employers_qs = EmployerProfile.objects.filter(payment_status='paid').select_related('user').order_by('-created_at')
@@ -655,24 +679,43 @@ def admin_dashboard(request):
             Q(phone__icontains=employer_query)
         )
 
-    paid_employers = EmployerProfile.objects.filter(payment_status='paid').select_related('user')
-    total_revenue = sum(ep.amount for ep in paid_employers)
+    paid_employers = EmployerProfile.objects.filter(payment_status='paid')
+    # Revenue + count computed in a single DB query instead of iterating every
+    # employer row in Python (this used to fetch all rows on every page load).
+    revenue_agg = paid_employers.aggregate(
+        cnt=Count('id'),
+        total=Sum(
+            Case(
+                When(plan='premium', then=Value(EmployerProfile.PLAN_AMOUNTS['premium'])),
+                default=Value(EmployerProfile.PLAN_AMOUNTS['standard']),
+                output_field=IntegerField(),
+            )
+        ),
+    )
+    paid_employer_count = revenue_agg['cnt'] or 0
+    total_revenue = revenue_agg['total'] or 0
+
+    blog_paginator = Paginator(BlogPost.objects.all(), 20)
+    blog_page_num = request.GET.get('page', 1)
 
     context = {
         # stat cards
         'maid_count':            MaidRegistration.objects.count(),
-        'paid_employer_count':   paid_employers.count(),
+        'paid_employer_count':   paid_employer_count,
         'total_revenue':         total_revenue,
-        'support_count':         SupportMessage.objects.count(),
+        'support_count':         SupportMessage.objects.filter(
+                                     employer__isnull=False,
+                                 ).values('employer').distinct().count(),
         # unread badge — messages sent by employers (non-staff) that admin hasn't read
         'unread_count':          SupportMessage.objects.filter(
                                      is_read=False,
                                      sender__is_staff=False,
                                  ).count(),
-        # maids tab
+        # maids tab (paginated)
         'maid_query':            maid_query,
+        'maid_total':            maids_page.paginator.count,
         'recent_maids':          MaidRegistration.objects.order_by('-created_at')[:5],
-        'all_maids':             maids_qs,
+        'all_maids':             maids_page,
         # employers tab
         'employer_query':        employer_query,
         'employers':             employers_qs,
@@ -682,13 +725,127 @@ def admin_dashboard(request):
         'service_icon_choices':  Service.ICON_CHOICES,
         'service_badge_choices': Service.BADGE_CHOICES,
         'placements':            PlacementRequest.objects.select_related('employer', 'candidate').all()[:50],
-        'page_obj':           Paginator(BlogPost.objects.all(), 20).get_page(request.GET.get('page', 1)),
-        'page_range':         Paginator(BlogPost.objects.all(), 20).get_elided_page_range(request.GET.get('page', 1) or 1, on_each_side=2, on_ends=1),
+        'page_obj':           blog_paginator.get_page(blog_page_num),
+        'page_range':         blog_paginator.get_elided_page_range(blog_page_num or 1, on_each_side=2, on_ends=1),
         'blog_categories':    BlogPost.CATEGORY_CHOICES,
     }
     return render(request, 'Dashboard/Admin.html', context)
 
 
+@login_required
+def recommend_maids_list(request):
+    """JSON feed for the Recommend-a-Maid modal.
+
+    The modal loads this lazily on first open so the dashboard itself stays
+    lightweight while still offering every active maid (newest first).
+    """
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Forbidden.'}, status=403)
+
+    maids = (
+        MaidProfile.objects.filter(is_active=True)
+        .order_by('-created_at', '-id')
+    )
+    data = [
+        {
+            'id': m.id,
+            'full_name': m.full_name,
+            'first_name': m.first_name,
+            'reg_number': m.reg_number,
+            'age': m.age or '',
+            'photo_url': m.photo_url() if m.photo_url() else '',
+            'available': m.is_available,
+        }
+        for m in maids
+    ]
+    return JsonResponse({'count': len(data), 'maids': data})
+
+
+@login_required
+def recommend_maid(request, employer_id):
+    """Let an admin recommend a maid to a specific employer (from the modal)."""
+    if not request.user.is_superuser or request.method != 'POST':
+        return redirect('Authentication:employer_dashboard')
+
+    employer = get_object_or_404(User, pk=employer_id)
+    maid = get_object_or_404(MaidProfile, pk=request.POST.get('maid_id'), is_active=True)
+    notes = request.POST.get('notes', '').strip()
+
+    recommendation, created = MaidRecommendation.objects.get_or_create(
+        employer=employer,
+        maid=maid,
+        defaults={
+            'status': 'pending',
+            'recommended_by': request.user,
+            'notes': notes,
+        },
+    )
+    if created:
+        # Notify the employer by email that a maid has been recommended for them.
+        try:
+            send_maid_recommended_email(employer, maid)
+        except Exception:
+            logger.exception('Failed to send maid-recommended email to %s.', employer.email)
+        messages.success(request, f'Recommended {maid.full_name} to {employer.get_full_name() or employer.username}.')
+    else:
+        messages.info(request, f'{maid.full_name} was already recommended to this employer.')
+
+    return redirect('/admin/dashboard/?tab=employers')
+
+
+@login_required
+def respond_recommendation(request, recommendation_id):
+    """Let an employer accept or decline a recommended maid card."""
+    if request.method != 'POST':
+        return redirect('Authentication:employer_dashboard')
+
+    recommendation = get_object_or_404(
+        MaidRecommendation,
+        pk=recommendation_id,
+        employer=request.user,
+        status='pending',
+    )
+    action = request.POST.get('action', '').strip()
+
+    if action == 'accept':
+        recommendation.accept()
+        # Notify admin as a support message (renders as a card in the support chat).
+        card_html = (
+            '<div style="border:1px solid #bbf7d0;background:#f0fdf4;border-radius:10px;'
+            'padding:12px 14px;font-family:\'Inter\',sans-serif;line-height:1.5;">'
+            '<div style="font-size:.72rem;font-weight:800;letter-spacing:.05em;color:#15803d;'
+            'text-transform:uppercase;margin-bottom:6px;">'
+            '<i class="fa-solid fa-circle-check"></i> Recommendation Accepted</div>'
+            '<div style="display:flex;align-items:center;gap:10px;">'
+            '<div style="width:40px;height:40px;border-radius:50%;background:#bbf7d0;color:#15803d;'
+            'display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">'
+            '<i class="fa-solid fa-user-check"></i></div>'
+            '<div>'
+            '<div style="font-size:.9rem;font-weight:700;color:#14532d;">'
+            '<a href="/view-profile/?slug=' + recommendation.maid.slug + '" '
+            'target="_blank" style="color:#166534;text-decoration:underline;">'
+            + recommendation.maid.full_name + '</a>'
+            '<span style="font-weight:500;color:#166534;"> (' + recommendation.maid.reg_number + ')</span>'
+            '</div>'
+            '<div style="font-size:.78rem;color:#166534;">' + (request.user.get_full_name() or request.user.username) + ' accepted this recommended maid.</div>'
+            '</div></div></div>'
+        )
+        SupportMessage.objects.create(
+            sender=request.user,
+            employer=request.user,
+            body=card_html,
+        )
+        messages.success(
+            request,
+            f'You have accepted {recommendation.maid.full_name}. Our team has been notified and will proceed with the placement.'
+        )
+    elif action == 'decline':
+        recommendation.decline()
+        messages.info(request, f'{recommendation.maid.full_name} has been removed from your recommendations.')
+    else:
+        messages.error(request, 'Invalid action.')
+
+    return redirect('Authentication:employer_dashboard')
 @login_required
 def conclude_placement(request, placement_id):
     if not request.user.is_superuser or request.method != 'POST':

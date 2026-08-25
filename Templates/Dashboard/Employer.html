@@ -615,6 +615,78 @@
       </div>
     </div>
 
+{% if recommendations %}
+    <!-- Recommended Maids -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 4px;flex-wrap:wrap;">
+      <div>
+        <h2 style="font-size:1.05rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:9px;">
+          <i class="fa-solid fa-user-check" style="color:var(--accent);"></i> Recommended For You
+        </h2>
+        <p style="font-size:.8rem;color:var(--muted);margin-top:3px;">Our team hand-picked these maids based on your request. Review and accept, or decline.</p>
+      </div>
+      <span class="badge badge-blue" style="padding:5px 12px;">{{ recommendation_count }} new</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-top:14px;margin-bottom:26px;">
+      {% for rec in recommendations %}
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;">
+        <div style="aspect-ratio:16/8;background:linear-gradient(135deg,#eff6ff,#f5f3ff);position:relative;">
+          {% if rec.maid.photo_url %}
+            <img src="{{ rec.maid.photo_url }}" alt="{{ rec.maid.full_name }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+          {% endif %}
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;color:var(--accent);{% if rec.maid.photo_url %}display:none;{% endif %}">
+            {{ rec.maid.first_name|slice:":1" }}
+          </div>
+          <span style="position:absolute;top:10px;left:10px;background:rgba(7,26,57,.72);color:#fff;font-size:.68rem;font-weight:700;padding:4px 10px;border-radius:100px;">
+            {{ rec.maid.reg_number }}
+          </span>
+          {% if rec.maid.is_available %}
+          <span style="position:absolute;top:10px;right:10px;background:var(--green-lt);color:var(--green);font-size:.68rem;font-weight:800;padding:4px 10px;border-radius:100px;text-transform:uppercase;">
+            <i class="fa-solid fa-circle" style="font-size:.5rem;margin-right:4px;"></i> Available
+          </span>
+          {% endif %}
+        </div>
+
+        <div style="padding:16px 18px;flex:1;display:flex;flex-direction:column;">
+          <strong style="font-size:1rem;color:var(--text);">{{ rec.maid.full_name }}</strong>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:.76rem;color:var(--muted);">
+            {% if rec.maid.age %}<span class="badge badge-blue"><i class="fa-solid fa-cake-candles"></i> {{ rec.maid.age }} yrs</span>{% endif %}
+            {% if rec.maid.address %}<span><i class="fa-solid fa-location-dot"></i> {{ rec.maid.address|truncatechars:28 }}</span>{% endif %}
+          </div>
+          {% if rec.maid.description %}
+          <p style="font-size:.82rem;color:var(--muted);line-height:1.6;margin:10px 0 12px;flex:1;">{{ rec.maid.description|truncatechars:120 }}</p>
+          {% endif %}
+          {% if rec.notes %}
+          <div style="background:var(--accent-lt);border:1px solid #bfdbfe;border-radius:8px;padding:8px 12px;font-size:.76rem;color:var(--accent-dk);margin-bottom:12px;">
+            <strong><i class="fa-solid fa-note-sticky"></i> Note:</strong> {{ rec.notes }}
+          </div>
+          {% endif %}
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:12px;">
+            <a href="{% url 'MaidApp:view-profile' %}?slug={{ rec.maid.slug }}" target="_blank" class="btn btn-sm" style="flex:1;min-width:110px;border:1px solid var(--border);background:#fff;color:var(--text);justify-content:center;font-size:.8rem;">
+              <i class="fa-solid fa-eye"></i> View Profile
+            </a>
+            <form method="post" action="{% url 'Authentication:respond_recommendation' rec.id %}" style="flex:1;min-width:100px;display:flex;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="decline" />
+              <button type="submit" class="btn btn-sm" style="flex:1;border:1px solid var(--red);background:#fff;color:var(--red);justify-content:center;font-size:.8rem;" title="Remove this card">
+                <i class="fa-solid fa-xmark"></i> Decline
+              </button>
+            </form>
+            <form method="post" action="{% url 'Authentication:respond_recommendation' rec.id %}" style="flex:1;min-width:100px;display:flex;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="accept" />
+              <button type="submit" class="btn btn-sm" style="flex:1;background:var(--green);border-color:var(--green);color:#fff;justify-content:center;font-size:.8rem;"
+                onclick="return confirm('Accept {{ rec.maid.full_name }}? Our team will be notified to proceed with the placement.');">
+                <i class="fa-solid fa-check"></i> Accept
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
     <!-- Two-column section -->
     <div class="grid-2">
 

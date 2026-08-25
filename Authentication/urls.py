@@ -19,6 +19,9 @@ urlpatterns = [
     path('payment/success/',                       views.payment_success,     name='payment_success'),
     path('payment/failed/',                        views.payment_failed,      name='payment_failed'),
 
+    path('admin/recommend-maids/list/', views.recommend_maids_list, name='recommend_maids_list'),
+    path('admin/employer/<int:employer_id>/recommend/', views.recommend_maid, name='recommend_maid'),
+    path('admin/recommendation/<int:recommendation_id>/respond/', views.respond_recommendation, name='respond_recommendation'),
     path('employer/dashboard/',                    views.employer_dashboard,  name='employer_dashboard'),
     path('admin/dashboard/',                       views.admin_dashboard,     name='admin_dashboard'),
     path('admin/placements/<int:placement_id>/conclude/', views.conclude_placement, name='conclude_placement'),

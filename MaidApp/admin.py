@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.text import slugify
-from .models import MaidRegistration, MaidProfile
+from .models import MaidRegistration, MaidProfile, MaidRecommendation, SupportMessage
 
 
 @admin.register(MaidRegistration)
@@ -61,3 +61,19 @@ class MaidProfileAdmin(admin.ModelAdmin):
                 n += 1
             obj.slug = slug
         super().save_model(request, obj, form, change)
+
+
+@admin.register(MaidRecommendation)
+class MaidRecommendationAdmin(admin.ModelAdmin):
+    list_display = ('maid', 'employer', 'status', 'recommended_by', 'recommended_at', 'responded_at')
+    list_filter = ('status', 'recommended_at')
+    search_fields = ('maid__full_name', 'employer__email', 'employer__first_name', 'employer__last_name')
+    autocomplete_fields = ('maid', 'employer', 'recommended_by')
+    readonly_fields = ('recommended_at', 'responded_at')
+
+
+@admin.register(SupportMessage)
+class SupportMessageAdmin(admin.ModelAdmin):
+    list_display = ('sender', 'employer', 'is_read', 'is_resolved', 'created_at')
+    list_filter = ('is_read', 'is_resolved', 'created_at')
+    search_fields = ('sender__email', 'employer__email', 'body')

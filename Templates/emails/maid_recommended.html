@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Maid Has Been Recommended For You – SelectRoyal Maids</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#1e3a8a;padding:28px 40px;text-align:center;border-radius:12px 12px 0 0;">
+              <img src="{{ site_url }}/static/image/logo%20(1).png" width="112" alt="SelectRoyal Maids" style="display:block;width:112px;height:auto;margin:0 auto 12px;border:0;">
+              <h1 style="margin:0;font-size:1.4rem;color:#ffffff;font-weight:700;letter-spacing:.3px;">SelectRoyal Maids</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:.85rem;">A Maid Recommended For You</p>
+            </td>
+          </tr>
+
+          <!-- Hero -->
+          <tr>
+            <td style="background-color:#2563eb;padding:20px 40px;text-align:center;">
+              <p style="margin:0;font-size:1.8rem;">&#128104;&zwj;&#128105;&zwj;&zwj;&#128200;</p>
+              <p style="margin:8px 0 0;color:#ffffff;font-weight:700;font-size:1.05rem;">We found a great match for you</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="background-color:#ffffff;padding:32px 40px;">
+              <h2 style="margin:0 0 14px;font-size:1.1rem;color:#0f172a;">Hi {{ employer.get_full_name|default:employer.username }},</h2>
+              <p style="margin:0 0 16px;color:#334155;font-size:.95rem;line-height:1.65;">
+                Our placement team has recommended <strong>{{ maid.full_name }}</strong> for you.
+                You can view their full profile and accept or decline this recommendation directly from your dashboard.
+              </p>
+
+              <!-- Maid card -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 8px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Recommended Candidate</p>
+                    <p style="margin:0;font-size:.95rem;color:#0f172a;font-weight:600;">{{ maid.full_name }}</p>
+                    <p style="margin:2px 0 0;font-size:.85rem;color:#64748b;">{{ maid.reg_number }}{% if maid.age %} &nbsp;·&nbsp; {{ maid.age }} yrs{% endif %}</p>
+                    {% if maid.phone %}<p style="margin:4px 0 0;font-size:.85rem;color:#64748b;">{{ maid.phone }}</p>{% endif %}
+                  </td>
+                </tr>
+              </table>
+
+              <!-- What happens next -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:14px 20px;">
+                    <p style="margin:0;color:#1e3a8a;font-size:.88rem;line-height:1.65;">
+                      &#128073;&nbsp; Log in to your dashboard, open the <strong>Recommendations</strong> section and review this candidate. If you accept, our team will be notified immediately to proceed with the placement.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background-color:#1e3a8a;border-radius:8px;">
+                    <a href="{{ site_url }}/employer/dashboard/" style="display:inline-block;padding:13px 28px;color:#ffffff;text-decoration:none;font-weight:600;font-size:.95rem;">View My Recommendations &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0 0 6px;color:#64748b;font-size:.82rem;">
+                Questions? Email us at
+                <a href="mailto:info@selectroyalmaids.com.ng" style="color:#1e3a8a;text-decoration:underline;">info@selectroyalmaids.com.ng</a>
+              </p>
+              <p style="margin:0;color:#94a3b8;font-size:.75rem;">&copy; {% now "Y" %} SelectRoyal Maids. All rights reserved.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

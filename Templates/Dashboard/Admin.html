@@ -387,9 +387,9 @@
         <div class="stat-card">
           <div class="stat-icon red"><i class="fa-solid fa-headset"></i></div>
           <div>
-            <div class="stat-label">Support Messages</div>
+            <div class="stat-label">Support Conversations</div>
             <div class="stat-value">{{ support_count|default:"0" }}</div>
-            <div class="stat-sub">All time</div>
+            <div class="stat-sub">Employers with messages</div>
           </div>
         </div>
       </div>
@@ -425,7 +425,7 @@
           <div>
             <h2 style="font-size:1.05rem;font-weight:800;">Maid Profiles</h2>
             <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">
-              {{ all_maids|length }} profile{{ all_maids|length|pluralize }} imported from SelectRoyal database
+              {{ maid_total }} profile{{ maid_total|pluralize }} imported from SelectRoyal database
             </p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -473,7 +473,7 @@
               <tr>
                 <td style="padding:8px;">
                   {% if maid.photo_url %}
-                  <img src="{{ maid.photo_url }}" alt=""
+                  <img src="{{ maid.photo_url }}" alt="" loading="lazy" decoding="async"
                        style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;"
                        onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';" />
                   <div style="display:none;width:36px;height:36px;border-radius:50%;background:var(--accent-lt);color:var(--accent);align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;">
@@ -529,6 +529,18 @@
             </tbody>
           </table>
         </div>
+
+        {% if all_maids.paginator.num_pages > 1 %}
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 16px;border-top:1px solid var(--border);flex-wrap:wrap;">
+          {% if all_maids.has_previous %}
+          <a href="?tab=maids&amp;mq={{ maid_query|urlencode }}&amp;page={{ all_maids.previous_page_number }}" class="btn btn-ghost btn-sm">&larr; Prev</a>
+          {% else %}<span class="btn btn-ghost btn-sm" style="opacity:.4;pointer-events:none;">&larr; Prev</span>{% endif %}
+          <span style="font-size:.8rem;color:var(--muted);">Page {{ all_maids.number }} of {{ all_maids.paginator.num_pages }} &middot; {{ maid_total }} profiles</span>
+          {% if all_maids.has_next %}
+          <a href="?tab=maids&amp;mq={{ maid_query|urlencode }}&amp;page={{ all_maids.next_page_number }}" class="btn btn-ghost btn-sm">Next &rarr;</a>
+          {% else %}<span class="btn btn-ghost btn-sm" style="opacity:.4;pointer-events:none;">Next &rarr;</span>{% endif %}
+        </div>
+        {% endif %}
       </div>
     </div>
 
@@ -603,20 +615,32 @@
         <div class="card-body">
           <div style="overflow-x:auto;">
             <table class="data-table">
-              <thead><tr><th>Employer</th><th>Email</th><th>Phone</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+              <thead><tr><th>Employer</th><th>Email</th><th>Phone</th><th>Request</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 {% for ep in employers %}
                 <tr>
                   <td><strong>{{ ep.user.get_full_name|default:ep.user.username }}</strong></td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.user.email }}</td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.phone|default:"—" }}</td>
+                  <td style="font-size:.78rem;max-width:260px;color:#475569;">
+                    {% if ep.request_details %}
+                      <span title="{{ ep.request_details }}" style="display:inline-block;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;">
+                        <i class="fa-solid fa-clipboard-list" style="color:#2563eb;margin-right:5px;"></i>{{ ep.request_details|truncatechars:70 }}
+                      </span>
+                    {% else %}<span style="color:#cbd5e1;">— no request —</span>{% endif %}
+                  </td>
                   <td><span class="badge {% if ep.plan == 'premium' %}badge-amber{% else %}badge-blue{% endif %}">{{ ep.get_plan_display }}</span></td>
                   <td style="white-space:nowrap;">₦{{ ep.amount|floatformat:0 }}</td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.created_at|date:"d M Y" }}</td>
                   <td><span class="status-pill active">Paid</span></td>
+                  <td>
+                    <button type="button" class="btn btn-primary btn-sm" data-recommend-target="{{ ep.user.id }}" data-employer-name="{{ ep.user.get_full_name|default:ep.user.username }}">
+                      <i class="fa-solid fa-user-plus"></i> Recommend Maid
+                    </button>
+                  </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;">No paid employers yet.</td></tr>
+                <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">No paid employers yet.</td></tr>
                 {% endfor %}
               </tbody>
             </table>
@@ -659,7 +683,7 @@
                 <td style="max-width:0;">
                   <div style="display:flex;align-items:center;gap:10px;min-width:0;">
                      {% if post.cover_url %}
-                       <img src="{{ post.cover_url }}" alt="" style="width:38px;height:38px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                       <img src="{{ post.cover_url }}" alt="" loading="lazy" decoding="async" style="width:38px;height:38px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
                      {% else %}
                        <div style="width:38px;height:38px;background:var(--accent-lt);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent);font-size:.85rem;">
                         <i class="fa-solid fa-newspaper"></i>
@@ -1252,5 +1276,181 @@ function bindImageDrop(dropId, inputId, labelId) {
 bindImageDrop('svcImageDrop', 'svcImageFile', 'svcImageLabel');
 bindImageDrop('esImageDrop', 'esServiceImage', 'esImageLabel');
 </script>
+
+<!-- ════ Recommend Maid Modal (lazy-loaded via JSON feed) ════ -->
+<div id="recommendModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:16px;max-width:640px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e2e8f0;">
+      <div>
+        <h3 style="font-size:1.05rem;font-weight:800;color:#0f172a;margin:0;display:flex;align-items:center;gap:9px;">
+          <i class="fa-solid fa-user-plus" style="color:#2563eb;"></i> Recommend a Maid
+        </h3>
+        <p style="font-size:.8rem;color:#64748b;margin:3px 0 0;">For: <strong id="recEmployerName" style="color:#0f172a;">—</strong></p>
+      </div>
+      <button type="button" id="recCloseBtn" style="background:none;border:none;color:#94a3b8;font-size:1.3rem;cursor:pointer;line-height:1;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form method="post" id="recommendForm" style="display:flex;flex-direction:column;min-height:0;">
+      {% csrf_token %}
+      <div style="flex:1;overflow-y:auto;padding:16px 22px;">
+        <p style="font-size:.82rem;color:#64748b;margin:0 0 12px;">
+          Showing all <strong id="recMaidCount">…</strong> active maids (newest first) — select one and an email notification is sent to the employer automatically.
+        </p>
+
+        <input type="text" id="recSearch" placeholder="Search maids by name or registration number…"
+               style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:9px;font-family:'Inter',sans-serif;font-size:.85rem;margin-bottom:14px;" />
+
+        <div id="recMaidList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <p id="recLoading" style="text-align:center;color:#94a3b8;font-size:.85rem;padding:24px 0;">
+          <i class="fa-solid fa-circle-notch fa-spin"></i> Loading maids…
+        </p>
+        <p id="recNoResults" hidden style="text-align:center;color:#94a3b8;font-size:.85rem;padding:20px 0;">No maids match your search.</p>
+
+        <div style="margin-top:16px;">
+          <label for="recNotes" style="font-size:.8rem;font-weight:700;color:#334155;display:block;margin-bottom:6px;">
+            <i class="fa-solid fa-note-sticky" style="color:#2563eb;margin-right:5px;"></i> Note to employer (optional)
+          </label>
+          <textarea id="recNotes" name="notes" rows="2" maxlength="1000" placeholder="e.g. This candidate is great with toddlers and can start immediately."
+                    style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:9px;font-family:'Inter',sans-serif;font-size:.84rem;resize:vertical;line-height:1.5;"></textarea>
+        </div>
+      </div>
+      <div style="padding:14px 22px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" id="recCancelBtn" class="btn btn-ghost" style="padding:10px 18px;">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="padding:10px 18px;">
+          <i class="fa-solid fa-paper-plane"></i> Recommend &amp; Notify Employer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  const overlay = document.getElementById('recommendModalOverlay');
+  const form    = document.getElementById('recommendForm');
+  const empName = document.getElementById('recEmployerName');
+  const listEl  = document.getElementById('recMaidList');
+  const search  = document.getElementById('recSearch');
+  const noRes   = document.getElementById('recNoResults');
+  const loading = document.getElementById('recLoading');
+  const cntEl   = document.getElementById('recMaidCount');
+  const MAIDS_URL = "{% url 'Authentication:recommend_maids_list' %}";
+
+  let loaded = false;
+  let currentQuery = '';
+
+  function makeThumb(m) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'width:42px;height:42px;border-radius:50%;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0;overflow:hidden;';
+    if (m.photo_url) {
+      const img = document.createElement('img');
+      img.src = m.photo_url;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      img.addEventListener('error', () => { img.remove(); wrap.textContent = m.first_name ? m.first_name.charAt(0) : '?'; });
+      wrap.appendChild(img);
+    } else {
+      wrap.textContent = m.first_name ? m.first_name.charAt(0) : '?';
+    }
+    return wrap;
+  }
+
+  function buildRow(m) {
+    const label = document.createElement('label');
+    label.className = 'rec-maid-option';
+    label.dataset.search = (m.full_name + ' ' + m.reg_number).toLowerCase();
+    label.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:11px;cursor:pointer;';
+
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'maid_id';
+    radio.value = m.id;
+    radio.required = true;
+    radio.style.cssText = 'accent-color:#2563eb;flex-shrink:0;';
+    label.appendChild(radio);
+    label.appendChild(makeThumb(m));
+
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0;';
+    const nameEl = document.createElement('strong');
+    nameEl.textContent = m.full_name;
+    nameEl.style.cssText = 'font-size:.86rem;color:#0f172a;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+    const meta = document.createElement('span');
+    meta.textContent = m.reg_number + (m.age ? ' · ' + m.age + ' yrs' : '');
+    meta.style.cssText = 'font-size:.72rem;color:#64748b;';
+    info.appendChild(nameEl);
+    info.appendChild(meta);
+    label.appendChild(info);
+
+    const badge = document.createElement('span');
+    badge.className = 'badge ' + (m.available ? 'badge-green' : 'badge-amber');
+    badge.style.flexShrink = '0';
+    badge.textContent = m.available ? 'Available' : 'Assigned';
+    label.appendChild(badge);
+
+    label.addEventListener('click', () => { radio.checked = true; });
+    return label;
+  }
+
+  function applyFilter() {
+    if (!loaded) return;
+    const q = currentQuery.trim().toLowerCase();
+    let shown = 0;
+    listEl.querySelectorAll('.rec-maid-option').forEach(row => {
+      const ok = !q || row.dataset.search.indexOf(q) !== -1;
+      row.style.display = ok ? 'flex' : 'none';
+      if (ok) shown++;
+    });
+    noRes.hidden = shown !== 0;
+  }
+
+  async function ensureLoaded() {
+    if (loaded) { applyFilter(); return; }
+    loading.hidden = false;
+    try {
+      const res = await fetch(MAIDS_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      cntEl.textContent = data.count;
+      listEl.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      (data.maids || []).forEach(m => frag.appendChild(buildRow(m)));
+      listEl.appendChild(frag);
+      loaded = true;
+      applyFilter();
+    } catch (err) {
+      loading.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Could not load maids — close and try again.';
+    }
+    if (loaded) loading.hidden = true;
+  }
+
+  function openRecModal(employerId, employerName) {
+    empName.textContent = employerName;
+    form.setAttribute('action', '/admin/employer/' + employerId + '/recommend/');
+    form.reset();
+    search.value = '';
+    currentQuery = '';
+    noRes.hidden = true;
+    overlay.style.display = 'flex';
+    ensureLoaded();
+  }
+
+  function closeRecModal() { overlay.style.display = 'none'; }
+
+  document.querySelectorAll('[data-recommend-target]').forEach(btn => {
+    btn.addEventListener('click', () =>
+      openRecModal(btn.getAttribute('data-recommend-target'), btn.getAttribute('data-employer-name')));
+  });
+  document.getElementById('recCloseBtn').addEventListener('click', closeRecModal);
+  document.getElementById('recCancelBtn').addEventListener('click', closeRecModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeRecModal(); });
+  search.addEventListener('input', () => { currentQuery = search.value; applyFilter(); });
+})();
+</script>
+
 </body>
 </html>

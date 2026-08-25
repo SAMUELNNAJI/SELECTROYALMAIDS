@@ -20,7 +20,7 @@
       border-radius: 24px;
       box-shadow: 0 8px 40px rgba(0,0,0,.10);
       padding: 44px 40px 40px;
-      max-width: 460px;
+      max-width: 560px;
       width: 100%;
       text-align: center;
     }
@@ -74,6 +74,51 @@
 
     .pay-cancel { display: block; margin-top: 14px; font-size: .82rem; color: #94a3b8; text-decoration: none; }
     .pay-cancel:hover { color: #ef4444; }
+
+    /* ── Request area ── */
+    .pay-request {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .pay-request-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .pay-request-head i { font-size: 1.1rem; color: #2563eb; width: 34px; height: 34px; background: #eff6ff; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .pay-request-head strong { display: block; font-size: .92rem; color: #1e293b; }
+    .pay-request-head span { font-size: .76rem; color: #64748b; line-height: 1.45; }
+    .pay-request textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: .875rem;
+      color: #1e293b;
+      resize: vertical;
+      background: #fff;
+      line-height: 1.6;
+    }
+    .pay-request textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+    .pay-req-count { font-size: .72rem; color: #94a3b8; }
+    .pay-save-btn {
+      padding: 8px 16px;
+      background: #fff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: inherit;
+      transition: background .2s;
+    }
+    .pay-save-btn:hover { background: #eff6ff; }
+    .pay-save-btn:disabled { opacity: .6; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -111,6 +156,28 @@
       </div>
     </div>
 
+    <!-- Employer request area -->
+    <div class="pay-request">
+      <div class="pay-request-head">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <div>
+          <strong>Your Request</strong>
+          <span>Tell us what you're looking for — our team will match you with the right candidates.</span>
+        </div>
+      </div>
+      <form method="post" action="{% url 'Authentication:payment_page' %}" autocomplete="off">
+        {% csrf_token %}
+        <textarea id="requestDetails" name="requestDetails" rows="5" maxlength="2000"
+          placeholder="e.g. I need a nanny for my 2-year-old. Live-in preferred, experience with toddlers, Mondays–Saturdays, must be able to start within 2 weeks. Expected salary ₦50,000/month.">{{ request_details }}</textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+          <span class="pay-req-count" id="reqCount">0 / 2000</span>
+          <button type="submit" class="pay-save-btn" id="saveReqBtn">
+            <i class="fa-solid fa-floppy-disk"></i> Save Request
+          </button>
+        </div>
+      </form>
+    </div>
+
     <form method="post" action="{% url 'Authentication:payment_redirect' %}">
       {% csrf_token %}
       <button class="pay-btn" id="payBtn" type="submit">
@@ -130,7 +197,21 @@
   </div>
 
   <script>
-    document.querySelector('form[action]').addEventListener('submit', function () {
+    var reqEl   = document.getElementById('requestDetails');
+    var reqSpan = document.getElementById('reqCount');
+    function updateReqCount() {
+      reqSpan.textContent = reqEl.value.length + ' / 2000';
+    }
+    updateReqCount();
+    reqEl.addEventListener('input', updateReqCount);
+
+    var saveBtn = document.getElementById('saveReqBtn');
+    saveBtn.addEventListener('click', function () {
+      saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving…';
+      saveBtn.disabled = true;
+    });
+
+    document.querySelector('form[action$="/payment/redirect/"]').addEventListener('submit', function () {
       var btn = document.getElementById('payBtn');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Opening payment…';

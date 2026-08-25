@@ -154,6 +154,16 @@ def send_employer_action_email(employer, action, maid=None):
     )
 
 
+def send_maid_recommended_email(employer, maid):
+    """Notify an employer that a maid has been recommended to them by admin."""
+    return send_email(
+        f"A Maid Has Been Recommended For You - SelectRoyal Maids",
+        employer.email,
+        'emails/maid_recommended.html',
+        {'employer': employer, 'maid': maid},
+    )
+
+
 def send_blog_alert_email(user, post):
     send_email(
         f"New Blog Post: {post.title}",
