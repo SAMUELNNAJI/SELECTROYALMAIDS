@@ -28,6 +28,15 @@ if [[ ! -f "$ENV_FILE" ]]; then
 fi
 
 cd "$APP_DIR"
+# Load the production environment so migrate/collectstatic hit the SAME
+# database and settings gunicorn uses (without this, shell commands silently
+# fall back to defaults — e.g. the Neon URL — instead of the live local DB).
+set -a
+source "$ENV_FILE"
+set +a
+
+echo "▶ Using database host: $(printf '%s' "$DATABASE_URL" | sed -E 's#.*@([^/:]+).*#\1#')"
+
 echo "▶ Pulling latest code…"
 sudo -u selectroyal git fetch --all --prune
 sudo -u selectroyal git reset --hard origin/main

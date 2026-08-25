@@ -1,0 +1,14 @@
+DEBUG = False
+STATICFILES_STORAGE = whitenoise.storage.CompressedManifestStaticFilesStorage
+WHITENOISE_USE_FINDERS = <unset>
+
+===== ADMIN DASHBOARD =====
+ADMIN /admin/dashboard/ -> 200
+ADMIN /admin/dashboard/?tab=employers -> 200
+ADMIN /admin/dashboard/?tab=maids -> 200
+ADMIN /admin/dashboard/?tab=placements -> 200
+
+===== EMPLOYER DASHBOARD =====
+EMPLOYER /employer/dashboard/ -> 200
+
+DONE
