@@ -291,7 +291,11 @@ def _payment_callback_inner(request):
                 status, tx_ref, transaction_id)
 
     # ── Payment not completed / cancelled ────────────────────────────────────
-    if status != 'successful' or not transaction_id:
+    # Flutterwave returns different success labels depending on the payment
+    # method: 'successful' (most methods), 'completed' (card payments) and
+    # occasionally 'success-pending-validation'. Treat all of them as paid,
+    # then confirm authoritatively via the server-side verify call below.
+    if status not in ('successful', 'completed', 'success-pending-validation') or not transaction_id:
         logger.warning('payment_callback: non-successful status=%s, redirecting to failed.', status)
         return redirect('Authentication:payment_failed')
 
