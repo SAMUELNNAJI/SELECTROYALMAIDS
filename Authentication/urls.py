@@ -44,4 +44,9 @@ urlpatterns = [
     path('admin/blog/<int:post_id>/edit/',         views.blog_edit,           name='blog_edit'),
     path('admin/blog/<int:post_id>/delete/',       views.blog_delete,         name='blog_delete'),
     path('admin/video-conferencing/',               views.video_conferencing,  name='video_conferencing'),
+    path('admin/video-conferencing/',               views.video_conferencing,  name='video_conferencing'),
+    # Maid application actions
+    path('admin/application/<int:application_id>/view/', views.application_view, name='application_view'),
+    path('admin/application/<int:application_id>/decline/', views.application_decline, name='application_decline'),
+    path('admin/application/<int:application_id>/upload/', views.application_upload, name='application_upload'),
 ]

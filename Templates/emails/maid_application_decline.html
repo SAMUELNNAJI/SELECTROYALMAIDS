@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Declined – SelectRoyal Maids</title>
+</head>
+<body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#f1f5f9;">
+  <table role="presentation" style="width:100%;border-collapse:collapse;background:#f1f5f9;">
+    <tr>
+      <td align="center" style="padding:40px 0;">
+        <table role="presentation" style="max-width:560px;width:100%;border-collapse:collapse;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08);">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background:#dc2626;padding:32px 24px;">
+              <h1 style="margin:0;color:#ffffff;font-size:1.3rem;font-weight:700;">Application Update</h1>
+            </td>
+          </tr>
+          <!-- Content -->
+          <tr>
+            <td style="padding:32px 24px;">
+              <p style="margin:0 0 16px;color:#1e293b;font-size:.95rem;">Dear {{ application.first_name }},</p>
+              <p style="margin:0 0 16px;color:#475569;font-size:.9rem;line-height:1.6;">
+                We regret to inform you that your application to join <strong>SelectRoyal Maids</strong> as a 
+                <strong>{{ application.get_role_display }}</strong> has been declined.
+              </p>
+              {% if reason %}
+              <div style="background:#fef3c7;border-left:4px solid #b45309;padding:16px;margin:20px 0;border-radius:6px;">
+                <p style="margin:0;color:#92400e;font-size:.88rem;line-height:1.5;">
+                  <strong>Reason:</strong> {{ reason }}
+                </p>
+              </div>
+              {% endif %}
+              <p style="margin:0 0 16px;color:#475569;font-size:.88rem;line-height:1.6;">
+                This decision is final. We appreciate your interest in joining our platform and encourage you to apply again in the future if your circumstances change.
+              </p>
+              <p style="margin:0;color:#475569;font-size:.88rem;">
+                Thank you for considering SelectRoyal Maids.<br>
+                Best regards,<br>
+                <strong>The SelectRoyal Maids Team</strong>
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="background:#f8fafc;padding:20px 24px;border-top:1px solid #e2e8f0;">
+              <p style="margin:0;color:#64748b;font-size:.78rem;">
+                &copy; {% now "Y" %} SelectRoyal Maids. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -232,3 +232,13 @@ def send_password_changed_email(user):
         'emails/password_changed.html',
         {'user': user},
     )
+
+
+def send_maid_application_decline_email(application, reason=None):
+    """Notify a maid that her registration application has been declined."""
+    return send_email(
+        "Application Declined – SelectRoyal Maids",
+        application.email,
+        'emails/maid_application_decline.html',
+        {'application': application, 'reason': reason or 'Not specified'},
+    )

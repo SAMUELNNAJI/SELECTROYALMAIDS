@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application #{{ application.pk }}</title>
+<link rel="icon" href="{% static 'image/logo (1).png' %}" type="image/png" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1e293b; padding: 24px; }
+.page-container { max-width: 800px; margin: 0 auto; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.back-link { color: #2563eb; text-decoration: none; font-size: .875rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+.back-link:hover { text-decoration: underline; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-size: .875rem; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.document { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.07); overflow: hidden; }
+.document-header { background: #1e3a8a; color: #fff; padding: 32px 40px; }
+.document-header h1 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+.document-header .meta { font-size: .82rem; opacity: .85; }
+.document-body { padding: 40px; }
+.section { margin-bottom: 32px; }
+.section:last-child { margin-bottom: 0; }
+.section-title { font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #64748b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 32px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: .75rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .03em; }
+.field-value { font-size: .95rem; color: #1e293b; font-weight: 500; }
+.field-value.full-width { grid-column: 1 / -1; }
+.photo-container { text-align: center; margin-bottom: 24px; }
+.photo-container img { max-width: 150px; max-height: 150px; border-radius: 8px; object-fit: cover; border: 2px solid #e2e8f0; }
+.photo-placeholder { width: 150px; height: 150px; margin: 0 auto; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 3rem; border: 2px solid #e2e8f0; }
+@media print { body { background: #fff; padding: 0; } .toolbar { display: none !important; } .document { box-shadow: none; border-radius: 0; } .document-header { background: #1e3a8a !important; -webkit-print-color-adjust: exact; } }
+</style>
+</head>
+<body>
+<div class="page-container">
+<div class="toolbar">
+<a href="{% url 'Authentication:admin_dashboard' %}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+<button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>
+</div>
+<div class="document">
+<div class="document-header">
+<h1>{{ application.first_name }} {{ application.last_name }}</h1>
+<div class="meta">Application #{{ application.pk }} | {{ application.created_at|date:"d M Y, H:i" }} | {{ application.get_role_display }}</div>
+</div>
+<div class="document-body">
+{% if application.profile_photo %}<div class="photo-container"><img src="{{ application.profile_photo.url }}" alt="Photo"></div>{% else %}<div class="photo-container"><div class="photo-placeholder"><i class="fa-solid fa-user"></i></div></div>{% endif %}
+<div class="section"><div class="section-title">Personal Information</div><div class="grid"><div class="field"><span class="field-label">Full Name</span><span class="field-value">{{ application.first_name }} {{ application.last_name }}</span></div><div class="field"><span class="field-label">Email</span><span class="field-value">{{ application.email }}</span></div><div class="field"><span class="field-label">Phone</span><span class="field-value">{{ application.phone }}</span></div><div class="field"><span class="field-label">Date of Birth</span><span class="field-value">{{ application.date_of_birth|date:"d M Y" }}</span></div><div class="field"><span class="field-label">Gender</span><span class="field-value">{{ application.gender }}</span></div><div class="field"><span class="field-label">NIN</span><span class="field-value">{{ application.nin }}</span></div></div></div>
+<div class="section"><div class="section-title">Location</div><div class="grid"><div class="field"><span class="field-label">State</span><span class="field-value">{{ application.state }}</span></div><div class="field"><span class="field-label">City</span><span class="field-value">{{ application.city }}</span></div></div></div>
+<div class="section"><div class="section-title">Professional Details</div><div class="grid"><div class="field"><span class="field-label">Role</span><span class="field-value">{{ application.get_role_display }}</span></div><div class="field"><span class="field-label">Work Type</span><span class="field-value">{{ application.get_work_type_display }}</span></div><div class="field"><span class="field-label">Experience</span><span class="field-value">{{ application.years_experience }} years</span></div><div class="field"><span class="field-label">Availability</span><span class="field-value">{{ application.availability }}</span></div><div class="field"><span class="field-label">Expected Salary</span><span class="field-value">{{ application.expected_salary }}</span></div><div class="field"><span class="field-label">Languages</span><span class="field-value">{{ application.languages }}</span></div><div class="field field-value full-width"><span class="field-label">Skills</span><span class="field-value">{{ application.skills }}</span></div></div></div>
+<div class="section"><div class="section-title">About</div><div class="field"><span class="field-value">{{ application.bio|linebreaks }}</span></div></div>
+<div class="section"><div class="section-title">Reference</div><div class="grid"><div class="field"><span class="field-label">Reference Name</span><span class="field-value">{{ application.reference_name }}</span></div><div class="field"><span class="field-label">Reference Phone</span><span class="field-value">{{ application.reference_phone }}</span></div></div></div>
+</div></div></div></body></html>

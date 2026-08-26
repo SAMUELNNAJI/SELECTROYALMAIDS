@@ -22,7 +22,7 @@ from django.views.decorators.http import require_POST
 from datetime import timedelta
 from MaidApp.models import BlogPost, FAQ, MaidProfile, MaidRegistration, MaidRecommendation, PlacementRequest, Service, SupportMessage
 from MaidApp.image_utils import resolve_image_url
-from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email, send_maid_recommended_email
+from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email, send_maid_recommended_email, send_maid_application_decline_email
 from .models import EmployerProfile, PendingSignup
 
 logger = logging.getLogger(__name__)
@@ -1204,3 +1204,64 @@ def video_conferencing(request):
         'room_name': room_name,
         'jitsi_url': jitsi_url,
     })
+
+
+@login_required
+def application_view(request, application_id):
+    """Display a maid application in document format with print option."""
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    application = get_object_or_404(MaidRegistration, pk=application_id)
+    return render(request, 'Dashboard/application_detail.html', {'application': application})
+
+
+@login_required
+@require_POST
+def application_decline(request, application_id):
+    """Decline a maid application, send email, and delete the record."""
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    application = get_object_or_404(MaidRegistration, pk=application_id)
+    reason = request.POST.get('reason', '').strip()
+    # Send decline email
+    send_maid_application_decline_email(application, reason)
+    name = f'{application.first_name} {application.last_name}'
+    application.delete()
+    messages.success(request, f'Application for {name} has been declined and deleted.')
+    return redirect('/admin/dashboard/')
+
+
+@login_required
+@require_POST
+def application_upload(request, application_id):
+    """Upload a maid application as a profile using the Add Maid fields."""
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    application = get_object_or_404(MaidRegistration, pk=application_id)
+    # Create slug from application data
+    full_name = f'{application.first_name} {application.last_name}'
+    import re
+    slug_base = re.sub(r'[^a-z0-9]+', '-', full_name.lower()).strip('-')
+    slug = slug_base
+    counter = 1
+    while MaidProfile.objects.filter(slug=slug).exists():
+        slug = f'{slug_base}-{counter}'
+        counter += 1
+    # Create MaidProfile from application data
+    MaidProfile.objects.create(
+        slug=slug,
+        full_name=full_name,
+        address=f'{application.city}, {application.state}',
+        age=(timezone.now().year - application.date_of_birth.year) if application.date_of_birth else '',
+        phone=application.phone,
+        email=application.email,
+        description=application.bio,
+        image=application.profile_photo if application.profile_photo else None,
+        assign_status='unassigned',
+        is_featured=False,
+        is_active=True,
+    )
+    name = f'{application.first_name} {application.last_name}'
+    application.delete()
+    messages.success(request, f'{name} has been uploaded as a maid profile.')
+    return redirect('/admin/dashboard/?tab=maids')

@@ -400,7 +400,7 @@
         </div>
         <div style="overflow-x:auto;">
           <table class="data-table">
-            <thead><tr><th>Name</th><th>Role</th><th>Location</th><th>Experience</th><th>Applied</th><th>Status</th></tr></thead>
+            <thead><tr><th>Name</th><th>Role</th><th>Location</th><th>Experience</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {% for maid in recent_maids %}
               <tr>
@@ -410,9 +410,16 @@
                 <td>{{ maid.years_experience }} yr{{ maid.years_experience|pluralize }}</td>
                 <td>{{ maid.created_at|date:"M d, Y" }}</td>
                 <td><span class="badge badge-amber">Pending</span></td>
+                <td>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <a href="{% url 'Authentication:application_view' maid.pk %}" class="btn btn-ghost" style="padding:6px 10px;font-size:.75rem;" target="_blank"><i class="fa-solid fa-eye"></i> View</a>
+                    <button class="btn btn-ghost decline-btn" style="padding:6px 10px;font-size:.75rem;color:#dc2626;" data-id="{{ maid.pk }}" data-name="{{ maid.first_name }} {{ maid.last_name }}"><i class="fa-solid fa-xmark"></i> Decline</button>
+                    <form method="post" action="{% url 'Authentication:application_upload' maid.pk %}" style="display:inline;">{% csrf_token %}<button type="submit" class="btn" style="padding:6px 10px;font-size:.75rem;background:#16a34a;color:#fff;"><i class="fa-solid fa-upload"></i> Upload</button></form>
+                  </div>
+                </td>
               </tr>
               {% empty %}
-              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No applications yet.</td></tr>
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;">No applications yet.</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -1447,6 +1454,66 @@ bindImageDrop('esImageDrop', 'esServiceImage', 'esImageLabel');
   overlay.addEventListener('click', e => { if (e.target === overlay) closeRecModal(); });
   search.addEventListener('input', () => { currentQuery = search.value; applyFilter(); });
 })();
+</script>
+
+<!-- Decline Application Modal -->
+<div id="declineModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:32px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <h3 style="margin:0 0 8px;font-size:1.15rem;font-weight:700;color:#1e293b;">Decline Application</h3>
+    <p style="margin:0 0 20px;font-size:.88rem;color:#64748b;">Are you sure you want to decline <strong id="declineMaidName"></strong>'s application? This action cannot be undone.</p>
+    <form id="declineForm" method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="reason" id="declineReasonInput" />
+      <div style="margin-bottom:20px;">
+        <label style="display:block;margin-bottom:6px;font-size:.82rem;font-weight:600;color:#475569;">Reason for declining (optional)</label>
+        <textarea id="declineReason" rows="3" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-family:'Inter',sans-serif;font-size:.88rem;resize:vertical;" placeholder="Enter reason that will be sent to the maid..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button type="button" id="declineCancel" class="btn btn-ghost" style="padding:10px 18px;">Cancel</button>
+        <button type="submit" class="btn" style="padding:10px 18px;background:#dc2626;color:#fff;">Confirm Decline</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Decline modal logic
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('declineModal');
+  const cancelBtn = document.getElementById('declineCancel');
+  const form = document.getElementById('declineForm');
+  const maidNameEl = document.getElementById('declineMaidName');
+  const reasonInput = document.getElementById('declineReasonInput');
+  const reasonTextarea = document.getElementById('declineReason');
+
+  // Open modal on decline button click
+  document.querySelectorAll('.decline-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      const name = this.getAttribute('data-name');
+      maidNameEl.textContent = name;
+      form.action = '/admin/application/' + id + '/decline/';
+      modal.style.display = 'flex';
+    });
+  });
+
+  // Cancel button
+  cancelBtn.addEventListener('click', function() {
+    modal.style.display = 'none';
+  });
+
+  // Click outside modal to close
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+
+  // Copy reason to hidden input before submit
+  form.addEventListener('submit', function() {
+    reasonInput.value = reasonTextarea.value;
+  });
+});
 </script>
 
 </body>
