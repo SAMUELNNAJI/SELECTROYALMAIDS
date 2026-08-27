@@ -310,6 +310,7 @@
     <a href="#" data-tab="maids"><i class="fa-solid fa-users icon"></i> Maid Applications</a>
     <a href="#" data-tab="placements"><i class="fa-solid fa-briefcase icon"></i> Placements</a>
     <a href="#" data-tab="employers"><i class="fa-solid fa-building icon"></i> Employers &amp; Payments</a>
+    <a href="{% url 'Authentication:all_employers' %}"><i class="fa-solid fa-address-book icon"></i> All Employers</a>
     <div class="sidebar-label">Content</div>
     <a href="#" data-tab="blog"><i class="fa-solid fa-newspaper icon"></i> Blog Posts</a>
     <a href="#" data-tab="faq"><i class="fa-solid fa-circle-question icon"></i> FAQs</a>
@@ -507,6 +508,7 @@
                   {% else %}
                   <span class="status-pill inactive">Assigned</span>
                   {% endif %}
+                  {% if maid.assigned_employer_label %}<br><small style="color:var(--muted);font-size:.68rem;display:inline-block;max-width:140px;white-space:normal;line-height:1.3;" title="{{ maid.assigned_employer_label }}">{{ maid.assigned_employer_label }}</small>{% endif %}
                   {% if maid.is_featured %}<br><span class="badge badge-amber" style="margin-top:3px;display:inline-flex;font-size:.65rem;">Featured</span>{% endif %}
                 </td>
                 <td style="white-space:nowrap;">
@@ -516,7 +518,7 @@
                     <i class="fa-solid fa-eye"></i> View
                   </a>
                   <button class="btn btn-ghost" style="padding:6px 10px;font-size:.78rem;"
-                    onclick="openMaidEdit({{ maid.pk }},'{{ maid.full_name|escapejs }}','{{ maid.reg_number|escapejs }}','{{ maid.address|escapejs }}','{{ maid.age|escapejs }}','{{ maid.phone|escapejs }}','{{ maid.email|escapejs }}','{{ maid.description|escapejs }}','{{ maid.assign_status }}',{{ maid.is_featured|yesno:'true,false' }},{{ maid.is_active|yesno:'true,false' }},'{% if maid.image %}{{ maid.image.url|escapejs }}{% else %}{{ maid.photo_url|escapejs }}{% endif %}')">
+                    onclick="openMaidEdit({{ maid.pk }},'{{ maid.full_name|escapejs }}','{{ maid.reg_number|escapejs }}','{{ maid.address|escapejs }}','{{ maid.age|escapejs }}','{{ maid.phone|escapejs }}','{{ maid.email|escapejs }}','{{ maid.description|escapejs }}','{{ maid.assign_status }}',{{ maid.is_featured|yesno:'true,false' }},{{ maid.is_active|yesno:'true,false' }},'{% if maid.image %}{{ maid.image.url|escapejs }}{% else %}{{ maid.photo_url|escapejs }}{% endif %}','{% if maid.assigned_employer_id %}user:{{ maid.assigned_employer_id }}{% elif maid.assigned_legacy_employer_id %}legacy:{{ maid.assigned_legacy_employer_id }}{% endif %}')">
                     <i class="fa-solid fa-pen"></i>
                   </button>
                   <button class="btn btn-danger" style="padding:6px 10px;font-size:.78rem;"
@@ -853,7 +855,24 @@
           <div class="form-field"><label>Phone</label><input type="text" name="phone" /></div>
           <div class="form-field"><label>Email</label><input type="email" name="email" /></div>
           <div class="form-field full"><label>Profile Photo</label><input type="file" name="profile_image" accept="image/*" /></div>
-          <div class="form-field"><label>Status</label><select name="assign_status"><option value="unassigned">Available</option><option value="assigned">Assigned</option></select></div>
+          <div class="form-field"><label>Status</label><select name="assign_status" id="amAssignStatus"><option value="unassigned">Available</option><option value="assigned">Assigned</option></select></div>
+          <div class="form-field" id="amAssignedToWrap" style="display:none;">
+            <label>Assigned To (Employer)</label>
+            <select name="assigned_to" id="amAssignedTo">
+              <option value="">— Select employer —</option>
+              <optgroup label="Site Employers">
+                {% for e in assignment_employers_site %}
+                <option value="user:{{ e.user_id }}" data-plan="{{ e.plan }}" data-count="{{ e.maid_count }}">{{ e.user.get_full_name|default:e.user.username|default:e.user.email }} — {{ e.get_plan_display }} plan{% if e.plan == 'standard' and e.maid_count %} (has {{ e.maid_count }} maid{{ e.maid_count|pluralize }}){% endif %}</option>
+                {% endfor %}
+              </optgroup>
+              <optgroup label="Legacy Employers (request.sql)">
+                {% for e in assignment_employers_legacy %}
+                <option value="legacy:{{ e.pk }}" data-plan="{{ e.plan }}" data-count="{{ e.maid_count }}">{{ e.full_name|default:"Unnamed" }} — {{ e.get_plan_display }} plan{% if e.plan == 'standard' and e.maid_count %} (has {{ e.maid_count }} maid{{ e.maid_count|pluralize }}){% endif %}</option>
+                {% endfor %}
+              </optgroup>
+            </select>
+            <small style="color:var(--muted);font-size:.68rem;display:block;margin-top:4px;">Standard = 1 maid max · Premium = unlimited</small>
+          </div>
           <div class="form-field" style="display:flex;align-items:center;gap:10px;padding-top:22px;">
             <label class="toggle" style="flex-shrink:0;"><input type="checkbox" name="is_featured" /><span class="toggle-track"></span></label>
             <span style="font-size:.85rem;font-weight:600;">Featured</span>
@@ -906,6 +925,23 @@
           <div class="form-field form-field-i"><label>Phone</label><i class="fa-solid fa-phone field-icon"></i><input type="tel" name="phone" id="emPhone" placeholder="+1 234 567 890" /></div>
           <div class="form-field form-field-i"><label>Email</label><i class="fa-solid fa-envelope field-icon"></i><input type="email" name="email" id="emEmail" placeholder="name@example.com" /></div>
           <div class="form-field"><label>Placement Status</label><select name="assign_status" id="emAssignStatus"><option value="unassigned">Available</option><option value="assigned">Assigned</option></select></div>
+          <div class="form-field" id="emAssignedToWrap" style="display:none;">
+            <label>Assigned To (Employer)</label>
+            <select name="assigned_to" id="emAssignedTo">
+              <option value="">— Select employer —</option>
+              <optgroup label="Site Employers">
+                {% for e in assignment_employers_site %}
+                <option value="user:{{ e.user_id }}" data-plan="{{ e.plan }}" data-count="{{ e.maid_count }}">{{ e.user.get_full_name|default:e.user.username|default:e.user.email }} — {{ e.get_plan_display }} plan{% if e.plan == 'standard' and e.maid_count %} (has {{ e.maid_count }} maid{{ e.maid_count|pluralize }}){% endif %}</option>
+                {% endfor %}
+              </optgroup>
+              <optgroup label="Legacy Employers (request.sql)">
+                {% for e in assignment_employers_legacy %}
+                <option value="legacy:{{ e.pk }}" data-plan="{{ e.plan }}" data-count="{{ e.maid_count }}">{{ e.full_name|default:"Unnamed" }} — {{ e.get_plan_display }} plan{% if e.plan == 'standard' and e.maid_count %} (has {{ e.maid_count }} maid{{ e.maid_count|pluralize }}){% endif %}</option>
+                {% endfor %}
+              </optgroup>
+            </select>
+            <small style="color:var(--muted);font-size:.68rem;display:block;margin-top:4px;">Standard = 1 maid max · Premium = unlimited</small>
+          </div>
           </div>
         </section>
         <section class="maid-editor-section">
@@ -1179,7 +1215,16 @@
     openModal('deleteServiceModal');
   }
 
-  function openMaidEdit(pk, fullName, regNumber, address, age, phone, email, description, assignStatus, isFeatured, isActive, imageUrl) {
+  function syncAssignedToField() {
+    /* Show the employer picker only when the placement status is Assigned. */
+    const pairs = [['emAssignStatus', 'emAssignedToWrap'], ['amAssignStatus', 'amAssignedToWrap']];
+    pairs.forEach(([statusId, wrapId]) => {
+      const status = document.getElementById(statusId);
+      const wrap   = document.getElementById(wrapId);
+      if (status && wrap) wrap.style.display = status.value === 'assigned' ? '' : 'none';
+    });
+  }
+  function openMaidEdit(pk, fullName, regNumber, address, age, phone, email, description, assignStatus, isFeatured, isActive, imageUrl, assignedTo) {
     document.getElementById('editMaidForm').action = `/admin/maid/${pk}/edit/`;
     document.getElementById('emFullName').value    = fullName;
     document.getElementById('emProfileName').textContent = fullName || 'Maid profile';
@@ -1192,6 +1237,9 @@
     document.getElementById('emDescription').value = description;
     const as = document.getElementById('emAssignStatus');
     for(let i=0;i<as.options.length;i++) as.options[i].selected = as.options[i].value === assignStatus;
+    const at = document.getElementById('emAssignedTo');
+    if (at) at.value = assignedTo || '';
+    syncAssignedToField();
     document.getElementById('emIsFeatured').checked = isFeatured;
     document.getElementById('emIsActive').checked   = isActive;
     const preview = document.getElementById('emImagePreview');
@@ -1235,6 +1283,24 @@
     document.getElementById('deleteMaidPreview').textContent = fullName;
     openModal('deleteMaidModal');
   }
+
+  /* ── Maid placement ("Assigned To") wiring ── */
+  [['emAssignStatus'], ['amAssignStatus']].forEach(([id]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', syncAssignedToField);
+  });
+  [['emAssignedTo', 'emAssignStatus'], ['amAssignedTo', 'amAssignStatus']].forEach(([selectId, statusId]) => {
+    const el = document.getElementById(selectId);
+    if (el) el.addEventListener('change', function () {
+      if (this.value) {
+        const status = document.getElementById(statusId);
+        if (status && status.value !== 'assigned') {
+          status.value = 'assigned';
+          syncAssignedToField();
+        }
+      }
+    });
+  });
 
   function openBlogDelete(pk,title) {
     document.getElementById('deleteBlogForm').action = `/admin/blog/${pk}/delete/`;

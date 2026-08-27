@@ -1,6 +1,40 @@
 from django.contrib import admin
+from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.text import slugify
-from .models import MaidRegistration, MaidProfile, MaidRecommendation, SupportMessage
+from .models import MaidRegistration, MaidProfile, MaidRecommendation, SupportMessage, placement_capacity_error
+
+
+class MaidProfileAdminForm(forms.ModelForm):
+    """Adds inline validation for the maid placement (employer assignment).
+
+    Mirrors MaidProfile.save() so admins get a normal form error instead of
+    a server error when a plan's capacity would be exceeded (Standard = 1
+    maid, Premium = unlimited).
+    """
+
+    class Meta:
+        model = MaidProfile
+        fields = '__all__'
+
+    def clean(self):
+        cleaned = super().clean()
+        assign_status = cleaned.get('assign_status')
+        employer = cleaned.get('assigned_employer')
+        legacy_employer = cleaned.get('assigned_legacy_employer')
+
+        if assign_status == 'unassigned' and (employer or legacy_employer):
+            raise ValidationError(
+                'This maid is marked Available but an employer is selected. '
+                'Set the placement status to Assigned or clear the employer.')
+
+        target = employer or legacy_employer
+        if target:
+            kind = 'user' if employer else 'legacy'
+            error = placement_capacity_error(target, kind, exclude_pk=self.instance.pk)
+            if error:
+                raise ValidationError(error)
+        return cleaned
 
 
 @admin.register(MaidRegistration)
@@ -37,9 +71,10 @@ def _next_legacy_id():
 
 @admin.register(MaidProfile)
 class MaidProfileAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'reg_number', 'age', 'assign_status', 'is_featured', 'is_active', 'created_at')
+    form = MaidProfileAdminForm
+    list_display = ('full_name', 'reg_number', 'age', 'assign_status', 'assigned_employer_label', 'is_featured', 'is_active', 'created_at')
     list_filter = ('assign_status', 'is_featured', 'is_active')
-    search_fields = ('full_name', 'reg_number', 'email', 'phone')
+    search_fields = ('full_name', 'reg_number', 'email', 'phone', 'assigned_employer__first_name', 'assigned_employer__last_name', 'assigned_employer__email')
     ordering = ['-created_at']
     prepopulated_fields = {'slug': ('full_name',)}
     readonly_fields = ('reg_number', 'legacy_id')

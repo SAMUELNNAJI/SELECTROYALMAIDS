@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Employers – SelectRoyal Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    :root { --bg:#f1f5f9; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
+      --accent:#2563eb; --sidebar-bg:#0f172a; --sidebar-w:260px; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',system-ui,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
+    .sidebar { width:var(--sidebar-w); height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:200; display:flex; flex-direction:column; }
+    .sidebar-brand { padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.07); }
+    .sidebar-brand strong { color:#fff; font-size:.95rem; font-weight:800; display:block; }
+    .sidebar-brand span { color:#94a3b8; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; }
+    .sidebar-nav { flex:1; padding:12px; overflow-y:auto; }
+    .sidebar-label { font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#475569; padding:16px 10px 6px; }
+    .sidebar-nav a { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:#94a3b8; font-size:.875rem; font-weight:500; text-decoration:none; }
+    .sidebar-nav a:hover, .sidebar-nav a.active { background:var(--accent); color:#fff; }
+    .sidebar-nav a .icon { width:18px; text-align:center; }
+    .sidebar-footer { padding:16px; border-top:1px solid rgba(255,255,255,.07); display:flex; align-items:center; gap:10px; }
+    .sidebar-avatar { width:36px; height:36px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; }
+    .sidebar-user-info strong { color:#f1f5f9; font-size:.8rem; display:block; }
+    .sidebar-user-info span { color:#64748b; font-size:.72rem; }
+    .main { margin-left:var(--sidebar-w); min-height:100vh; display:flex; flex-direction:column; }
+    .topbar { background:var(--card); border-bottom:1px solid var(--border); padding:16px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .topbar h1 { font-size:1.15rem; font-weight:800; }
+    .content { padding:24px 28px; }
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:22px; }
+    .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; }
+    .stat-card .num { font-size:1.7rem; font-weight:800; }
+    .stat-card .lbl { font-size:.72rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
+    .num.blue { color:var(--accent); } .num.green { color:#16a34a; } .num.amber { color:#d97706; }
+    .tab-row { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+    .tab-link { display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:999px; border:1px solid var(--border); background:var(--card); color:var(--muted); font-size:.85rem; font-weight:600; text-decoration:none; }
+    .tab-link.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:20px; }
+    .card-head { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
+    .card-head h2 { font-size:.95rem; font-weight:800; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .filter-bar { display:flex; gap:8px; flex-wrap:wrap; }
+    .input, .select { padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:.83rem; background:#fff; color:var(--text); }
+    .input { min-width:230px; }
+    .btn { padding:9px 16px; border-radius:8px; border:none; font-size:.83rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:7px; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-ghost { background:transparent; border:1px solid var(--border); color:var(--muted); }
+    .data-table { width:100%; border-collapse:collapse; }
+    .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .table-scroll .data-table { min-width:960px; }
+    .data-table th, .data-table td { text-align:left; padding:12px 16px; border-bottom:1px solid var(--border); font-size:.85rem; vertical-align:top; }
+    .data-table th { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); background:var(--bg); }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tbody tr:hover { background:#f8faff; }
+    .pill { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; font-size:.68rem; font-weight:700; }
+    .pill-green { background:#dcfce7; color:#166534; } .pill-amber { background:#fef3c7; color:#92400e; } .pill-gray { background:#e2e8f0; color:#475569; }
+    .maid-chip { display:inline-flex; align-items:center; gap:6px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; border-radius:999px; padding:3px 10px; font-size:.72rem; font-weight:600; margin:2px 4px 2px 0; text-decoration:none; }
+    .maid-chip:hover { background:#dbeafe; }
+    .muted { color:var(--muted); } .small { font-size:.76rem; }
+    .wrap-cell { max-width:320px; white-space:normal; line-height:1.45; }
+    .spam-badge { background:#fee2e2; color:#991b1b; border-radius:999px; padding:2px 8px; font-size:.65rem; font-weight:700; }
+    .pagination { display:flex; gap:6px; flex-wrap:wrap; padding:14px 20px; }
+    .page-link { padding:7px 13px; border:1px solid var(--border); border-radius:8px; font-size:.8rem; font-weight:600; color:var(--muted); text-decoration:none; background:#fff; }
+    .page-link.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .empty { padding:56px 20px; text-align:center; color:var(--muted); }
+    .empty i { font-size:2.2rem; opacity:.3; display:block; margin-bottom:10px; }
+    @media (max-width:900px) { .main { margin-left:0; } .data-table { display:block; overflow-x:auto; } }
+  </style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <strong>SelectRoyal Maids</strong>
+    <span>Admin Panel</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-label">Workspace</div>
+    <a href="{% url 'Authentication:admin_dashboard' %}"><i class="fa-solid fa-chart-pie icon"></i> Dashboard</a>
+    <a href="{% url 'Authentication:admin_dashboard' %}#maids"><i class="fa-solid fa-users icon"></i> Maid Applications</a>
+    <a href="{% url 'Authentication:admin_dashboard' %}#placements"><i class="fa-solid fa-briefcase icon"></i> Placements</a>
+    <a href="{% url 'Authentication:admin_dashboard' %}#employers"><i class="fa-solid fa-building icon"></i> Employers &amp; Payments</a>
+    <a href="{% url 'Authentication:all_employers' %}" class="active"><i class="fa-solid fa-address-book icon"></i> All Employers</a>
+    <div class="sidebar-label">Support</div>
+    <a href="{% url 'MaidApp:support-chat' %}"><i class="fa-solid fa-comments icon"></i> Support Chat</a>
+    <a href="{% url 'MaidApp:index' %}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square icon"></i> View Website</a>
+    <a href="{% url 'Authentication:logout' %}"><i class="fa-solid fa-right-from-bracket icon"></i> Log Out</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-avatar"><i class="fa-solid fa-user"></i></div>
+    <div class="sidebar-user-info">
+      <strong>{{ user.get_full_name|default:user.username }}</strong>
+      <span>Super Admin</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <h1><i class="fa-solid fa-address-book" style="color:var(--accent);margin-right:8px;"></i>All Employers</h1>
+    <a class="btn btn-ghost" href="{% url 'Authentication:admin_dashboard' %}"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+  </header>
+
+  <div class="content">
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num blue">{{ stats.site_total }}</div><div class="lbl">Site Employers</div></div>
+      <div class="stat-card"><div class="num green">{{ stats.legacy_total }}</div><div class="lbl">Legacy Employers (request.sql)</div></div>
+      <div class="stat-card"><div class="num amber">{{ stats.legacy_spam }}</div><div class="lbl">Legacy Spam Flagged</div></div>
+      <div class="stat-card"><div class="num">{{ stats.assigned_total }}</div><div class="lbl">Maids Currently Assigned</div></div>
+    </div>
+
+    <!-- Source tabs -->
+    <div class="tab-row">
+      <a class="tab-link {% if tab == 'site' %}active{% endif %}" href="?tab=site"><i class="fa-solid fa-building"></i> Site Employers</a>
+      <a class="tab-link {% if tab == 'legacy' %}active{% endif %}" href="?tab=legacy"><i class="fa-solid fa-clock-rotate-left"></i> Legacy Employers (request.sql)</a>
+    </div>
+
+{% if tab == 'site' %}
+<!-- ══ SITE EMPLOYERS ══ -->
+<div class="card">
+  <div class="card-head">
+    <h2><i class="fa-solid fa-building"></i> Registered Employer Accounts <span class="pill pill-blue">{{ site_page.paginator.count }}</span></h2>
+    <form method="get" class="filter-bar">
+      <input type="hidden" name="tab" value="site" />
+      <input type="text" class="input" name="q" value="{{ query }}" placeholder="Search name, email, phone…" />
+      <select class="select" name="plan">
+        <option value="">All Plans</option>
+        <option value="standard" {% if plan == 'standard' %}selected{% endif %}>Standard</option>
+        <option value="premium" {% if plan == 'premium' %}selected{% endif %}>Premium</option>
+      </select>
+      <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Filter</button>
+      {% if query or plan %}<a class="btn btn-ghost" href="?tab=site">Clear</a>{% endif %}
+    </form>
+  </div>
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr><th>Employer</th><th>Phone</th><th>Plan</th><th>Payment</th><th>Joined</th><th>Maids Assigned</th><th>Placement History</th></tr>
+    </thead>
+    <tbody>
+      {% for entry in site_rows %}
+      <tr>
+        <td>
+          <strong>{{ entry.profile.user.get_full_name|default:entry.profile.user.username }}</strong><br>
+          <span class="small muted">{{ entry.profile.user.email }}</span>
+          {% if entry.profile.city %}<br><span class="small muted"><i class="fa-solid fa-location-dot"></i> {{ entry.profile.city }}</span>{% endif %}
+          {% if entry.profile.service_needed %}<br><span class="small muted"><i class="fa-solid fa-broom"></i> {{ entry.profile.service_needed }}</span>{% endif %}
+        </td>
+        <td style="white-space:nowrap;">{{ entry.profile.phone|default:"—" }}</td>
+        <td>
+          <span class="pill {% if entry.profile.plan == 'premium' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.profile.get_plan_display }}</span><br>
+          <span class="small muted">{% if entry.profile.plan == 'standard' %}1 maid max{% else %}unlimited{% endif %}</span>
+        </td>
+        <td><span class="pill {% if entry.profile.payment_status == 'paid' %}pill-green{% elif entry.profile.payment_status == 'pending' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.profile.get_payment_status_display }}</span></td>
+        <td style="white-space:nowrap;">{{ entry.profile.created_at|date:"d M Y" }}</td>
+        <td class="wrap-cell">
+          {% if entry.maids %}
+            {% for maid in entry.maids %}<a class="maid-chip" href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" target="_blank"><i class="fa-solid fa-id-card"></i> {{ maid.reg_number }} · {{ maid.full_name }}</a>{% endfor %}
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td class="wrap-cell">
+          {% if entry.placements %}
+            {% for pr in entry.placements %}<span class="maid-chip" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;"><i class="fa-solid fa-circle-check"></i> {% if pr.candidate %}{{ pr.candidate.reg_number }} · {{ pr.candidate.full_name }}{% else %}—{% endif %}</span>{% endfor %}
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7"><div class="empty"><i class="fa-solid fa-building"></i>No site employers found{% if query %} matching "<strong>{{ query }}</strong>"{% endif %}.</div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if site_page.has_other_pages %}
+  <div class="pagination">
+    {% if site_page.has_previous %}<a class="page-link" href="?tab=site&q={{ query|urlencode }}&plan={{ plan|urlencode }}&page={{ site_page.previous_page_number }}">‹ Prev</a>{% endif %}
+    {% for num in site_page.paginator.get_elided_page_range %}
+      {% if num == site_page.paginator.ELLIPSIS %}<span class="page-link">…</span>
+      {% elif num == site_page.number %}<span class="page-link active">{{ num }}</span>
+      {% else %}<a class="page-link" href="?tab=site&q={{ query|urlencode }}&plan={{ plan|urlencode }}&page={{ num }}">{{ num }}</a>{% endif %}
+    {% endfor %}
+    {% if site_page.has_next %}<a class="page-link" href="?tab=site&q={{ query|urlencode }}&plan={{ plan|urlencode }}&page={{ site_page.next_page_number }}">Next ›</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<!-- ══ LEGACY EMPLOYERS ══ -->
+<div class="card">
+  <div class="card-head">
+    <h2>
+      <i class="fa-solid fa-clock-rotate-left"></i> Legacy Requests — imported from request.sql
+      <span class="pill pill-gray">selectro_new.request</span>
+      <span class="pill pill-blue">{{ legacy_page.paginator.count }}</span>
+    </h2>
+    <form method="get" class="filter-bar">
+      <input type="hidden" name="tab" value="legacy" />
+      {% if show_spam %}<input type="hidden" name="spam" value="1" />{% endif %}
+      <input type="text" class="input" name="q" value="{{ query }}" placeholder="Search name, email, phone, company…" />
+      <select class="select" name="plan">
+        <option value="">All Plans</option>
+        <option value="standard" {% if plan == 'standard' %}selected{% endif %}>Standard</option>
+        <option value="premium" {% if plan == 'premium' %}selected{% endif %}>Premium</option>
+      </select>
+      <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Filter</button>
+      {% if query or plan %}<a class="btn btn-ghost" href="?tab=legacy{% if show_spam %}&amp;spam=1{% endif %}">Clear</a>{% endif %}
+    </form>
+  </div>
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr><th>#</th><th>Employer</th><th>Contact</th><th>Location / Company</th><th>Plan</th><th>Requested Service</th><th>How Soon</th><th>Assigned Maid(s)</th></tr>
+    </thead>
+    <tbody>
+      {% for entry in legacy_rows %}
+      <tr>
+        <td class="muted">{{ entry.row.legacy_id }}</td>
+        <td>
+          <strong>{{ entry.row.full_name|default:"Unnamed" }}</strong>{% if entry.row.is_spam %} <span class="spam-badge">SPAM?</span>{% endif %}<br>
+          <span class="small muted">{{ entry.row.profession|default:"—" }}</span>
+        </td>
+        <td style="white-space:nowrap;">
+          {{ entry.row.phone|default:"—" }}
+          {% if entry.row.email %}<br><span class="small muted">{{ entry.row.email }}</span>{% endif %}
+        </td>
+        <td class="wrap-cell">
+          {% if entry.row.home_address %}{{ entry.row.home_address }}{% else %}<span class="muted">—</span>{% endif %}
+          {% if entry.row.company %}<br><span class="small muted"><i class="fa-solid fa-briefcase"></i> {{ entry.row.company }}{% if entry.row.company_address %} — {{ entry.row.company_address }}{% endif %}</span>{% endif %}
+        </td>
+        <td><span class="pill {% if entry.row.plan == 'premium' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.row.get_plan_display }}</span></td>
+        <td class="wrap-cell">{% if entry.row.requested_service %}{{ entry.row.requested_service|truncatechars:140 }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td style="white-space:nowrap;">{{ entry.row.how_soon|default:"—" }}</td>
+        <td class="wrap-cell">
+          {% for maid in entry.maids %}<a class="maid-chip" href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" target="_blank"><i class="fa-solid fa-id-card"></i> {{ maid.reg_number }} · {{ maid.full_name }}</a>{% endfor %}
+          {% if entry.legacy_maid %}
+            <a class="maid-chip" style="background:#fefce8;border-color:#fde68a;color:#854d0e;" href="{% url 'MaidApp:view-profile' %}?slug={{ entry.legacy_maid.slug }}" target="_blank" title="Reg number recorded in the legacy dump"><i class="fa-solid fa-clock-rotate-left"></i> {{ entry.legacy_maid.reg_number }} · {{ entry.legacy_maid.full_name }}</a>
+          {% elif entry.row.assigned_reg_number %}
+            <span class="pill pill-amber" title="Reg number recorded in the legacy dump; this maid is not in the current database">{{ entry.row.assigned_reg_number }}</span>
+          {% endif %}
+          {% if not entry.maids and not entry.legacy_maid and not entry.row.assigned_reg_number %}<span class="muted">—</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8"><div class="empty"><i class="fa-solid fa-clock-rotate-left"></i>No legacy employers found{% if query %} matching "<strong>{{ query }}</strong>"{% endif %}.{% if not show_spam and stats.legacy_spam %} <a href="?tab=legacy&amp;spam=1">Show spam-flagged rows</a>.{% endif %}</div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if legacy_page.has_other_pages %}
+  <div class="pagination">
+    {% if legacy_page.has_previous %}<a class="page-link" href="?tab=legacy&q={{ query|urlencode }}&plan={{ plan|urlencode }}{% if show_spam %}&spam=1{% endif %}&page={{ legacy_page.previous_page_number }}">‹ Prev</a>{% endif %}
+    {% for num in legacy_page.paginator.get_elided_page_range %}
+      {% if num == legacy_page.paginator.ELLIPSIS %}<span class="page-link">…</span>
+      {% elif num == legacy_page.number %}<span class="page-link active">{{ num }}</span>
+      {% else %}<a class="page-link" href="?tab=legacy&q={{ query|urlencode }}&plan={{ plan|urlencode }}{% if show_spam %}&spam=1{% endif %}&page={{ num }}">{{ num }}</a>{% endif %}
+    {% endfor %}
+    {% if legacy_page.has_next %}<a class="page-link" href="?tab=legacy&q={{ query|urlencode }}&plan={{ plan|urlencode }}{% if show_spam %}&spam=1{% endif %}&page={{ legacy_page.next_page_number }}">Next ›</a>{% endif %}
+  </div>
+  {% endif %}
+  {% if not show_spam and stats.legacy_spam %}
+  <div style="padding:10px 20px 16px;" class="small muted"><i class="fa-solid fa-shield-halved"></i> {{ stats.legacy_spam }} suspected bot/spam submissions are hidden. <a href="?tab=legacy&amp;spam=1">Show them</a>.</div>
+  {% endif %}
+</div>
+{% endif %}
+  </div>
+</div>
+</body>
+</html>

@@ -202,6 +202,98 @@ def _next_legacy_id():
     return (MaidProfile.objects.aggregate(m=Max('legacy_id'))['m'] or 0) + 1
 
 
+def employer_plan(target, kind):
+    """Return the subscription plan ('standard'/'premium') for an assignment target.
+
+    `kind` is 'user' for site employers (AUTH_USER_MODEL) or 'legacy' for
+    LegacyEmployer rows imported from request.sql.
+    """
+    if kind == 'user':
+        try:
+            return target.employer_profile.plan
+        except Exception:
+            return 'standard'
+    return getattr(target, 'plan', 'standard')
+
+
+def assigned_maid_count(target, kind, exclude_pk=None):
+    """How many maids are currently assigned to this employer."""
+    qs = MaidProfile.objects.all()
+    qs = qs.filter(assigned_employer=target) if kind == 'user' else qs.filter(assigned_legacy_employer=target)
+    if exclude_pk:
+        qs = qs.exclude(pk=exclude_pk)
+    return qs.count()
+
+
+def placement_capacity_error(target, kind, exclude_pk=None):
+    """Return an error message when assigning another maid would exceed the
+    employer's plan capacity, or None when the assignment is allowed.
+    Standard employers can hold only one maid; Premium employers unlimited."""
+    if employer_plan(target, kind) == 'standard' and assigned_maid_count(target, kind, exclude_pk=exclude_pk) >= 1:
+        name = str(target)
+        return (f'{name} is on the Standard plan and already has a maid assigned. '
+                'Standard employers can only be assigned one maid — upgrade them to Premium to assign more.')
+    return None
+
+
+class LegacyEmployer(models.Model):
+    """An employer request imported from the legacy site's `request` table
+    (selectro_new.request — see request.sql in the project root)."""
+
+    PLAN_CHOICES = [
+        ('standard', 'Standard'),
+        ('premium',  'Premium'),
+    ]
+
+    legacy_id        = models.PositiveIntegerField(unique=True, help_text='Original `request.id` from the legacy database')
+    first_name       = models.CharField(max_length=500, blank=True)
+    last_name        = models.CharField(max_length=500, blank=True)
+    phone            = models.CharField(max_length=500, blank=True)
+    email            = models.CharField(max_length=500, blank=True)
+    home_address     = models.CharField(max_length=500, blank=True)
+    profession       = models.CharField(max_length=500, blank=True)
+    company          = models.CharField(max_length=500, blank=True)
+    company_address  = models.CharField(max_length=500, blank=True)
+    family_members   = models.CharField(max_length=500, blank=True)
+    apartment_type   = models.CharField(max_length=500, blank=True)
+    marital_status   = models.CharField(max_length=500, blank=True)
+    maid_gender      = models.CharField(max_length=500, blank=True)
+    requested_service = models.TextField(blank=True)
+    how_soon         = models.CharField(max_length=500, blank=True)
+    plan             = models.CharField(max_length=20, choices=PLAN_CHOICES, default='premium')
+    assigned         = models.CharField(max_length=500, blank=True, help_text="Raw legacy 'assigned' value ('unassigned' or a maid reg number)")
+    is_spam          = models.BooleanField(default=False, db_index=True, help_text='Bot/spam submission detected during import')
+    imported_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['legacy_id']
+        verbose_name = 'Legacy employer (request.sql)'
+        verbose_name_plural = 'Legacy employers (request.sql)'
+
+    def __str__(self):
+        return f'#{self.legacy_id} {self.full_name or "Unnamed"} — {self.get_plan_display()}'
+
+    @property
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'.strip()
+
+    @property
+    def assigned_reg_number(self):
+        """The maid reg number recorded in the legacy dump, if any."""
+        value = (self.assigned or '').strip()
+        if not value or value.lower() == 'unassigned':
+            return ''
+        return value
+
+    @property
+    def legacy_assigned_maid(self):
+        """MaidProfile referenced by the legacy 'assigned' reg number, if any."""
+        reg = self.assigned_reg_number
+        if not reg:
+            return None
+        return MaidProfile.objects.filter(reg_number__iexact=reg).first()
+
+
 class MaidProfile(models.Model):
     """Imported maid profiles from the old selectroyalmaids.com.ng database."""
 
@@ -226,6 +318,18 @@ class MaidProfile(models.Model):
                                       help_text='Upload a profile photo')
     assign_status  = models.CharField(max_length=20, choices=ASSIGN_STATUS,
                                       default='unassigned')
+    assigned_employer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='assigned_maids',
+        help_text='Site employer this maid is currently placed with.')
+    assigned_legacy_employer = models.ForeignKey(
+        'LegacyEmployer',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='assigned_maids',
+        help_text='Legacy employer (request.sql) this maid is currently placed with.')
     is_featured    = models.BooleanField(default=False)
     is_active      = models.BooleanField(default=True)
     created_at     = models.DateTimeField(auto_now_add=True)
@@ -234,15 +338,55 @@ class MaidProfile(models.Model):
         ordering = ['-created_at', '-id']   # newest profiles first everywhere
 
     def save(self, *args, **kwargs):
-        """Auto-generate a unique SRM-XXXXX reg_number and legacy_id on creation."""
+        """Auto-generate reg_number/legacy_id, keep the placement status in
+        sync with the assigned employer, and enforce the plan capacity rule
+        (Standard employers may hold only ONE maid, Premium unlimited)."""
         if not self.pk:
             if not self.reg_number:
                 self.reg_number = _next_reg_number()
             if not self.legacy_id:
                 self.legacy_id = _next_legacy_id()
+
+        if self.assign_status == 'unassigned':
+            # An available maid cannot keep an employer attached.
+            if self.assigned_employer_id or self.assigned_legacy_employer_id:
+                self.assigned_employer = None
+                self.assigned_legacy_employer = None
+                update_fields = kwargs.get('update_fields')
+                if update_fields:
+                    kwargs['update_fields'] = tuple(set(update_fields) | {'assigned_employer', 'assigned_legacy_employer'})
+        else:
+            if self.assigned_employer_id:
+                error = placement_capacity_error(self.assigned_employer, 'user', exclude_pk=self.pk)
+                if error:
+                    raise ValueError(error)
+            if self.assigned_legacy_employer_id:
+                error = placement_capacity_error(self.assigned_legacy_employer, 'legacy', exclude_pk=self.pk)
+                if error:
+                    raise ValueError(error)
+            # Choosing an employer implies the maid is assigned.
+            if self.assigned_employer_id or self.assigned_legacy_employer_id:
+                self.assign_status = 'assigned'
         return super().save(*args, **kwargs)
 
     # ── Helpers ────────────────────────────────────────────────────────────────
+
+    @property
+    def assigned_employer_label(self):
+        """Human-readable label of the employer this maid is assigned to."""
+        if self.assigned_employer_id:
+            user = self.assigned_employer
+            name = user.get_full_name() or user.username or user.email
+            plan = 'standard'
+            try:
+                plan = user.employer_profile.plan
+            except Exception:
+                pass
+            return f'{name} — {plan} plan'
+        if self.assigned_legacy_employer_id:
+            legacy = self.assigned_legacy_employer
+            return f'{legacy.full_name} — {legacy.plan} plan (legacy)'
+        return ''
 
     def photo_url(self):
         """

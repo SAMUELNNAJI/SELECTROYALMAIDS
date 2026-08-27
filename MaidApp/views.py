@@ -18,6 +18,8 @@ from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q, Value
+from django.db.models.functions import Replace
 from .models import BlogPost, BlogSubscriber, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
 from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_contact_ack_email, send_maid_application_email, send_maid_registration_success_email
 
@@ -281,7 +283,15 @@ def find_a_maid(request):
 
     query = request.GET.get('q', '').strip()
     if query:
-        qs = qs.filter(full_name__icontains=query)
+        # Match the maid's full name or registration code (e.g. "SRM-1510"),
+        # tolerating variants typed without the dash, e.g. "SRM1510".
+        compact = query.replace('-', '').replace(' ', '')
+        qs = qs.annotate(reg_compact=Replace('reg_number', Value('-'), Value('')))
+        qs = qs.filter(
+            Q(full_name__icontains=query)
+            | Q(reg_number__icontains=query)
+            | Q(reg_compact__icontains=compact)
+        )
 
     availability = request.GET.get('avail', '')
     if availability == 'available':

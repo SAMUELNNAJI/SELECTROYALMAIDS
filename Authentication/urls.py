@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/recommendation/<int:recommendation_id>/respond/', views.respond_recommendation, name='respond_recommendation'),
     path('employer/dashboard/',                    views.employer_dashboard,  name='employer_dashboard'),
     path('admin/dashboard/',                       views.admin_dashboard,     name='admin_dashboard'),
+    path('admin/employers/',                       views.all_employers,       name='all_employers'),
     path('admin/placements/<int:placement_id>/conclude/', views.conclude_placement, name='conclude_placement'),
     path('admin/placements/<int:placement_id>/replace/', views.record_free_replacement, name='record_free_replacement'),
     # MaidProfile CRUD
