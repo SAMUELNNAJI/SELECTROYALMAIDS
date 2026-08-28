@@ -147,23 +147,30 @@ class Command(BaseCommand):
             if not legacy_id:
                 continue
 
+            raw_plan = (row.get('subplan') or 'premium').strip().lower()
+            plan = 'premium' if raw_plan == 'premium' else ('standard' if raw_plan == 'standard' else 'premium')
+
+            def _clip(value, limit=500):
+                text = str(value or '')
+                return text[:limit]
+
             defaults = dict(
-                first_name=row.get('fname', ''),
-                last_name=row.get('lname', ''),
-                phone=row.get('phone', ''),
-                email=row.get('email', ''),
-                home_address=row.get('homeaddress', ''),
-                profession=row.get('profession', ''),
-                company=row.get('company', ''),
-                company_address=row.get('companyaddress', ''),
-                family_members=row.get('familymembers', ''),
-                apartment_type=row.get('typeofapartment', ''),
-                marital_status=row.get('marital', ''),
-                maid_gender=row.get('maidgender', ''),
-                requested_service=row.get('reqservice', ''),
-                how_soon=row.get('howsoon', ''),
-                plan=(row.get('subplan') or 'premium').strip().lower() or 'premium',
-                assigned=row.get('assigned', ''),
+                first_name=_clip(row.get('fname', '')),
+                last_name=_clip(row.get('lname', '')),
+                phone=_clip(row.get('phone', '')),
+                email=_clip(row.get('email', '')),
+                home_address=_clip(row.get('homeaddress', '')),
+                profession=_clip(row.get('profession', '')),
+                company=_clip(row.get('company', '')),
+                company_address=_clip(row.get('companyaddress', '')),
+                family_members=_clip(row.get('familymembers', '')),
+                apartment_type=_clip(row.get('typeofapartment', '')),
+                marital_status=_clip(row.get('marital', '')),
+                maid_gender=_clip(row.get('maidgender', '')),
+                requested_service=_clip(row.get('reqservice', ''), 5000),
+                how_soon=_clip(row.get('howsoon', '')),
+                plan=plan,
+                assigned=_clip(row.get('assigned', '')),
                 is_spam=looks_like_spam(row),
             )
             if defaults['is_spam']:
