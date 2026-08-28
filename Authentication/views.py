@@ -731,6 +731,89 @@ def admin_dashboard(request):
         .order_by('legacy_id')
     )
 
+    # ── All Employers tab data ────────────────────────────────────────────────
+    ae_tab = request.GET.get('ae_tab', request.GET.get('tab', 'site'))
+    if ae_tab not in ('site', 'legacy'):
+        ae_tab = 'site'
+    ae_query = request.GET.get('q', '').strip()
+    ae_plan = request.GET.get('plan', '')
+    ae_show_spam = request.GET.get('spam') == '1'
+
+    ae_site_page = ae_legacy_page = None
+    ae_maids_by_employer = {}
+    ae_placements_by_employer = {}
+    ae_maids_by_reg = {}
+
+    if ae_tab == 'site':
+        ae_qs = EmployerProfile.objects.select_related('user').annotate(
+            maid_count=Count('user__assigned_maids'))
+        if ae_query:
+            ae_qs = ae_qs.filter(
+                Q(user__first_name__icontains=ae_query) |
+                Q(user__last_name__icontains=ae_query) |
+                Q(user__username__icontains=ae_query) |
+                Q(user__email__icontains=ae_query) |
+                Q(phone__icontains=ae_query)
+            )
+        if ae_plan in ('standard', 'premium'):
+            ae_qs = ae_qs.filter(plan=ae_plan)
+        ae_site_page = Paginator(ae_qs.order_by('-created_at'), 25).get_page(request.GET.get('page', 1))
+        ae_employer_ids = [profile.user_id for profile in ae_site_page.object_list]
+        for maid in MaidProfile.objects.filter(assigned_employer_id__in=ae_employer_ids):
+            ae_maids_by_employer.setdefault(maid.assigned_employer_id, []).append(maid)
+        ae_concluded = (
+            PlacementRequest.objects
+            .filter(employer_id__in=ae_employer_ids, candidate__isnull=False, status='concluded')
+            .select_related('candidate')
+            .order_by('-concluded_at')
+        )
+        for placement in ae_concluded:
+            ae_placements_by_employer.setdefault(placement.employer_id, []).append(placement)
+    else:
+        ae_qs = LegacyEmployer.objects.all()
+        if not ae_show_spam:
+            ae_qs = ae_qs.filter(is_spam=False)
+        if ae_query:
+            ae_qs = ae_qs.filter(
+                Q(first_name__icontains=ae_query) |
+                Q(last_name__icontains=ae_query) |
+                Q(email__icontains=ae_query) |
+                Q(phone__icontains=ae_query) |
+                Q(company__icontains=ae_query) |
+                Q(home_address__icontains=ae_query)
+            )
+        if ae_plan in ('standard', 'premium'):
+            ae_qs = ae_qs.filter(plan=ae_plan)
+        ae_legacy_page = Paginator(ae_qs.order_by('legacy_id'), 25).get_page(request.GET.get('page', 1))
+        ae_row_ids = [row.pk for row in ae_legacy_page.object_list]
+        for maid in MaidProfile.objects.filter(assigned_legacy_employer_id__in=ae_row_ids):
+            ae_maids_by_employer.setdefault(maid.assigned_legacy_employer_id, []).append(maid)
+        ae_reg_numbers = {row.assigned_reg_number for row in ae_legacy_page.object_list if row.assigned_reg_number}
+        if ae_reg_numbers:
+            for maid in MaidProfile.objects.filter(reg_number__in=ae_reg_numbers):
+                ae_maids_by_reg.setdefault(maid.reg_number.lower(), maid)
+
+    ae_site_rows = []
+    ae_legacy_rows = []
+    if ae_tab == 'site' and ae_site_page:
+        ae_site_rows = [
+            {
+                'profile':    profile,
+                'maids':      ae_maids_by_employer.get(profile.user_id, []),
+                'placements': ae_placements_by_employer.get(profile.user_id, []),
+            }
+            for profile in ae_site_page.object_list
+        ]
+    elif ae_tab == 'legacy' and ae_legacy_page:
+        ae_legacy_rows = [
+            {
+                'row':         record,
+                'maids':       ae_maids_by_employer.get(record.pk, []),
+                'legacy_maid': ae_maids_by_reg.get(record.assigned_reg_number.lower()) if record.assigned_reg_number else None,
+            }
+            for record in ae_legacy_page.object_list
+        ]
+
     context = {
         # stat cards
         'maid_count':            MaidRegistration.objects.count(),
@@ -752,6 +835,21 @@ def admin_dashboard(request):
         # employers tab
         'employer_query':        employer_query,
         'employers':             employers_qs,
+        # all employers tab
+        'ae_tab': ae_tab,
+        'ae_query': ae_query,
+        'ae_plan': ae_plan,
+        'ae_show_spam': ae_show_spam,
+        'ae_site_page': ae_site_page,
+        'ae_legacy_page': ae_legacy_page,
+        'ae_site_rows': ae_site_rows,
+        'ae_legacy_rows': ae_legacy_rows,
+        'ae_stats': {
+            'site_total':     EmployerProfile.objects.count(),
+            'legacy_total':   LegacyEmployer.objects.filter(is_spam=False).count(),
+            'legacy_spam':    LegacyEmployer.objects.filter(is_spam=True).count(),
+            'assigned_total': MaidProfile.objects.filter(assign_status='assigned').count(),
+        },
         # content tabs
         'faqs':                  FAQ.objects.all(),
         'services':              Service.objects.all(),
@@ -1101,6 +1199,10 @@ def all_employers(request):
             'legacy_spam':    LegacyEmployer.objects.filter(is_spam=True).count(),
             'assigned_total': MaidProfile.objects.filter(assign_status='assigned').count(),
         },
+        'unread_count': SupportMessage.objects.filter(
+                             is_read=False,
+                             sender__is_staff=False,
+                         ).count(),
     }
     if tab == 'site':
         context['site_rows'] = [

@@ -24,13 +24,25 @@
     .sidebar-nav a { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:#94a3b8; font-size:.875rem; font-weight:500; text-decoration:none; }
     .sidebar-nav a:hover, .sidebar-nav a.active { background:var(--accent); color:#fff; }
     .sidebar-nav a .icon { width:18px; text-align:center; }
-    .sidebar-footer { padding:16px; border-top:1px solid rgba(255,255,255,.07); display:flex; align-items:center; gap:10px; }
-    .sidebar-avatar { width:36px; height:36px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; }
+    .sidebar-footer { padding:16px; border-top:1px solid rgba(255,255,255,.07); }
+    .sidebar-user { display:flex; align-items:center; gap:10px; }
+    .sidebar-avatar { width:36px; height:36px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:.85rem; flex-shrink:0; }
     .sidebar-user-info strong { color:#f1f5f9; font-size:.8rem; display:block; }
     .sidebar-user-info span { color:#64748b; font-size:.72rem; }
-    .main { margin-left:var(--sidebar-w); min-height:100vh; display:flex; flex-direction:column; }
-    .topbar { background:var(--card); border-bottom:1px solid var(--border); padding:16px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
-    .topbar h1 { font-size:1.15rem; font-weight:800; }
+    .main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; min-width:0; }
+    .topbar { background:var(--card); border-bottom:1px solid var(--border); padding:0 28px; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .topbar-left { display:flex; align-items:center; gap:14px; }
+    .topbar h1 { font-size:1.1rem; font-weight:700; color:var(--text); }
+    .topbar-right { display:flex; align-items:center; gap:14px; }
+    .topbar-badge { background:var(--accent-lt); color:var(--accent); font-size:.7rem; font-weight:700; padding:4px 10px; border-radius:100px; }
+    .nav-badge-wrap { justify-content:flex-start; }
+    .nav-badge {
+      margin-left:auto; min-width:20px; height:20px; padding:0 6px;
+      border-radius:100px; background:#ef4444; color:#fff;
+      font-size:.7rem; font-weight:700;
+      display:inline-flex; align-items:center; justify-content:center;
+      line-height:1; flex-shrink:0;
+    }
     .content { padding:24px 28px; }
     .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:22px; }
     .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; }
@@ -83,38 +95,50 @@
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
-    <strong>SelectRoyal Maids</strong>
-    <span>Admin Panel</span>
+    <img src="{% static 'image/logo (1).png' %}" alt="Logo" />
+    <div class="sidebar-brand-text">
+      <strong>SelectRoyal</strong>
+      <span>Admin Console</span>
+    </div>
   </div>
   <nav class="sidebar-nav">
     <div class="sidebar-label">Workspace</div>
-    <a href="{% url 'Authentication:admin_dashboard' %}"><i class="fa-solid fa-chart-pie icon"></i> Dashboard</a>
+    <a href="{% url 'Authentication:admin_dashboard' %}"><i class="fa-solid fa-chart-pie icon"></i> Overview</a>
     <a href="{% url 'Authentication:admin_dashboard' %}#maids"><i class="fa-solid fa-users icon"></i> Maid Applications</a>
     <a href="{% url 'Authentication:admin_dashboard' %}#placements"><i class="fa-solid fa-briefcase icon"></i> Placements</a>
     <a href="{% url 'Authentication:admin_dashboard' %}#employers"><i class="fa-solid fa-building icon"></i> Employers &amp; Payments</a>
     <a href="{% url 'Authentication:all_employers' %}" class="active"><i class="fa-solid fa-address-book icon"></i> All Employers</a>
+    <div class="sidebar-label">Content</div>
+    <a href="{% url 'Authentication:admin_dashboard' %}#blog"><i class="fa-solid fa-newspaper icon"></i> Blog Posts</a>
+    <a href="{% url 'Authentication:admin_dashboard' %}#faq"><i class="fa-solid fa-circle-question icon"></i> FAQs</a>
+    <a href="{% url 'Authentication:admin_dashboard' %}#services"><i class="fa-solid fa-sliders icon"></i> Services</a>
     <div class="sidebar-label">Support</div>
-    <a href="{% url 'MaidApp:support-chat' %}"><i class="fa-solid fa-comments icon"></i> Support Chat</a>
+    <a href="{% url 'MaidApp:support-chat' %}" class="nav-badge-wrap"><i class="fa-solid fa-comments icon"></i> Support Chat{% if unread_count %}<span class="nav-badge">{{ unread_count }}</span>{% endif %}</a>
+    <a href="{% url 'Authentication:video_conferencing' %}"><i class="fa-solid fa-video icon"></i> Video Conferencing</a>
     <a href="{% url 'MaidApp:index' %}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square icon"></i> View Website</a>
-    <a href="{% url 'Authentication:logout' %}"><i class="fa-solid fa-right-from-bracket icon"></i> Log Out</a>
+    <a href="{% url 'Authentication:logout' %}" class="danger"><i class="fa-solid fa-right-from-bracket icon"></i> Log Out</a>
   </nav>
   <div class="sidebar-footer">
-    <div class="sidebar-avatar"><i class="fa-solid fa-user"></i></div>
-    <div class="sidebar-user-info">
-      <strong>{{ user.get_full_name|default:user.username }}</strong>
-      <span>Super Admin</span>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" aria-label="Admin profile"><i class="fa-solid fa-user"></i></div>
+      <div class="sidebar-user-info">
+        <strong>{{ user.get_full_name|default:user.username }}</strong>
+        <span>Super Admin</span>
+      </div>
     </div>
   </div>
 </aside>
 
 <!-- MAIN -->
 <div class="main">
-    <header class="topbar">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
       <h1><i class="fa-solid fa-address-book" style="color:var(--accent);margin-right:8px;"></i>All Employers</h1>
     </div>
-    <a class="btn btn-ghost" href="{% url 'Authentication:admin_dashboard' %}"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+    <div class="topbar-right">
+      <a class="btn btn-ghost" href="{% url 'Authentication:admin_dashboard' %}"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
   </header>
 
   <div class="content">
@@ -294,3 +318,4 @@
 </script>
 </body>
 </html>
+

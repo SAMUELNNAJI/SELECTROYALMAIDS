@@ -324,7 +324,7 @@
     <a href="#" data-tab="maids"><i class="fa-solid fa-users icon"></i> Maid Applications</a>
     <a href="#" data-tab="placements"><i class="fa-solid fa-briefcase icon"></i> Placements</a>
     <a href="#" data-tab="employers"><i class="fa-solid fa-building icon"></i> Employers &amp; Payments</a>
-    <a href="{% url 'Authentication:all_employers' %}"><i class="fa-solid fa-address-book icon"></i> All Employers</a>
+    <a href="{% url 'Authentication:all_employers' %}" data-tab="all-employers"><i class="fa-solid fa-address-book icon"></i> All Employers</a>
     <div class="sidebar-label">Content</div>
     <a href="#" data-tab="blog"><i class="fa-solid fa-newspaper icon"></i> Blog Posts</a>
     <a href="#" data-tab="faq"><i class="fa-solid fa-circle-question icon"></i> FAQs</a>
@@ -367,6 +367,7 @@
        <button class="tab-btn" data-tab="maids" role="tab"><i class="fa-solid fa-users"></i> <span>Maids</span></button>
        <button class="tab-btn" data-tab="placements" role="tab"><i class="fa-solid fa-briefcase"></i> <span>Placements</span></button>
        <button class="tab-btn" data-tab="employers" role="tab"><i class="fa-solid fa-building"></i> <span>Employers</span></button>
+      <button class="tab-btn" data-tab="all-employers" role="tab"><i class="fa-solid fa-address-book"></i> <span>All Employers</span></button>
       <button class="tab-btn" data-tab="blog" role="tab"><i class="fa-solid fa-newspaper"></i> <span>Blog</span></button>
       <button class="tab-btn" data-tab="faq" role="tab"><i class="fa-solid fa-circle-question"></i> <span>FAQs</span></button>
       <button class="tab-btn" data-tab="services" role="tab"><i class="fa-solid fa-sliders"></i> <span>Services</span></button>
@@ -670,6 +671,157 @@
           </div>
         </div>
       </div>
+    </div>
+    <!-- ── TAB: All Employers ── -->
+    <div class="tab-panel" id="tab-all-employers">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.05rem;font-weight:800;">All Employers</h2>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">Site accounts + legacy requests from request.sql</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a class="btn {% if ae_tab == 'site' %}btn-primary{% else %}btn-ghost{% endif %}" href="?tab=all-employers&ae_tab=site" style="font-size:.82rem;"><i class="fa-solid fa-building"></i> Site Employers</a>
+        <a class="btn {% if ae_tab == 'legacy' %}btn-primary{% else %}btn-ghost{% endif %}" href="?tab=all-employers&ae_tab=legacy" style="font-size:.82rem;"><i class="fa-solid fa-clock-rotate-left"></i> Legacy Employers</a>
+      </div>
+      {% if ae_tab == 'site' %}
+      <div class="card">
+        <div class="card-head">
+          <h2><i class="fa-solid fa-building"></i> Registered Employer Accounts <span class="badge badge-blue">{{ ae_site_page.paginator.count }}</span></h2>
+          <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="hidden" name="tab" value="all-employers" />
+            <input type="text" name="q" value="{{ ae_query }}" placeholder="Search name, email, phone…" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;min-width:220px;" />
+            <select name="plan" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;background:#fff;">
+              <option value="">All Plans</option>
+              <option value="standard" {% if ae_plan == 'standard' %}selected{% endif %}>Standard</option>
+              <option value="premium" {% if ae_plan == 'premium' %}selected{% endif %}>Premium</option>
+            </select>
+            <button type="submit" class="btn btn-primary" style="padding:9px 18px;"><i class="fa-solid fa-magnifying-glass"></i> Filter</button>
+            {% if ae_query or ae_plan %}<a href="?tab=all-employers&ae_tab=site" class="btn btn-ghost" style="padding:9px 14px;">Clear</a>{% endif %}
+          </form>
+        </div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table class="data-table" style="table-layout:fixed;min-width:1100px;width:100%;">
+          <thead>
+            <tr><th>Employer</th><th>Phone</th><th style="width:100px;">Plan</th><th style="width:110px;">Payment</th><th style="width:100px;">Joined</th><th>Maids Assigned</th><th>Placement History</th></tr>
+          </thead>
+          <tbody>
+            {% for entry in ae_site_rows %}
+            <tr>
+              <td style="padding:14px 16px;">
+                <strong style="font-weight:800;">{{ entry.profile.user.get_full_name|default:entry.profile.user.username }}</strong><br>
+                <span class="small muted" style="word-break:break-all;overflow-wrap:break-word;">{{ entry.profile.user.email }}</span>
+                {% if entry.profile.city %}<br><span class="small muted"><i class="fa-solid fa-location-dot"></i> {{ entry.profile.city }}</span>{% endif %}
+                {% if entry.profile.service_needed %}<br><span class="small muted"><i class="fa-solid fa-broom"></i> {{ entry.profile.service_needed }}</span>{% endif %}
+              </td>
+              <td style="white-space:nowrap;padding:14px 16px;">{{ entry.profile.phone|default:"—" }}</td>
+              <td style="padding:14px 16px;">
+                <span class="badge {% if entry.profile.plan == 'premium' %}badge-amber{% else %}badge-blue{% endif %}">{{ entry.profile.get_plan_display }}</span><br>
+                <span style="font-size:.78rem;color:var(--muted);">{% if entry.profile.plan == 'standard' %}1 maid max{% else %}unlimited{% endif %}</span>
+              </td>
+              <td style="padding:14px 16px;"><span class="status-pill {% if entry.profile.payment_status == 'paid' %}active{% elif entry.profile.payment_status == 'pending' %}inactive{% else %}inactive{% endif %}">{{ entry.profile.get_payment_status_display }}</span></td>
+              <td style="white-space:nowrap;padding:14px 16px;">{{ entry.profile.created_at|date:"d M Y" }}</td>
+              <td style="padding:14px 16px;">
+                {% if entry.maids %}
+                  {% for maid in entry.maids %}<a class="maid-chip" href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" target="_blank"><i class="fa-solid fa-id-card"></i> {{ maid.reg_number }} · {{ maid.full_name }}</a>{% endfor %}
+                {% else %}<span class="muted">—</span>{% endif %}
+              </td>
+              <td style="padding:14px 16px;">
+                {% if entry.placements %}
+                  {% for pr in entry.placements %}<span class="maid-chip" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;"><i class="fa-solid fa-circle-check"></i> {% if pr.candidate %}{{ pr.candidate.reg_number }} · {{ pr.candidate.full_name }}{% else %}—{% endif %}</span>{% endfor %}
+                {% else %}<span class="muted">—</span>{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;"><i class="fa-solid fa-building" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>No site employers found{% if ae_query %} matching "<strong>{{ ae_query }}</strong>"{% endif %}.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        {% if ae_site_page.has_other_pages %}
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;flex-wrap:wrap;">
+          {% if ae_site_page.has_previous %}<a href="?tab=all-employers&ae_tab=site&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}&page={{ ae_site_page.previous_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">‹ Prev</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">‹ Prev</span>{% endif %}
+          {% for num in ae_site_page.paginator.get_elided_page_range %}
+            {% if num == ae_site_page.number %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;font-size:.82rem;font-weight:700;">{{ num }}</span>{% elif num == ae_site_page.paginator.ELLIPSIS %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;font-size:.82rem;color:var(--muted);">…</span>{% else %}<a href="?tab=all-employers&ae_tab=site&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}&page={{ num }}" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.82rem;text-decoration:none;">{{ num }}</a>{% endif %}
+          {% endfor %}
+          {% if ae_site_page.has_next %}<a href="?tab=all-employers&ae_tab=site&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}&page={{ ae_site_page.next_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">Next ›</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">Next ›</span>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="card">
+        <div class="card-head">
+          <h2>
+            <i class="fa-solid fa-clock-rotate-left"></i> Legacy Requests — imported from request.sql
+            <span class="badge badge-blue">{{ ae_legacy_page.paginator.count }}</span>
+          </h2>
+          <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="hidden" name="tab" value="all-employers" />
+            {% if ae_show_spam %}<input type="hidden" name="spam" value="1" />{% endif %}
+            <input type="text" name="q" value="{{ ae_query }}" placeholder="Search name, email, phone, company…" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;min-width:220px;" />
+            <select name="plan" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;background:#fff;">
+              <option value="">All Plans</option>
+              <option value="standard" {% if ae_plan == 'standard' %}selected{% endif %}>Standard</option>
+              <option value="premium" {% if ae_plan == 'premium' %}selected{% endif %}>Premium</option>
+            </select>
+            <button type="submit" class="btn btn-primary" style="padding:9px 18px;"><i class="fa-solid fa-magnifying-glass"></i> Filter</button>
+            {% if ae_query or ae_plan %}<a href="?tab=all-employers&ae_tab=legacy{% if ae_show_spam %}&amp;spam=1{% endif %}" class="btn btn-ghost" style="padding:9px 14px;">Clear</a>{% endif %}
+          </form>
+        </div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table class="data-table" style="table-layout:fixed;min-width:1200px;width:100%;">
+          <thead>
+            <tr><th style="width:60px;">#</th><th>Employer</th><th>Contact</th><th>Location / Company</th><th style="width:100px;">Plan</th><th>Requested Service</th><th style="width:110px;">How Soon</th><th>Assigned Maid(s)</th></tr>
+          </thead>
+          <tbody>
+            {% for entry in ae_legacy_rows %}
+            <tr>
+              <td style="white-space:nowrap;padding:14px 16px;color:var(--muted);">{{ entry.row.legacy_id }}</td>
+              <td style="padding:14px 16px;">
+                <strong style="font-weight:800;">{{ entry.row.full_name|default:"Unnamed" }}</strong>{% if entry.row.is_spam %}                   <span class="badge badge-red">SPAM?</span>{% endif %}<br>
+                <span style="font-size:.82rem;color:var(--muted);">{{ entry.row.profession|default:"—" }}</span>
+              </td>
+              <td style="padding:14px 16px;font-size:.82rem;word-break:break-all;overflow-wrap:break-word;">
+                {{ entry.row.phone|default:"—" }}
+                {% if entry.row.email %}<br><span style="color:var(--muted);">{{ entry.row.email }}</span>{% endif %}
+              </td>
+              <td style="padding:14px 16px;font-size:.82rem;word-break:break-all;overflow-wrap:break-word;">
+                {% if entry.row.home_address %}{{ entry.row.home_address }}{% else %}<span style="color:var(--muted);">—</span>{% endif %}
+                {% if entry.row.company %}<br><span style="font-size:.78rem;color:var(--muted);"><i class="fa-solid fa-briefcase"></i> {{ entry.row.company }}{% if entry.row.company_address %} — {{ entry.row.company_address }}{% endif %}</span>{% endif %}
+              </td>
+              <td style="padding:14px 16px;"><span class="badge {% if entry.row.plan == 'premium' %}badge-amber{% else %}badge-blue{% endif %}">{{ entry.row.get_plan_display }}</span></td>
+              <td style="padding:14px 16px;font-size:.82rem;">{% if entry.row.requested_service %}{{ entry.row.requested_service|truncatechars:140 }}{% else %}<span style="color:var(--muted);">—</span>{% endif %}</td>
+              <td style="white-space:nowrap;padding:14px 16px;font-size:.82rem;">{{ entry.row.how_soon|default:"—" }}</td>
+              <td style="padding:14px 16px;font-size:.82rem;">
+                {% for maid in entry.maids %}<a href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;background:var(--accent-lt);color:var(--accent);border:1px solid #bfdbfe;border-radius:999px;padding:2px 10px;font-size:.72rem;font-weight:600;text-decoration:none;margin:2px 4px 2px 0;"><i class="fa-solid fa-id-card"></i> {{ maid.reg_number }} · {{ maid.full_name }}</a>{% endfor %}
+                {% if entry.legacy_maid %}
+                  <a href="{% url 'MaidApp:view-profile' %}?slug={{ entry.legacy_maid.slug }}" target="_blank" title="Reg number recorded in the legacy dump" style="display:inline-flex;align-items:center;gap:4px;background:#fefce8;border-color:#fde68a;color:#854d0e;border-radius:999px;padding:2px 10px;font-size:.72rem;font-weight:600;text-decoration:none;margin:2px 4px 2px 0;"><i class="fa-solid fa-clock-rotate-left"></i> {{ entry.legacy_maid.reg_number }} · {{ entry.legacy_maid.full_name }}</a>
+                {% elif entry.row.assigned_reg_number %}
+                  <span class="badge badge-amber" title="Reg number recorded in the legacy dump; this maid is not in the current database" style="margin:2px 4px 2px 0;display:inline-flex;">{{ entry.row.assigned_reg_number }}</span>
+                {% endif %}
+                {% if not entry.maids and not entry.legacy_maid and not entry.row.assigned_reg_number %}<span style="color:var(--muted);">—</span>{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;"><i class="fa-solid fa-clock-rotate-left" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>No legacy employers found{% if ae_query %} matching "<strong>{{ ae_query }}</strong>"{% endif %}.{% if not ae_show_spam and ae_stats.legacy_spam %} <a href="?tab=all-employers&ae_tab=legacy&amp;spam=1" style="color:var(--accent);">Show spam-flagged rows</a>.{% endif %}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        {% if ae_legacy_page.has_other_pages %}
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;flex-wrap:wrap;">
+          {% if ae_legacy_page.has_previous %}<a href="?tab=all-employers&ae_tab=legacy&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}{% if ae_show_spam %}&spam=1{% endif %}&page={{ ae_legacy_page.previous_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">‹ Prev</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">‹ Prev</span>{% endif %}
+          {% for num in ae_legacy_page.paginator.get_elided_page_range %}
+            {% if num == ae_legacy_page.number %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;font-size:.82rem;font-weight:700;">{{ num }}</span>{% elif num == ae_legacy_page.paginator.ELLIPSIS %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;font-size:.82rem;color:var(--muted);">…</span>{% else %}<a href="?tab=all-employers&ae_tab=legacy&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}{% if ae_show_spam %}&spam=1{% endif %}&page={{ num }}" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.82rem;text-decoration:none;">{{ num }}</a>{% endif %}
+          {% endfor %}
+          {% if ae_legacy_page.has_next %}<a href="?tab=all-employers&ae_tab=legacy&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}{% if ae_show_spam %}&spam=1{% endif %}&page={{ ae_legacy_page.next_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">Next ›</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">Next ›</span>{% endif %}
+        </div>
+        {% endif %}
+        {% if not ae_show_spam and ae_stats.legacy_spam %}
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem;"><i class="fa-solid fa-shield-halved" style="color:var(--accent);"></i> {{ ae_stats.legacy_spam }} suspected bot/spam submissions are hidden. <a href="?tab=all-employers&ae_tab=legacy&amp;spam=1" style="color:var(--accent);font-weight:600;">Show them</a>.</div>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
     <!-- ── TAB: Blog ── -->
     <div class="tab-panel" id="tab-blog">
@@ -1152,7 +1304,7 @@
   overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
 
   /* ── Tab system ── */
-  const titleMap = { overview:'Overview', maids:'Maid Applications', placements:'Placements', employers:'Employers & Payments', blog:'Blog Posts', faq:'FAQs', services:'Services' };
+  const titleMap = { overview:'Overview', maids:'Maid Applications', placements:'Placements', employers:'Employers & Payments', 'all-employers':'All Employers', blog:'Blog Posts', faq:'FAQs', services:'Services' };
   function activateTab(name) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     document.querySelectorAll('.sidebar-nav a[data-tab]').forEach(a => a.classList.toggle('active', a.dataset.tab === name));
