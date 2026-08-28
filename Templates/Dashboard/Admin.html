@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -381,7 +382,7 @@
           <div class="stat-icon amber"><i class="fa-solid fa-naira-sign"></i></div>
           <div>
             <div class="stat-label">Revenue</div>
-            <div class="stat-value">₦{{ total_revenue|floatformat:0|default:"0" }}</div>
+            <div class="stat-value">₦{{ total_revenue|floatformat:0|default:"0"|intcomma }}</div>
             <div class="stat-sub">Paid employer signups</div>
           </div>
         </div>
@@ -639,7 +640,7 @@
                     {% else %}<span style="color:#cbd5e1;">— no request —</span>{% endif %}
                   </td>
                   <td><span class="badge {% if ep.plan == 'premium' %}badge-amber{% else %}badge-blue{% endif %}">{{ ep.get_plan_display }}</span></td>
-                  <td style="white-space:nowrap;">₦{{ ep.amount|floatformat:0 }}</td>
+                  <td style="white-space:nowrap;">₦{{ ep.amount|intcomma }}</td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.created_at|date:"d M Y" }}</td>
                   <td><span class="status-pill active">Paid</span></td>
                   <td>

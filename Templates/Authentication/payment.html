@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load humanize %}
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -43,11 +44,11 @@
       margin-bottom: 28px;
       text-align: left;
     }
-    .pay-summary-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #e2e8f0; font-size: .87rem; }
+    .pay-summary-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 7px 0; border-bottom: 1px solid #e2e8f0; font-size: .87rem; }
     .pay-summary-row:last-child { border-bottom: none; }
-    .pay-summary-row .label  { color: #64748b; font-weight: 600; }
-    .pay-summary-row .value  { color: #1e293b; font-weight: 700; }
-    .pay-summary-row .amount { color: #2563eb; font-size: 1.05rem; font-weight: 800; }
+    .pay-summary-row .label  { color: #64748b; font-weight: 600; flex-shrink: 0; }
+    .pay-summary-row .value  { color: #1e293b; font-weight: 700; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+    .pay-summary-row .amount { color: #2563eb; font-size: 1.05rem; font-weight: 800; white-space: nowrap; }
 
     .pay-btn {
       width: 100%;
@@ -152,7 +153,7 @@
       </div>
       <div class="pay-summary-row">
         <span class="label">Amount</span>
-        <span class="value amount">₦{{ amount|floatformat:"0" }}</span>
+        <span class="value amount">₦{{ amount|intcomma }}</span>
       </div>
     </div>
 
@@ -181,7 +182,7 @@
     <form method="post" action="{% url 'Authentication:payment_redirect' %}">
       {% csrf_token %}
       <button class="pay-btn" id="payBtn" type="submit">
-        <i class="fa-solid fa-lock"></i> Pay ₦{{ amount|floatformat:"0" }} Securely
+        <i class="fa-solid fa-lock"></i> Pay ₦{{ amount|intcomma }} Securely
       </button>
     </form>
 

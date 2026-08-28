@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -539,7 +540,7 @@
           <div style="flex:1;min-width:200px;">
             <strong style="color:#92400e;display:block;font-size:.9rem;">Payment Pending</strong>
             <span style="color:#b45309;font-size:.82rem;">
-              Your <strong>{{ profile.get_plan_display }}</strong> plan (₦{{ profile.amount|floatformat:0 }}) is not yet activated.
+              Your <strong>{{ profile.get_plan_display }}</strong> plan (₦{{ profile.amount|intcomma }}) is not yet activated.
               Complete payment to unlock full access.
             </span>
           </div>
