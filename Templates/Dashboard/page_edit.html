@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit {{ page_meta.title }} – SelectRoyal Admin</title>
+  <link rel="icon" href="{% static 'image/logo (1).png' %}" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.css" />
+  <link rel="stylesheet" href="{% static 'css/policy.css' %}" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:#f1f5f9;min-height:100vh;padding:24px 16px;}
+    .wrap{max-width:1100px;margin:0 auto;}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+    .top h1{font-size:1.1rem;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:10px;}
+    .top h1 i{color:#2563eb;}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:9px;font-size:.875rem;font-weight:700;cursor:pointer;text-decoration:none;border:none;font-family:inherit;}
+    .btn-primary{background:#2563eb;color:#fff;}
+    .btn-ghost{background:#fff;color:#334155;border:1px solid #e2e8f0;}
+    .btn-danger{background:#dc2626;color:#fff;}
+    .btn-danger:hover{background:#b91c1c;}
+    .meta{font-size:.8rem;color:#64748b;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;}
+    textarea#pageContent{width:100%;}
+    .note-editor.note-frame{border-color:#e2e8f0;border-radius:8px;}
+    .editor-hero{margin-bottom:20px;}
+    .editor-hero .page-hero{border-radius:10px;overflow:hidden;margin-bottom:0;}
+    @media(min-width:768px){
+      .editor-layout{display:flex;gap:24px;align-items:flex-start;}
+      .editor-aside{display:block;flex:0 0 220px;max-width:220px;}
+      .editor-main{flex:1;min-width:0;}
+      .editor-aside .policy-toc{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;position:sticky;top:24px;}
+      .editor-aside .policy-toc-title{font-size:.8rem;font-weight:700;color:#0f172a;margin-bottom:12px;}
+      .editor-aside ul{list-style:none;padding:0;margin:0;}
+      .editor-aside li{margin-bottom:6px;}
+      .editor-aside a{color:#334155;text-decoration:none;font-size:.8rem;display:flex;align-items:center;gap:6px;cursor:pointer;}
+      .editor-aside a:hover{color:#2563eb;}
+      .editor-aside .policy-toc-arrow{opacity:.4;font-size:.7rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <h1><i class="fa-solid fa-file-lines"></i> Edit: {{ page_meta.title }}</h1>
+      <a class="btn btn-ghost" href="/admin/dashboard/?tab=pages"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+    {% if messages %}{% for msg in messages %}
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:16px;background:{% if msg.tags == 'success' %}#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;{% else %}#fef2f2;border:1px solid #fecaca;color:#dc2626;{% endif %}">
+        <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+        <span style="font-size:.875rem;font-weight:600;">{{ msg }}</span>
+      </div>
+    {% endfor %}{% endif %}
+
+    <!-- ===== FIXED HERO (from page_meta, not editable) ===== -->
+    <div class="editor-hero">
+      <section class="page-hero">
+        <div class="page-hero-bg"></div>
+        <div class="container page-hero-inner">
+          <div class="page-hero-pill"><i class="fa-solid {{ page_meta.hero_icon }}"></i> {{ page_meta.hero_pill }}</div>
+          <h1 class="page-hero-title">{{ page_meta.title }} <span class="accent-light">{{ page_meta.title|lower }}</span></h1>
+          <p class="page-hero-sub">{{ page_meta.hero_subtitle }}</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== EDITOR LAYOUT: live TOC + editable sections ===== -->
+    <div class="editor-layout">
+      <!-- ===== LIVE SIDEBAR TOC ===== -->
+      <aside class="editor-aside" id="editorToc">
+        <div class="policy-toc">
+          <p class="policy-toc-title">On This Page</p>
+          <ul id="tocList"></ul>
+        </div>
+      </aside>
+
+      <!-- ===== EDITABLE SECTIONS ===== -->
+      <div class="editor-main">
+        <p class="meta">
+          <span><i class="fa-solid fa-globe"></i> Public page: /{{ page_meta.slug }}/</span>
+          {% if page_obj %}<span><i class="fa-regular fa-clock"></i> Last updated: {{ page_obj.updated_at|date:"d M Y, H:i" }}</span>{% else %}<span><i class="fa-solid fa-triangle-exclamation"></i> Not yet imported — shows built-in template until you save.</span>{% endif %}
+          <span style="color:#2563eb;font-weight:600;"><i class="fa-solid fa-lightbulb"></i> Tip: click <strong>+ Section</strong> to add a styled container.</span>
+        </p>
+
+        <form method="post" id="pageForm">
+          {% csrf_token %}
+          <textarea id="pageContent" name="content">{{ template_body }}</textarea>
+          <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save &amp; Publish</button>
+            <a class="btn btn-ghost" href="/{{ page_meta.slug }}/" target="_blank"><i class="fa-solid fa-up-right-from-square"></i> Preview public page</a>
+            {% if page_obj %}
+            <button type="submit" form="resetForm" class="btn btn-danger" onclick="return confirm('Reset {{ page_meta.title }} to the built-in template? This will delete your custom edits.');"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            {% endif %}
+          </div>
+        </form>
+
+        {% if page_obj %}
+        <form method="post" id="resetForm" action="/admin/pages/{{ page_meta.slug }}/reset/" style="display:none;">
+          {% csrf_token %}
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      function syncToc() {
+        var $editable = $('.note-editable').first();
+        var $tocList = $('#tocList');
+        $tocList.empty();
+        if (!$editable.length) { return; }
+        $editable.find('.policy-block').each(function () {
+          var $block = $(this);
+          var $h2 = $block.find('h2').first();
+          if (!$h2.length) { return; }
+          var title = $h2.text().trim();
+          if (!title) { return; }
+          if (!this.id) {
+            var base = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'section';
+            var id = base;
+            var n = 2;
+            while (document.getElementById(id) && document.getElementById(id) !== $block[0]) {
+              id = base + '-' + n; n++;
+            }
+            $block.attr('id', id);
+          }
+          var safeTitle = $('<div>').text(title).html();
+          $tocList.append('<li><a href="#' + this.id + '">' + safeTitle + ' <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>');
+        });
+      }
+
+      function PolicySectionButton(context) {
+        var ui = $.summernote.ui;
+        var button = ui.button({
+          contents: '<i class="fa-solid fa-plus"></i> Section',
+          tooltip: 'Add a new styled section container',
+          className: 'note-btn-policy-section',
+          click: function () {
+            try {
+              var SECTION_HTML = '<div class="policy-block">' +
+                '<h2><i class="fa-solid fa-circle-plus"></i> New Section Title</h2>' +
+                '<p>Write the content of this section here…</p>' +
+                '</div>';
+              try {
+                if (context.invoke('codeview.isActive')) { context.invoke('codeview.deactivate'); }
+              } catch (e) {}
+              var $editable = context.layoutInfo.editable;
+              var $current = null;
+              var sel = window.getSelection();
+              if (sel && sel.rangeCount) {
+                var node = sel.getRangeAt(0).startContainer;
+                $current = $(node).closest('.policy-block', $editable[0]);
+              }
+              var $new;
+              if ($current && $current.length) {
+                $current.after(SECTION_HTML);
+                $new = $current.next('.policy-block');
+              } else {
+                $editable.append(SECTION_HTML);
+                $new = $editable.find('.policy-block').last();
+              }
+              if ($new && $new.length) {
+                var el = $new.find('h2')[0] || $new[0];
+                $editable.focus();
+                var range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                var s = window.getSelection();
+                s.removeAllRanges();
+                s.addRange(range);
+              }
+              syncToc();
+            } catch (err) { console.error('+ Section failed:', err); }
+          }
+        });
+        return button.render();
+      }
+
+      $('#pageForm').on('submit', syncToc);
+      $('#pageContent').summernote({
+        height: 460,
+        codeviewFilter: true,
+        codeviewIframeFilter: true,
+        buttons: { policySection: PolicySectionButton },
+        callbacks: {
+          onChange: function () {
+            clearTimeout(window.__tocSyncTimer);
+            window.__tocSyncTimer = setTimeout(syncToc, 350);
+          }
+        },
+        toolbar: [
+          ['custom', ['policySection']],
+          ['style', ['style']],
+          ['font', ['bold', 'underline', 'clear']],
+          ['para', ['ul', 'ol', 'paragraph']],
+          ['table', ['table']],
+          ['insert', ['link']],
+          ['view', ['codeview']]
+        ]
+      });
+      syncToc();
+    });
+  </script>
+</body>
+</html>

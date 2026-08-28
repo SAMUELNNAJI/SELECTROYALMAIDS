@@ -1,3 +1,6 @@
+import re
+import re
+import re
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -533,6 +536,85 @@ class FAQ(models.Model):
 
     def __str__(self):
         return self.question
+
+
+
+def extract_policy_blocks(html):
+    """Parse HTML and return a list of dicts {id, title, html} for every
+    <div class="policy-block">...</div> section. Handles nested divs
+    (e.g. .policy-notice) via balanced-div matching."""
+    result = []
+    content = html or ''
+    pos = 0
+    while True:
+        start = content.find('<div class="policy-block"', pos)
+        if start == -1:
+            break
+        i = start
+        depth = 0
+        end = -1
+        while i < len(content):
+            m = re.search(r'<div\b|</div\s*>', content[i:])
+            if not m:
+                break
+            if m.group(0) == '<div':
+                depth += 1
+            else:
+                depth -= 1
+                if depth == 0:
+                    end = i + m.end()
+                    break
+            i += m.end()
+        if end == -1:
+            end = len(content)
+        block_html = content[start:end].strip()
+        pos = end
+        if not block_html:
+            continue
+        idm = re.search(r'\bid="([^"]+)"', block_html)
+        bid = idm.group(1) if idm else ''
+        h2m = re.search(r'<h2[^>]*>(.*?)</h2>', block_html, re.S)
+        title = re.sub(r'<[^>]+>', ' ', h2m.group(1)).strip() if h2m else ''
+        title = re.sub(r'\s+', ' ', title).strip()
+        result.append({'id': bid, 'title': title, 'html': block_html})
+    return result
+
+
+class EditablePage(models.Model):
+    """Admin-editable content for the public static pages
+    (safety guidelines, terms, privacy, refund). When a row exists for a
+    slug the public page renders this HTML instead of the hardcoded template."""
+
+    slug = models.SlugField(unique=True)
+    title = models.CharField(max_length=200)
+    content = models.TextField(help_text='HTML content rendered on the public page')
+    hero_subtitle = models.TextField(default='', blank=True)
+    hero_icon = models.CharField(max_length=100, default='fa-file-lines')
+    hero_pill = models.CharField(max_length=100, default='')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['slug']
+
+    def __str__(self):
+        return self.title
+
+    def body_html(self):
+        """Return just the .policy-block sections (extras stripped)."""
+        return '\n'.join(b['html'] for b in extract_policy_blocks(self.content or ''))
+
+    def toc_blocks(self):
+        """Return a list of {'id', 'title'} for the 'On This Page' sidebar,
+        auto-derived from the section headings. Sections without an id get one
+        slugified from their title."""
+        blocks = []
+        for b in extract_policy_blocks(self.content or ''):
+            bid = b['id']
+            if not bid:
+                base = re.sub(r'[^a-z0-9]+', '-', b['title'].lower()).strip('-')
+                bid = base or 'section'
+            blocks.append({'id': bid, 'title': b['title']})
+        return blocks
 
 
 class BlogSubscriber(models.Model):

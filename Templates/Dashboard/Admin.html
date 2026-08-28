@@ -398,6 +398,7 @@
       <button class="tab-btn" data-tab="all-employers" role="tab"><i class="fa-solid fa-address-book"></i> <span>All Employers</span></button>
       <button class="tab-btn" data-tab="blog" role="tab"><i class="fa-solid fa-newspaper"></i> <span>Blog</span></button>
       <button class="tab-btn" data-tab="faq" role="tab"><i class="fa-solid fa-circle-question"></i> <span>FAQs</span></button>
+      <button class="tab-btn" data-tab="pages" role="tab"><i class="fa-solid fa-file-lines"></i> <span>Pages</span></button>
       <button class="tab-btn" data-tab="services" role="tab"><i class="fa-solid fa-sliders"></i> <span>Services</span></button>
     </div>
 
@@ -986,6 +987,52 @@
       <div style="text-align:center;padding:48px 24px;color:var(--muted);"><i class="fa-solid fa-circle-question" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>No FAQs yet.</div>
       {% endfor %}
     </div>
+    <!-- ── TAB: Pages ── -->
+    <div class="tab-panel" id="tab-pages">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.05rem;font-weight:800;">Public Pages</h2>
+          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">Import and edit the content of the public Safety Guidelines, Terms, Privacy and Refund pages</p>
+        </div>
+      </div>
+      {% if messages %}{% for msg in messages %}
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:16px;{% if msg.tags == 'success' %}background:var(--green-lt);border:1px solid #bbf7d0;color:var(--green);{% else %}background:var(--red-lt);border:1px solid #fecaca;color:var(--red);{% endif %}">
+          <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+          <span style="font-size:.875rem;font-weight:600;">{{ msg }}</span>
+        </div>
+      {% endfor %}{% endif %}
+      {% for p in editable_pages %}
+      <div class="faq-row">
+        <div class="faq-row-head">
+          <span class="faq-q"><i class="fa-solid fa-file-lines" style="color:var(--accent);margin-right:8px;"></i>{{ p.title }}</span>
+          <span class="status-pill {% if p.exists %}active{% else %}inactive{% endif %}">{% if p.exists %}Custom content{% else %}Template default{% endif %}</span>
+          <div class="faq-actions">
+            {% if p.exists %}
+            <span style="font-size:.75rem;color:var(--muted);white-space:nowrap;">Updated {{ p.updated_at|date:"d M Y, H:i" }}</span>
+            <a class="btn btn-primary" style="padding:6px 12px;font-size:.78rem;" href="{% url 'Authentication:page_admin_edit' p.slug %}"><i class="fa-solid fa-pen"></i> Edit</a>
+            <form method="post" action="{% url 'Authentication:page_admin_reset' p.slug %}" style="display:inline;" onsubmit="return confirm('Reset {{ p.title }} to the built-in template content? Your edits will be deleted.');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger" style="padding:6px 12px;font-size:.78rem;"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            </form>
+            {% else %}
+            <form method="post" action="{% url 'Authentication:page_admin_import' p.slug %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary" style="padding:6px 12px;font-size:.78rem;"><i class="fa-solid fa-file-import"></i> Import current content</button>
+            </form>
+            <a class="btn btn-ghost" style="padding:6px 12px;font-size:.78rem;" href="{% url 'Authentication:page_admin_edit' p.slug %}"><i class="fa-solid fa-pen"></i> Start blank</a>
+            {% endif %}
+          </div>
+        </div>
+        <p class="faq-a" style="font-size:.8rem;color:var(--muted);">
+          {% if p.exists %}
+            This page currently shows your custom content. Edits go live immediately on the public site.
+          {% else %}
+            Not imported yet — the public page still renders the built-in template. Click <strong>Import current content</strong> to copy it into the editor.
+          {% endif %}
+        </p>
+      </div>
+      {% endfor %}
+    </div>
     <!-- ── TAB: Services ── -->
     <div class="tab-panel" id="tab-services">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
@@ -1336,7 +1383,7 @@
   overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
 
   /* ── Tab system ── */
-  const titleMap = { overview:'Overview', maids:'Maid Applications', placements:'Placements', employers:'Employers & Payments', 'all-employers':'All Employers', blog:'Blog Posts', faq:'FAQs', services:'Services' };
+  const titleMap = { overview:'Overview', maids:'Maid Applications', placements:'Placements', employers:'Employers & Payments', 'all-employers':'All Employers', blog:'Blog Posts', faq:'FAQs', pages:'Public Pages', services:'Services' };
   function activateTab(name) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     document.querySelectorAll('.sidebar-nav a[data-tab]').forEach(a => a.classList.toggle('active', a.dataset.tab === name));

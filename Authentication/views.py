@@ -1,3 +1,4 @@
+import re
 from decimal import Decimal, InvalidOperation
 import logging
 from threading import Thread
@@ -20,7 +21,8 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q, Count, Sum, Case, When, Value, IntegerField
 from django.views.decorators.http import require_POST
 from datetime import timedelta
-from MaidApp.models import BlogPost, FAQ, LegacyEmployer, MaidProfile, MaidRegistration, MaidRecommendation, PlacementRequest, Service, SupportMessage
+from MaidApp.models import BlogPost, EditablePage, FAQ, LegacyEmployer, MaidProfile, MaidRegistration, MaidRecommendation, PlacementRequest, Service, SupportMessage
+from MaidApp.models import extract_policy_blocks
 from MaidApp.image_utils import resolve_image_url
 from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email, send_maid_recommended_email, send_maid_application_decline_email, send_maid_verified_email
 from .models import EmployerProfile, PendingSignup
@@ -866,8 +868,194 @@ def admin_dashboard(request):
         'page_obj':           blog_paginator.get_page(blog_page_num),
         'page_range':         blog_paginator.get_elided_page_range(blog_page_num or 1, on_each_side=2, on_ends=1),
         'blog_categories':    BlogPost.CATEGORY_CHOICES,
+        'editable_pages':     _editable_pages_context(),
     }
     return render(request, 'Dashboard/Admin.html', context)
+
+
+
+
+# ===== Public page editor (safety guidelines, terms, privacy, refund) =====
+
+EDITABLE_PAGES = [
+    {
+        'slug': 'safety-guidelines',
+        'title': 'Safety Guidelines',
+        'hero_subtitle': 'Your safety and peace of mind are our top priority. Please read these guidelines carefully before using our platform.',
+        'hero_icon': 'fa-shield-halved',
+        'hero_pill': 'TRUSTED & VERIFIED',
+    },
+    {
+        'slug': 'terms-of-service',
+        'title': 'Terms of Service',
+        'hero_subtitle': 'Please read these terms carefully. By using SelectRoyal Maids, you agree to be bound by these terms of service.',
+        'hero_icon': 'fa-file-contract',
+        'hero_pill': 'LEGAL AGREEMENT',
+    },
+    {
+        'slug': 'privacy-policy',
+        'title': 'Privacy Policy',
+        'hero_subtitle': 'We take your privacy seriously. This policy explains how we collect, use, and protect your personal information.',
+        'hero_icon': 'fa-lock',
+        'hero_pill': 'YOUR PRIVACY',
+    },
+    {
+        'slug': 'refund-policy',
+        'title': 'Refund Policy',
+        'hero_subtitle': 'We want you to be completely satisfied with our service. Here is our policy regarding refunds and cancellations.',
+        'hero_icon': 'fa-right-left',
+        'hero_pill': 'HASSLE-FREE',
+    },
+]
+
+
+def _editable_pages_context():
+    """Registry of admin-editable public pages with their current DB status."""
+    rows = {p.slug: p for p in EditablePage.objects.filter(
+        slug__in=[p['slug'] for p in EDITABLE_PAGES])}
+    pages = []
+    for meta in EDITABLE_PAGES:
+        row = rows.get(meta['slug'])
+        pages.append({
+            **meta,
+            'exists': row is not None,
+            'updated_at': row.updated_at if row else None,
+        })
+    return pages
+
+
+def _template_block_html(slug):
+    """Return the raw {% block content %} HTML from the template file."""
+    from pathlib import Path
+    from django.conf import settings
+    template_path = Path(settings.BASE_DIR) / 'Templates' / 'selectroyal' / f'{slug}.html'
+    src = template_path.read_text(encoding='utf-8')
+    m = re.search(r'\{%\s*block\s+content\s*%\}(.*?)\{%\s*endblock', src, re.S)
+    return m.group(1) if m else ''
+
+
+def _seed_block_html(slug):
+    """Extract the template's current .policy-block sections as HTML."""
+    return '\n'.join(
+        b['html'] for b in extract_policy_blocks(_template_block_html(slug))
+    )
+
+
+
+
+def _ensure_block_ids(blocks):
+    """Ensure every block dict has a unique id derived from its title."""
+    used = set()
+    for b in blocks:
+        bid = (b.get('id') or '').strip()
+        if not bid:
+            base = re.sub(r'[^a-z0-9]+', '-', (b.get('title') or '').lower()).strip('-')
+            base = base or 'section'
+        else:
+            base = bid
+        candidate = base
+        n = 2
+        while candidate in used:
+            candidate = '%s-%d' % (base, n)
+            n += 1
+        used.add(candidate)
+        b['id'] = candidate
+        if ' id="' not in b['html'] and ' id=' not in b['html']:
+            b['html'] = b['html'].replace(
+                '<div class="policy-block"',
+                '<div class="policy-block" id="%s"' % candidate, 1
+            )
+    return blocks
+
+
+@login_required
+def page_admin_edit(request, slug):
+    """Edit the .policy-block sections of a public page.
+
+    The hero and the page layout (TOC sidebar + wrapper) are always fixed,
+    taken from the template / hero metadata. Only the editable sections are
+    shown in the Summernote editor and saved to the DB.
+    """
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    meta = next((p for p in EDITABLE_PAGES if p['slug'] == slug), None)
+    if meta is None:
+        return redirect('/admin/dashboard/?tab=pages')
+    page = EditablePage.objects.filter(slug=slug).first()
+
+    if request.method == 'POST':
+        raw = request.POST.get('content', '').strip()
+        blocks = _ensure_block_ids(extract_policy_blocks(raw))
+        if not blocks:
+            messages.error(request, 'Content cannot be empty - add at least one section.')
+        else:
+            if page is None:
+                page = EditablePage(slug=slug)
+            page.title = meta['title']
+            page.content = '\n'.join(b['html'] for b in blocks)
+            page.hero_subtitle = meta.get('hero_subtitle', '')
+            page.hero_icon = meta.get('hero_icon', 'fa-file-lines')
+            page.hero_pill = meta.get('hero_pill', '')
+            page.save()
+            messages.success(request, '%s updated.' % meta['title'])
+            return redirect('/admin/dashboard/?tab=pages')
+
+    # 'Start blank' (no DB row yet) gives an empty editor: hero + sidebar
+    # TOC still render from page_meta, and the TOC auto-populates as new
+    # sections are added. If a row exists, its saved sections are loaded.
+    if page and page.content:
+        editable_body = page.body_html()
+    else:
+        editable_body = ''
+
+    return render(request, 'Dashboard/page_edit.html', {
+        'page_obj': page,
+        'page_meta': meta,
+        'template_body': editable_body,
+    })
+
+
+@login_required
+@require_POST
+def page_admin_import(request, slug):
+    """Seed the editable page with the template's current sections."""
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    meta = next((p for p in EDITABLE_PAGES if p['slug'] == slug), None)
+    if meta is None:
+        return redirect('/admin/dashboard/?tab=pages')
+
+    blocks = extract_policy_blocks(_template_block_html(slug))
+    if not blocks:
+        messages.error(request, 'Could not read the template for %s.' % meta['title'])
+        return redirect('/admin/dashboard/?tab=pages')
+    page = EditablePage.objects.filter(slug=slug).first()
+    if page is None:
+        page = EditablePage(slug=slug)
+    page.title = meta['title']
+    page.content = '\n'.join(b['html'] for b in blocks)
+    page.hero_subtitle = meta.get('hero_subtitle', '')
+    page.hero_icon = meta.get('hero_icon', 'fa-file-lines')
+    page.hero_pill = meta.get('hero_pill', '')
+    page.save()
+    messages.success(request, '%s imported from the template - you can now edit it.' % meta['title'])
+    return redirect('/admin/dashboard/?tab=pages')
+
+
+@login_required
+@require_POST
+def page_admin_reset(request, slug):
+    """Delete the custom content so the page falls back to the built-in
+    template."""
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    meta = next((p for p in EDITABLE_PAGES if p['slug'] == slug), None)
+    if meta is None:
+        return redirect('/admin/dashboard/?tab=pages')
+    EditablePage.objects.filter(slug=slug).delete()
+    messages.success(request, '%s reset to the built-in template.' % meta['title'])
+    return redirect('/admin/dashboard/?tab=pages')
+
 
 
 @login_required

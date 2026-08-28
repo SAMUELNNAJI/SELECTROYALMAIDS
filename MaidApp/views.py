@@ -20,7 +20,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Value
 from django.db.models.functions import Replace
-from .models import BlogPost, BlogSubscriber, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
+from .models import BlogPost, BlogSubscriber, EditablePage, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
 from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_contact_ack_email, send_maid_application_email, send_maid_registration_success_email
 
 logger = logging.getLogger(__name__)
@@ -327,10 +327,16 @@ def how_it_works(request):
 
 
 def privacy_policy(request):
+    page = EditablePage.objects.filter(slug='privacy-policy').first()
+    if page:
+        return render(request, 'selectroyal/editable-page.html', {'page': page})
     return render(request, 'selectroyal/privacy-policy.html')
 
 
 def refund_policy(request):
+    page = EditablePage.objects.filter(slug='refund-policy').first()
+    if page:
+        return render(request, 'selectroyal/editable-page.html', {'page': page})
     return render(request, 'selectroyal/refund-policy.html')
 
 
@@ -595,6 +601,9 @@ def conversation_list(request):
 
 
 def safety_guidelines(request):
+    page = EditablePage.objects.filter(slug='safety-guidelines').first()
+    if page:
+        return render(request, 'selectroyal/editable-page.html', {'page': page})
     return render(request, 'selectroyal/safety-guidelines.html')
 
 
@@ -604,6 +613,9 @@ def services(request):
 
 
 def terms_of_service(request):
+    page = EditablePage.objects.filter(slug='terms-of-service').first()
+    if page:
+        return render(request, 'selectroyal/editable-page.html', {'page': page})
     return render(request, 'selectroyal/terms-of-service.html')
 
 

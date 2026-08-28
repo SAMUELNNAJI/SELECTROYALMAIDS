@@ -40,6 +40,10 @@ urlpatterns = [
     path('admin/service/create/',                  views.service_create,      name='service_create'),
     path('admin/service/<int:service_id>/edit/',   views.service_edit,        name='service_edit'),
     path('admin/service/<int:service_id>/delete/', views.service_delete,      name='service_delete'),
+    # Public page editor (safety, terms, privacy, refund)
+    path('admin/pages/<slug:slug>/edit/',          views.page_admin_edit,     name='page_admin_edit'),
+    path('admin/pages/<slug:slug>/import/',        views.page_admin_import,   name='page_admin_import'),
+    path('admin/pages/<slug:slug>/reset/',         views.page_admin_reset,    name='page_admin_reset'),
     # Blog CRUD
     path('admin/blog/create/',                     views.blog_create,         name='blog_create'),
     path('admin/blog/<int:post_id>/edit/',         views.blog_edit,           name='blog_edit'),

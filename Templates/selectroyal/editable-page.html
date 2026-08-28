@@ -1,0 +1,42 @@
+{% extends 'selectroyal/base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} – SelectRoyal Maids{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/policy.css' %}" />
+{% endblock %}
+
+{% block content %}
+<!-- ===== PAGE HERO ===== -->
+<section class="page-hero">
+  <div class="page-hero-bg"></div>
+  <div class="container page-hero-inner">
+    <div class="page-hero-pill"><i class="fa-solid {{ page.hero_icon }}"></i> {{ page.hero_pill }}</div>
+    <h1 class="page-hero-title">{{ page.title }} <span class="accent-light">{{ page.title|lower }}</span></h1>
+    <p class="page-hero-sub">{{ page.hero_subtitle }}</p>
+    <p class="page-hero-meta"><i class="fa-regular fa-calendar"></i> Last updated: {{ page.updated_at|date:"F Y" }}</p>
+  </div>
+</section>
+
+<!-- ===== CONTENT ===== -->
+<section class="policy-section">
+  <div class="container policy-layout">
+
+    <!-- Sidebar TOC (auto-generated from the section headings) -->
+    <aside class="policy-toc" data-reveal="left">
+      <p class="policy-toc-title">On This Page</p>
+      <ul>
+        {% for block in page.toc_blocks %}
+        <li><a href="#{{ block.id }}">{{ block.title }} <i class="fa-solid fa-chevron-right policy-toc-arrow"></i></a></li>
+        {% endfor %}
+      </ul>
+    </aside>
+
+    <!-- Main content: editable .policy-block sections -->
+    <div class="policy-content" data-stagger="120">
+      {{ page.body_html|safe }}
+    </div>
+  </div>
+</section>
+{% endblock %}
