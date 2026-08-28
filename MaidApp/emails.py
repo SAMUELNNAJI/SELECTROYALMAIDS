@@ -242,3 +242,15 @@ def send_maid_application_decline_email(application, reason=None):
         'emails/maid_application_decline.html',
         {'application': application, 'reason': reason or 'Not specified'},
     )
+
+
+def send_maid_verified_email(maid):
+    """Notify a newly added maid that she is now a verified SelectRoyal maid."""
+    if not maid.email:
+        return False
+    return send_email(
+        "You Are Now a Verified Maid – SelectRoyal Maids",
+        maid.email,
+        'emails/maid_verified.html',
+        {'maid': maid},
+    )

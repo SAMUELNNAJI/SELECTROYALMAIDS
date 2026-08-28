@@ -7,23 +7,28 @@
   <title>All Employers – SelectRoyal Admin</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
-    :root { --bg:#f1f5f9; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
-      --accent:#2563eb; --sidebar-bg:#0f172a; --sidebar-w:260px; }
+    :root { --bg:#f1f5f9; --card:#fff; --border:#e2e8f0; --text:#1e293b; --muted:#64748b;
+      --accent:#2563eb; --accent-lt:#eff6ff; --sidebar-bg:#0f172a; --sidebar-w:260px; }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Inter',system-ui,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
-        .sidebar { width:var(--sidebar-w); height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:200; display:flex; flex-direction:column; transition:transform .25s ease; overflow:hidden; }
+    body { font-family:'Inter',system-ui,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+    /* Sidebar (matches Admin.html dashboard) */
+    .sidebar { width:var(--sidebar-w); height:100vh; background:var(--sidebar-bg); display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:200; transition:transform .25s ease; overflow:hidden; }
     .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:150; }
     .sidebar-overlay.show { display:block; }
     .menu-toggle { display:none; background:none; border:none; font-size:1.3rem; color:var(--text); cursor:pointer; }
     .sidebar.open { transform:translateX(0); }
-    .sidebar-brand { padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.07); }
-    .sidebar-brand strong { color:#fff; font-size:.95rem; font-weight:800; display:block; }
-    .sidebar-brand span { color:#94a3b8; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; }
+    .sidebar-brand { display:flex; align-items:center; gap:10px; padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.07); }
+    .sidebar-brand img { height:34px; width:auto; }
+    .sidebar-brand-text { line-height:1.2; }
+    .sidebar-brand-text strong { color:#fff; font-size:.95rem; font-weight:800; }
+    .sidebar-brand-text span { color:#94a3b8; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; display:block; }
     .sidebar-nav { flex:1; padding:12px; overflow-y:auto; }
     .sidebar-label { font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#475569; padding:16px 10px 6px; }
-    .sidebar-nav a { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:#94a3b8; font-size:.875rem; font-weight:500; text-decoration:none; }
-    .sidebar-nav a:hover, .sidebar-nav a.active { background:var(--accent); color:#fff; }
-    .sidebar-nav a .icon { width:18px; text-align:center; }
+    .sidebar-nav a { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:#94a3b8; font-size:.875rem; font-weight:500; text-decoration:none; transition:background .15s,color .15s; cursor:pointer; }
+    .sidebar-nav a .icon { width:18px; text-align:center; flex-shrink:0; }
+    .sidebar-nav a:hover,.sidebar-nav a.active { background:rgba(37,99,235,.25); color:#fff; }
+    .sidebar-nav a.active { background:var(--accent); }
+    .sidebar-nav a.danger:hover { background:rgba(220,38,38,.2); color:#fca5a5; }
     .sidebar-footer { padding:16px; border-top:1px solid rgba(255,255,255,.07); }
     .sidebar-user { display:flex; align-items:center; gap:10px; }
     .sidebar-avatar { width:36px; height:36px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:.85rem; flex-shrink:0; }
@@ -53,9 +58,12 @@
     .tab-link { display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:999px; border:1px solid var(--border); background:var(--card); color:var(--muted); font-size:.85rem; font-weight:600; text-decoration:none; }
     .tab-link.active { background:var(--accent); border-color:var(--accent); color:#fff; }
     .card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:20px; }
-    .card-head { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
+    .ae-panel { display:none; }
+    .ae-panel.active { display:block; }
+    .card-head { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px; align-items:stretch; }
     .card-head h2 { font-size:.95rem; font-weight:800; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .filter-bar { display:flex; gap:8px; flex-wrap:wrap; }
+    .filter-bar .input { flex:1; min-width:200px; }
     .input, .select { padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:.83rem; background:#fff; color:var(--text); }
     .input { min-width:230px; }
     .btn { padding:9px 16px; border-radius:8px; border:none; font-size:.83rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:7px; }
@@ -87,6 +95,13 @@
       .menu-toggle { display:flex; }
       .main { margin-left:0; }
       .data-table { display:block; overflow-x:auto; }
+      /* Filter controls stack vertically on mobile — no wrapping */
+      .filter-bar { flex-direction:column; flex-wrap:nowrap; }
+      .filter-bar .input, .filter-bar .select, .filter-bar button, .filter-bar .btn { width:100%; min-width:0; flex:none; font-size:16px; box-sizing:border-box; }
+      .filter-bar button, .filter-bar .btn { justify-content:center; text-align:center; }
+      .tab-row { flex-wrap:nowrap; }
+      .tab-link { flex:1 1 0; justify-content:center; padding:10px 8px; font-size:.8rem; white-space:nowrap; }
+      .tab-link i { display:none; }
     }
   </style>
 </head>
@@ -150,13 +165,14 @@
       <div class="stat-card"><div class="num">{{ stats.assigned_total }}</div><div class="lbl">Maids Currently Assigned</div></div>
     </div>
 
+    <div id="aeSwap">
     <!-- Source tabs -->
     <div class="tab-row">
-      <a class="tab-link {% if tab == 'site' %}active{% endif %}" href="?tab=site"><i class="fa-solid fa-building"></i> Site Employers</a>
-      <a class="tab-link {% if tab == 'legacy' %}active{% endif %}" href="?tab=legacy"><i class="fa-solid fa-clock-rotate-left"></i> Legacy Employers (request.sql)</a>
+      <a class="tab-link {% if tab == 'site' %}active{% endif %}" data-tab="site" href="?tab=site"><i class="fa-solid fa-building"></i> Site Employers</a>
+      <a class="tab-link {% if tab == 'legacy' %}active{% endif %}" data-tab="legacy" href="?tab=legacy"><i class="fa-solid fa-clock-rotate-left"></i> Legacy Employers (request.sql)</a>
     </div>
 
-{% if tab == 'site' %}
+<div class="ae-panel {% if tab == 'site' %}active{% endif %}" id="panel-site">
 <!-- ══ SITE EMPLOYERS ══ -->
 <div class="card">
   <div class="card-head">
@@ -176,7 +192,7 @@
   <div class="table-scroll">
   <table class="data-table">
     <thead>
-      <tr><th>Employer</th><th>Phone</th><th>Plan</th><th>Payment</th><th>Joined</th><th>Maids Assigned</th><th>Placement History</th></tr>
+      <tr><th>Employer</th><th>Phone</th><th>Plan</th><th>Payment</th><th>Sign Up Request</th><th>Joined</th><th>Maids Assigned</th><th>Placement History</th></tr>
     </thead>
     <tbody>
       {% for entry in site_rows %}
@@ -185,7 +201,6 @@
           <strong>{{ entry.profile.user.get_full_name|default:entry.profile.user.username }}</strong><br>
           <span class="small muted">{{ entry.profile.user.email }}</span>
           {% if entry.profile.city %}<br><span class="small muted"><i class="fa-solid fa-location-dot"></i> {{ entry.profile.city }}</span>{% endif %}
-          {% if entry.profile.service_needed %}<br><span class="small muted"><i class="fa-solid fa-broom"></i> {{ entry.profile.service_needed }}</span>{% endif %}
         </td>
         <td style="white-space:nowrap;">{{ entry.profile.phone|default:"—" }}</td>
         <td>
@@ -193,6 +208,11 @@
           <span class="small muted">{% if entry.profile.plan == 'standard' %}1 maid max{% else %}unlimited{% endif %}</span>
         </td>
         <td><span class="pill {% if entry.profile.payment_status == 'paid' %}pill-green{% elif entry.profile.payment_status == 'pending' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.profile.get_payment_status_display }}</span></td>
+        <td class="wrap-cell">
+          {% if entry.profile.service_needed %}<span class="small" style="color:#0f172a;font-weight:600;"><i class="fa-solid fa-broom"></i> {{ entry.profile.service_needed }}</span>{% endif %}
+          {% if entry.profile.request_details %}{% if entry.profile.service_needed %}<br>{% endif %}<span class="small muted">{{ entry.profile.request_details|truncatechars:200 }}</span>{% endif %}
+          {% if not entry.profile.service_needed and not entry.profile.request_details %}<span class="muted">—</span>{% endif %}
+        </td>
         <td style="white-space:nowrap;">{{ entry.profile.created_at|date:"d M Y" }}</td>
         <td class="wrap-cell">
           {% if entry.maids %}
@@ -206,7 +226,7 @@
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="7"><div class="empty"><i class="fa-solid fa-building"></i>No site employers found{% if query %} matching "<strong>{{ query }}</strong>"{% endif %}.</div></td></tr>
+      <tr><td colspan="8"><div class="empty"><i class="fa-solid fa-building"></i>No site employers found{% if query %} matching "<strong>{{ query }}</strong>"{% endif %}.</div></td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -214,7 +234,7 @@
   {% if site_page.has_other_pages %}
   <div class="pagination">
     {% if site_page.has_previous %}<a class="page-link" href="?tab=site&q={{ query|urlencode }}&plan={{ plan|urlencode }}&page={{ site_page.previous_page_number }}">‹ Prev</a>{% endif %}
-    {% for num in site_page.paginator.get_elided_page_range %}
+    {% for num in site_range %}
       {% if num == site_page.paginator.ELLIPSIS %}<span class="page-link">…</span>
       {% elif num == site_page.number %}<span class="page-link active">{{ num }}</span>
       {% else %}<a class="page-link" href="?tab=site&q={{ query|urlencode }}&plan={{ plan|urlencode }}&page={{ num }}">{{ num }}</a>{% endif %}
@@ -223,7 +243,8 @@
   </div>
   {% endif %}
 </div>
-{% else %}
+</div><!-- /#panel-site -->
+<div class="ae-panel {% if tab == 'legacy' %}active{% endif %}" id="panel-legacy">
 <!-- ══ LEGACY EMPLOYERS ══ -->
 <div class="card">
   <div class="card-head">
@@ -288,7 +309,7 @@
   {% if legacy_page.has_other_pages %}
   <div class="pagination">
     {% if legacy_page.has_previous %}<a class="page-link" href="?tab=legacy&q={{ query|urlencode }}&plan={{ plan|urlencode }}{% if show_spam %}&spam=1{% endif %}&page={{ legacy_page.previous_page_number }}">‹ Prev</a>{% endif %}
-    {% for num in legacy_page.paginator.get_elided_page_range %}
+    {% for num in legacy_range %}
       {% if num == legacy_page.paginator.ELLIPSIS %}<span class="page-link">…</span>
       {% elif num == legacy_page.number %}<span class="page-link active">{{ num }}</span>
       {% else %}<a class="page-link" href="?tab=legacy&q={{ query|urlencode }}&plan={{ plan|urlencode }}{% if show_spam %}&spam=1{% endif %}&page={{ num }}">{{ num }}</a>{% endif %}
@@ -300,7 +321,8 @@
   <div style="padding:10px 20px 16px;" class="small muted"><i class="fa-solid fa-shield-halved"></i> {{ stats.legacy_spam }} suspected bot/spam submissions are hidden. <a href="?tab=legacy&amp;spam=1">Show them</a>.</div>
   {% endif %}
 </div>
-{% endif %}
+</div><!-- /#panel-legacy -->
+    </div><!-- /#aeSwap -->
   </div>
 </div>
 <script>
@@ -315,6 +337,78 @@
       if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
     });
   });
+
+  /* ── Site / Legacy tabs — instant client-side toggle (no loading),
+     same pattern as the Admin dashboard tab system. Both panels are
+     rendered server-side; tabs just flip visibility. Fetch-swap is
+     only used for pagination / filter links inside a panel. ────── */
+  const swap = document.getElementById('aeSwap');
+  if (swap) {
+    let currentTab = swap.querySelector('.tab-link.active')?.dataset.tab || 'site';
+    let swapping = false;
+
+    function activate(tab, updateUrl) {
+      currentTab = tab;
+      swap.querySelectorAll('.tab-link').forEach(l => l.classList.toggle('active', l.dataset.tab === tab));
+      swap.querySelectorAll('.ae-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+      if (updateUrl) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        history.replaceState({}, '', url);
+      }
+    }
+
+    /* Fetch-swap used ONLY for pagination / search inside a panel */
+    async function fetchSwap(url) {
+      if (swapping) return;
+      swapping = true;
+      swap.style.opacity = '.55';
+      try {
+        const res = await fetch(url, { headers: { 'X-Requested-With': 'fetch' } });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+        const next = doc.getElementById('aeSwap');
+        if (!next) throw new Error('fragment missing');
+        swap.innerHTML = next.innerHTML;
+        activate(currentTab, false);
+        history.pushState({}, '', url);
+        window.scrollTo(0, 0);
+      } catch (err) {
+        window.location.href = url; /* graceful fallback: full reload */
+      } finally {
+        swap.style.opacity = '';
+        swapping = false;
+      }
+    }
+
+    swap.addEventListener('click', (e) => {
+      const tabLink = e.target.closest('a.tab-link');
+      if (tabLink && swap.contains(tabLink)) {
+        e.preventDefault();
+        activate(tabLink.dataset.tab, true);   /* instant — no network */
+        return;
+      }
+      const pageLink = e.target.closest('a.page-link[href^="?"]');
+      if (pageLink && swap.contains(pageLink)) {
+        e.preventDefault();
+        fetchSwap(pageLink.getAttribute('href'));
+      }
+    });
+
+    swap.addEventListener('submit', (e) => {
+      const form = e.target.closest('form');
+      if (!form || !swap.contains(form)) return;
+      e.preventDefault();
+      fetchSwap('?' + new URLSearchParams(new FormData(form)).toString());
+    });
+
+    window.addEventListener('popstate', () => {
+      const t = new URLSearchParams(window.location.search).get('tab');
+      if (t === 'site' || t === 'legacy') { activate(t, false); return; }
+      fetchSwap(window.location.search);
+    });
+  }
+
 </script>
 </body>
 </html>

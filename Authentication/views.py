@@ -22,7 +22,7 @@ from django.views.decorators.http import require_POST
 from datetime import timedelta
 from MaidApp.models import BlogPost, FAQ, LegacyEmployer, MaidProfile, MaidRegistration, MaidRecommendation, PlacementRequest, Service, SupportMessage
 from MaidApp.image_utils import resolve_image_url
-from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email, send_maid_recommended_email, send_maid_application_decline_email
+from MaidApp.emails import send_payment_success_email, send_payment_failed_email, send_signup_welcome_email, send_blog_alert_email, send_password_reset_email, send_password_changed_email, send_maid_recommended_email, send_maid_application_decline_email, send_maid_verified_email
 from .models import EmployerProfile, PendingSignup
 
 logger = logging.getLogger(__name__)
@@ -740,6 +740,7 @@ def admin_dashboard(request):
     ae_show_spam = request.GET.get('spam') == '1'
 
     ae_site_page = ae_legacy_page = None
+    ae_site_range = ae_legacy_range = None
     ae_maids_by_employer = {}
     ae_placements_by_employer = {}
     ae_maids_by_reg = {}
@@ -758,6 +759,7 @@ def admin_dashboard(request):
         if ae_plan in ('standard', 'premium'):
             ae_qs = ae_qs.filter(plan=ae_plan)
         ae_site_page = Paginator(ae_qs.order_by('-created_at'), 25).get_page(request.GET.get('page', 1))
+        ae_site_range = ae_site_page.paginator.get_elided_page_range(ae_site_page.number, on_each_side=3, on_ends=2)
         ae_employer_ids = [profile.user_id for profile in ae_site_page.object_list]
         for maid in MaidProfile.objects.filter(assigned_employer_id__in=ae_employer_ids):
             ae_maids_by_employer.setdefault(maid.assigned_employer_id, []).append(maid)
@@ -785,6 +787,7 @@ def admin_dashboard(request):
         if ae_plan in ('standard', 'premium'):
             ae_qs = ae_qs.filter(plan=ae_plan)
         ae_legacy_page = Paginator(ae_qs.order_by('legacy_id'), 25).get_page(request.GET.get('page', 1))
+        ae_legacy_range = ae_legacy_page.paginator.get_elided_page_range(ae_legacy_page.number, on_each_side=3, on_ends=2)
         ae_row_ids = [row.pk for row in ae_legacy_page.object_list]
         for maid in MaidProfile.objects.filter(assigned_legacy_employer_id__in=ae_row_ids):
             ae_maids_by_employer.setdefault(maid.assigned_legacy_employer_id, []).append(maid)
@@ -841,7 +844,9 @@ def admin_dashboard(request):
         'ae_plan': ae_plan,
         'ae_show_spam': ae_show_spam,
         'ae_site_page': ae_site_page,
+        'ae_site_range': ae_site_range,
         'ae_legacy_page': ae_legacy_page,
+        'ae_legacy_range': ae_legacy_range,
         'ae_site_rows': ae_site_rows,
         'ae_legacy_rows': ae_legacy_rows,
         'ae_stats': {
@@ -1104,6 +1109,7 @@ def maid_create(request):
             except ValueError as exc:
                 messages.error(request, str(exc))
                 return redirect('/admin/dashboard/?tab=maids')
+            send_maid_verified_email(maid)
             messages.success(request, f'Maid "{full_name}" added.')
         else:
             messages.error(request, 'Full name is required.')
@@ -1136,55 +1142,59 @@ def all_employers(request):
     placements_by_employer = {}
     maids_by_reg = {}
 
-    if tab == 'site':
-        qs = EmployerProfile.objects.select_related('user').annotate(
-            maid_count=Count('user__assigned_maids'))
-        if query:
-            qs = qs.filter(
-                Q(user__first_name__icontains=query) |
-                Q(user__last_name__icontains=query) |
-                Q(user__username__icontains=query) |
-                Q(user__email__icontains=query) |
-                Q(phone__icontains=query)
-            )
-        if plan in ('standard', 'premium'):
-            qs = qs.filter(plan=plan)
-        site_page = Paginator(qs.order_by('-created_at'), 25).get_page(request.GET.get('page', 1))
-        employer_ids = [profile.user_id for profile in site_page.object_list]
-        for maid in MaidProfile.objects.filter(assigned_employer_id__in=employer_ids):
-            maids_by_employer.setdefault(maid.assigned_employer_id, []).append(maid)
-        concluded = (
-            PlacementRequest.objects
-            .filter(employer_id__in=employer_ids, candidate__isnull=False, status='concluded')
-            .select_related('candidate')
-            .order_by('-concluded_at')
+    # ── Site employers (both panels are always rendered so the tab
+    #    toggle can switch instantly without a round-trip) ─────────
+    site_qs = EmployerProfile.objects.select_related('user').annotate(
+        maid_count=Count('user__assigned_maids'))
+    if query:
+        site_qs = site_qs.filter(
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query) |
+            Q(user__username__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(phone__icontains=query)
         )
-        for placement in concluded:
-            placements_by_employer.setdefault(placement.employer_id, []).append(placement)
-    else:
-        qs = LegacyEmployer.objects.all()
-        if not show_spam:
-            qs = qs.filter(is_spam=False)
-        if query:
-            qs = qs.filter(
-                Q(first_name__icontains=query) |
-                Q(last_name__icontains=query) |
-                Q(email__icontains=query) |
-                Q(phone__icontains=query) |
-                Q(company__icontains=query) |
-                Q(home_address__icontains=query)
-            )
-        if plan in ('standard', 'premium'):
-            qs = qs.filter(plan=plan)
-        legacy_page = Paginator(qs.order_by('legacy_id'), 25).get_page(request.GET.get('page', 1))
-        row_ids = [row.pk for row in legacy_page.object_list]
-        for maid in MaidProfile.objects.filter(assigned_legacy_employer_id__in=row_ids):
-            maids_by_employer.setdefault(maid.assigned_legacy_employer_id, []).append(maid)
-        # Resolve the maid reg numbers recorded in the dump in a single query.
-        reg_numbers = {row.assigned_reg_number for row in legacy_page.object_list if row.assigned_reg_number}
-        if reg_numbers:
-            for maid in MaidProfile.objects.filter(reg_number__in=reg_numbers):
-                maids_by_reg.setdefault(maid.reg_number.lower(), maid)
+    if plan in ('standard', 'premium'):
+        site_qs = site_qs.filter(plan=plan)
+    site_page = Paginator(site_qs.order_by('-created_at'), 25).get_page(request.GET.get('page', 1))
+    site_range = site_page.paginator.get_elided_page_range(site_page.number, on_each_side=3, on_ends=2)
+    employer_ids = [profile.user_id for profile in site_page.object_list]
+    for maid in MaidProfile.objects.filter(assigned_employer_id__in=employer_ids):
+        maids_by_employer.setdefault(maid.assigned_employer_id, []).append(maid)
+    concluded = (
+        PlacementRequest.objects
+        .filter(employer_id__in=employer_ids, candidate__isnull=False, status='concluded')
+        .select_related('candidate')
+        .order_by('-concluded_at')
+    )
+    for placement in concluded:
+        placements_by_employer.setdefault(placement.employer_id, []).append(placement)
+
+    # ── Legacy employers (request.sql dump) ──────────────────────
+    legacy_qs = LegacyEmployer.objects.all()
+    if not show_spam:
+        legacy_qs = legacy_qs.filter(is_spam=False)
+    if query:
+        legacy_qs = legacy_qs.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone__icontains=query) |
+            Q(company__icontains=query) |
+            Q(home_address__icontains=query)
+        )
+    if plan in ('standard', 'premium'):
+        legacy_qs = legacy_qs.filter(plan=plan)
+    legacy_page = Paginator(legacy_qs.order_by('legacy_id'), 25).get_page(request.GET.get('page', 1))
+    legacy_range = legacy_page.paginator.get_elided_page_range(legacy_page.number, on_each_side=3, on_ends=2)
+    row_ids = [row.pk for row in legacy_page.object_list]
+    for maid in MaidProfile.objects.filter(assigned_legacy_employer_id__in=row_ids):
+        maids_by_employer.setdefault(maid.assigned_legacy_employer_id, []).append(maid)
+    # Resolve the maid reg numbers recorded in the dump in a single query.
+    reg_numbers = {row.assigned_reg_number for row in legacy_page.object_list if row.assigned_reg_number}
+    if reg_numbers:
+        for maid in MaidProfile.objects.filter(reg_number__in=reg_numbers):
+            maids_by_reg.setdefault(maid.reg_number.lower(), maid)
 
     context = {
         'tab': tab,
@@ -1192,7 +1202,25 @@ def all_employers(request):
         'plan': plan,
         'show_spam': show_spam,
         'site_page': site_page,
+        'site_range': site_range,
         'legacy_page': legacy_page,
+        'legacy_range': legacy_range,
+        'site_rows': [
+            {
+                'profile':    profile,
+                'maids':      maids_by_employer.get(profile.user_id, []),
+                'placements': placements_by_employer.get(profile.user_id, []),
+            }
+            for profile in site_page.object_list
+        ],
+        'legacy_rows': [
+            {
+                'row':         record,
+                'maids':       maids_by_employer.get(record.pk, []),
+                'legacy_maid': maids_by_reg.get(record.assigned_reg_number.lower()) if record.assigned_reg_number else None,
+            }
+            for record in legacy_page.object_list
+        ],
         'stats': {
             'site_total':     EmployerProfile.objects.count(),
             'legacy_total':   LegacyEmployer.objects.filter(is_spam=False).count(),
@@ -1204,24 +1232,6 @@ def all_employers(request):
                              sender__is_staff=False,
                          ).count(),
     }
-    if tab == 'site':
-        context['site_rows'] = [
-            {
-                'profile':    profile,
-                'maids':      maids_by_employer.get(profile.user_id, []),
-                'placements': placements_by_employer.get(profile.user_id, []),
-            }
-            for profile in site_page.object_list
-        ]
-    else:
-        context['legacy_rows'] = [
-            {
-                'row':         record,
-                'maids':       maids_by_employer.get(record.pk, []),
-                'legacy_maid': maids_by_reg.get(record.assigned_reg_number.lower()) if record.assigned_reg_number else None,
-            }
-            for record in legacy_page.object_list
-        ]
     return render(request, 'Dashboard/AllEmployers.html', context)
 
 
@@ -1507,7 +1517,7 @@ def application_upload(request, application_id):
         slug = f'{slug_base}-{counter}'
         counter += 1
     # Create MaidProfile from application data
-    MaidProfile.objects.create(
+    maid = MaidProfile.objects.create(
         slug=slug,
         full_name=full_name,
         address=f'{application.city}, {application.state}',
@@ -1520,6 +1530,7 @@ def application_upload(request, application_id):
         is_featured=False,
         is_active=True,
     )
+    send_maid_verified_email(maid)
     name = f'{application.first_name} {application.last_name}'
     application.delete()
     messages.success(request, f'{name} has been uploaded as a maid profile.')

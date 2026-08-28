@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You Are Now a Verified Maid – SelectRoyal Maids</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:580px;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#1e3a8a;padding:28px 40px;text-align:center;border-radius:12px 12px 0 0;">
+              <img src="{{ site_url }}/static/image/logo%20(1).png" width="112" alt="SelectRoyal Maids" style="display:block;width:112px;height:auto;margin:0 auto 12px;border:0;">
+              <h1 style="margin:0;font-size:1.4rem;color:#ffffff;font-weight:700;letter-spacing:.3px;">SelectRoyal Maids</h1>
+              <p style="margin:6px 0 0;color:#93c5fd;font-size:.85rem;">Verified Maid Profile</p>
+            </td>
+          </tr>
+
+          <!-- Hero -->
+          <tr>
+            <td style="background-color:#059669;padding:26px 40px;text-align:center;">
+              <p style="margin:0;font-size:1.8rem;">&#9989;</p>
+              <p style="margin:8px 0 0;color:#ffffff;font-weight:700;font-size:1.2rem;">Congratulations, {{ maid.full_name }}!</p>
+              <p style="margin:6px 0 0;color:#d1fae5;font-size:.92rem;">You are now a <strong style="color:#ffffff;">Verified Maid</strong> on SelectRoyal Maids.</p>
+            </td>
+          </tr>
+
+          <!-- Details -->
+          <tr>
+            <td style="background-color:#ffffff;padding:28px 40px 24px;">
+              <p style="margin:0 0 14px;font-size:.85rem;color:#1e3a8a;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Your Verified Profile</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:22px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;width:38%;vertical-align:top;">Registration No.</td>
+                        <td style="padding:5px 0;color:#0f172a;font-weight:600;font-size:.88rem;">{{ maid.reg_number }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Full Name</td>
+                        <td style="padding:5px 0;color:#0f172a;font-weight:600;font-size:.88rem;">{{ maid.full_name }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Availability</td>
+                        <td style="padding:5px 0;color:#374151;font-size:.88rem;">{{ maid.get_assign_status_display }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;color:#64748b;font-size:.88rem;vertical-align:top;">Profile Status</td>
+                        <td style="padding:5px 0;color:#166534;font-weight:600;font-size:.88rem;">Live &amp; Visible to Employers</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+
+
+              <p style="margin:0 0 20px;color:#334155;font-size:.92rem;line-height:1.7;">
+                Your profile has been verified and published on our platform. Employers searching
+                for trusted domestic staff can now find and request you directly. Please keep your
+                contact details up to date so we can reach you when a placement matches your profile.
+              </p>
+
+              <!-- CTA -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{ site_url }}/view-profile/?slug={{ maid.slug }}"
+                       style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;
+                              font-weight:700;font-size:.95rem;padding:13px 34px;border-radius:8px;">
+                      View Your Live Profile
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fefce8;border:1px solid #fde68a;border-radius:8px;">
+                <tr>
+                  <td style="padding:14px 20px;">
+                    <p style="margin:0;color:#713f12;font-size:.86rem;line-height:1.6;">
+                      &#128222;&nbsp; Keep your phone reachable. If your details change, email us at
+                      <a href="mailto:info@selectroyalmaids.com.ng" style="color:#1e3a8a;">info@selectroyalmaids.com.ng</a>.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;padding:20px 40px;border-top:1px solid #e2e8f0;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0 0 4px;color:#64748b;font-size:.82rem;">
+                Questions? Call us or email
+                <a href="mailto:info@selectroyalmaids.com.ng" style="color:#1e3a8a;text-decoration:underline;">info@selectroyalmaids.com.ng</a>
+              </p>
+              <p style="margin:0;color:#94a3b8;font-size:.78rem;">&copy; SelectRoyal Maids &mdash; selectroyalmaids.com.ng</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

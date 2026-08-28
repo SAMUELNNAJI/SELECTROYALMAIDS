@@ -243,9 +243,28 @@
     .maid-editor-switch strong { font-size:.81rem; color:var(--text); }
     .maid-editor-switch small { margin-top:2px; color:var(--muted); font-size:.7rem; line-height:1.3; }
     .maid-editor .modal-foot { padding:16px 26px; background:#fff; }
+    /* ── Searchable "Assigned To (Employer)" picker ── */
+    .srch-select { position:relative; }
+    .srch-input { width:100%; box-sizing:border-box; padding:9px 34px 9px 12px; border:1px solid var(--border); border-radius:8px; font-family:'Inter',sans-serif; font-size:.875rem; background:#fff; color:var(--text); }
+    .srch-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+    .srch-select > .fa-magnifying-glass { position:absolute; right:12px; top:20px; transform:translateY(-50%); color:var(--muted); font-size:.8rem; pointer-events:none; }
+    .srch-list { display:none; position:absolute; z-index:60; left:0; right:0; top:calc(100% + 4px); max-height:230px; overflow-y:auto; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 10px 30px rgba(15,23,42,.18); }
+    .srch-list.open { display:block; }
+    .srch-item { padding:8px 12px; font-size:.82rem; color:var(--text); cursor:pointer; line-height:1.45; }
+    .srch-item:hover { background:#eff6ff; }
+    .srch-item.sel { background:#eff6ff; font-weight:600; }
+    .srch-group { display:block; font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+    .srch-empty { padding:10px 12px; font-size:.8rem; color:var(--muted); }
     /* Sidebar overlay */
     .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:199; }
     /* Responsive */
+    /* All Employers tab: tab toggle + filter bar */
+    .ae-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+    .ae-tabs .btn{display:inline-flex;align-items:center;justify-content:center;}
+    .ae-filter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;width:100%;}
+    .ae-filter input[type="text"]{flex:1;min-width:220px;}
+    .ae-filter select{flex:none;}
+    .ae-filter button,.ae-filter .btn{flex:none;}
     @media(max-width:1024px){
       .service-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
     }
@@ -266,6 +285,15 @@
       .tab-btn{flex-shrink:0;}
     }
     @media(max-width:640px){
+      /* ── All Employers: stack filter controls neatly, never wrap ── */
+      #tab-all-employers .card-head{flex-direction:column;align-items:stretch;gap:12px;}
+      #tab-all-employers .card-head h2{flex-wrap:wrap;}
+      .ae-filter{flex-direction:column;flex-wrap:nowrap;align-items:stretch;}
+      .ae-filter input[type="text"],.ae-filter select{width:100%;min-width:0;flex:none;font-size:16px;}
+      .ae-filter button,.ae-filter .btn{width:100%;justify-content:center;}
+      .ae-tabs{flex-wrap:nowrap;}
+      .ae-tabs .btn{flex:1 1 0;padding:10px 8px;font-size:.8rem;}
+      .ae-tabs .btn i{display:none;}
       .stats-grid{grid-template-columns:1fr 1fr;}
       .tab-btn{padding:8px 12px;font-size:.8rem;}
       .tab-btn span{display:none;}
@@ -680,7 +708,7 @@
           <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">Site accounts + legacy requests from request.sql</p>
         </div>
       </div>
-      <div style="display:flex;gap:8px;">
+      <div class="ae-tabs">
         <a class="btn {% if ae_tab == 'site' %}btn-primary{% else %}btn-ghost{% endif %}" href="?tab=all-employers&ae_tab=site" style="font-size:.82rem;"><i class="fa-solid fa-building"></i> Site Employers</a>
         <a class="btn {% if ae_tab == 'legacy' %}btn-primary{% else %}btn-ghost{% endif %}" href="?tab=all-employers&ae_tab=legacy" style="font-size:.82rem;"><i class="fa-solid fa-clock-rotate-left"></i> Legacy Employers</a>
       </div>
@@ -688,7 +716,7 @@
       <div class="card">
         <div class="card-head">
           <h2><i class="fa-solid fa-building"></i> Registered Employer Accounts <span class="badge badge-blue">{{ ae_site_page.paginator.count }}</span></h2>
-          <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <form method="get" class="ae-filter">
             <input type="hidden" name="tab" value="all-employers" />
             <input type="text" name="q" value="{{ ae_query }}" placeholder="Search name, email, phone…" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;min-width:220px;" />
             <select name="plan" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;background:#fff;">
@@ -701,9 +729,9 @@
           </form>
         </div>
         <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-        <table class="data-table" style="table-layout:fixed;min-width:1100px;width:100%;">
+        <table class="data-table" style="table-layout:fixed;min-width:1250px;width:100%;">
           <thead>
-            <tr><th>Employer</th><th>Phone</th><th style="width:100px;">Plan</th><th style="width:110px;">Payment</th><th style="width:100px;">Joined</th><th>Maids Assigned</th><th>Placement History</th></tr>
+            <tr><th>Employer</th><th>Phone</th><th style="width:100px;">Plan</th><th style="width:110px;">Payment</th><th>Sign Up Request</th><th style="width:100px;">Joined</th><th>Maids Assigned</th><th>Placement History</th></tr>
           </thead>
           <tbody>
             {% for entry in ae_site_rows %}
@@ -712,7 +740,6 @@
                 <strong style="font-weight:800;">{{ entry.profile.user.get_full_name|default:entry.profile.user.username }}</strong><br>
                 <span class="small muted" style="word-break:break-all;overflow-wrap:break-word;">{{ entry.profile.user.email }}</span>
                 {% if entry.profile.city %}<br><span class="small muted"><i class="fa-solid fa-location-dot"></i> {{ entry.profile.city }}</span>{% endif %}
-                {% if entry.profile.service_needed %}<br><span class="small muted"><i class="fa-solid fa-broom"></i> {{ entry.profile.service_needed }}</span>{% endif %}
               </td>
               <td style="white-space:nowrap;padding:14px 16px;">{{ entry.profile.phone|default:"—" }}</td>
               <td style="padding:14px 16px;">
@@ -720,6 +747,11 @@
                 <span style="font-size:.78rem;color:var(--muted);">{% if entry.profile.plan == 'standard' %}1 maid max{% else %}unlimited{% endif %}</span>
               </td>
               <td style="padding:14px 16px;"><span class="status-pill {% if entry.profile.payment_status == 'paid' %}active{% elif entry.profile.payment_status == 'pending' %}inactive{% else %}inactive{% endif %}">{{ entry.profile.get_payment_status_display }}</span></td>
+              <td style="padding:14px 16px;">
+                {% if entry.profile.service_needed %}<span class="small" style="color:var(--text);font-weight:700;"><i class="fa-solid fa-broom"></i> {{ entry.profile.service_needed }}</span>{% endif %}
+                {% if entry.profile.request_details %}{% if entry.profile.service_needed %}<br>{% endif %}<span class="small muted" title="{{ entry.profile.request_details }}">{{ entry.profile.request_details|truncatechars:200 }}</span>{% endif %}
+                {% if not entry.profile.service_needed and not entry.profile.request_details %}<span class="muted">—</span>{% endif %}
+              </td>
               <td style="white-space:nowrap;padding:14px 16px;">{{ entry.profile.created_at|date:"d M Y" }}</td>
               <td style="padding:14px 16px;">
                 {% if entry.maids %}
@@ -733,7 +765,7 @@
               </td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;"><i class="fa-solid fa-building" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>No site employers found{% if ae_query %} matching "<strong>{{ ae_query }}</strong>"{% endif %}.</td></tr>
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;"><i class="fa-solid fa-building" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px;"></i>No site employers found{% if ae_query %} matching "<strong>{{ ae_query }}</strong>"{% endif %}.</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -741,7 +773,7 @@
         {% if ae_site_page.has_other_pages %}
         <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;flex-wrap:wrap;">
           {% if ae_site_page.has_previous %}<a href="?tab=all-employers&ae_tab=site&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}&page={{ ae_site_page.previous_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">‹ Prev</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">‹ Prev</span>{% endif %}
-          {% for num in ae_site_page.paginator.get_elided_page_range %}
+          {% for num in ae_site_range %}
             {% if num == ae_site_page.number %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;font-size:.82rem;font-weight:700;">{{ num }}</span>{% elif num == ae_site_page.paginator.ELLIPSIS %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;font-size:.82rem;color:var(--muted);">…</span>{% else %}<a href="?tab=all-employers&ae_tab=site&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}&page={{ num }}" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.82rem;text-decoration:none;">{{ num }}</a>{% endif %}
           {% endfor %}
           {% if ae_site_page.has_next %}<a href="?tab=all-employers&ae_tab=site&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}&page={{ ae_site_page.next_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">Next ›</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">Next ›</span>{% endif %}
@@ -755,7 +787,7 @@
             <i class="fa-solid fa-clock-rotate-left"></i> Legacy Requests — imported from request.sql
             <span class="badge badge-blue">{{ ae_legacy_page.paginator.count }}</span>
           </h2>
-          <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <form method="get" class="ae-filter">
             <input type="hidden" name="tab" value="all-employers" />
             {% if ae_show_spam %}<input type="hidden" name="spam" value="1" />{% endif %}
             <input type="text" name="q" value="{{ ae_query }}" placeholder="Search name, email, phone, company…" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;min-width:220px;" />
@@ -811,7 +843,7 @@
         {% if ae_legacy_page.has_other_pages %}
         <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;flex-wrap:wrap;">
           {% if ae_legacy_page.has_previous %}<a href="?tab=all-employers&ae_tab=legacy&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}{% if ae_show_spam %}&spam=1{% endif %}&page={{ ae_legacy_page.previous_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">‹ Prev</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">‹ Prev</span>{% endif %}
-          {% for num in ae_legacy_page.paginator.get_elided_page_range %}
+          {% for num in ae_legacy_range %}
             {% if num == ae_legacy_page.number %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;font-size:.82rem;font-weight:700;">{{ num }}</span>{% elif num == ae_legacy_page.paginator.ELLIPSIS %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;font-size:.82rem;color:var(--muted);">…</span>{% else %}<a href="?tab=all-employers&ae_tab=legacy&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}{% if ae_show_spam %}&spam=1{% endif %}&page={{ num }}" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.82rem;text-decoration:none;">{{ num }}</a>{% endif %}
           {% endfor %}
           {% if ae_legacy_page.has_next %}<a href="?tab=all-employers&ae_tab=legacy&q={{ ae_query|urlencode }}&plan={{ ae_plan|urlencode }}{% if ae_show_spam %}&spam=1{% endif %}&page={{ ae_legacy_page.next_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">Next ›</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">Next ›</span>{% endif %}
@@ -1404,7 +1436,7 @@
     const as = document.getElementById('emAssignStatus');
     for(let i=0;i<as.options.length;i++) as.options[i].selected = as.options[i].value === assignStatus;
     const at = document.getElementById('emAssignedTo');
-    if (at) at.value = assignedTo || '';
+    if (at) { at.value = assignedTo || ''; if (window.syncEmployerSearch) window.syncEmployerSearch(at); }
     syncAssignedToField();
     document.getElementById('emIsFeatured').checked = isFeatured;
     document.getElementById('emIsActive').checked   = isActive;
@@ -1511,6 +1543,120 @@ function bindImageDrop(dropId, inputId, labelId) {
 }
 bindImageDrop('svcImageDrop', 'svcImageFile', 'svcImageLabel');
 bindImageDrop('esImageDrop', 'esServiceImage', 'esImageLabel');
+</script>
+
+<script>
+// ── Searchable "Assigned To (Employer)" picker ─────────────────────────────
+// Replaces the plain <select> with a type-to-search combobox. The select
+// stays in the DOM (hidden) so form submission and existing change-wiring
+// (auto-set status to Assigned) keep working untouched.
+(function () {
+  const pickers = {};
+
+  function makeSearchable(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select || select.dataset.srchBound) return;
+    select.dataset.srchBound = '1';
+    select.style.display = 'none';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'srch-select';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'srch-input';
+    input.placeholder = 'Type to search employer…';
+    input.autocomplete = 'off';
+    const icon = document.createElement('i');
+    icon.className = 'fa-solid fa-magnifying-glass';
+    const list = document.createElement('div');
+    list.className = 'srch-list';
+    select.parentNode.insertBefore(wrap, select);
+    wrap.append(input, icon, list);
+
+    const empty = document.createElement('div');
+    empty.className = 'srch-empty';
+    empty.textContent = 'No employer matches your search.';
+    empty.style.display = 'none';
+
+    const items = Array.from(select.options).map(function (opt) {
+      const group = opt.parentElement.tagName === 'OPTGROUP' ? opt.parentElement.label : '';
+      const el = document.createElement('div');
+      el.className = 'srch-item';
+      el.dataset.value = opt.value;
+      const label = document.createElement('span');
+      label.textContent = opt.textContent;
+      if (group) {
+        const g = document.createElement('span');
+        g.className = 'srch-group';
+        g.textContent = group;
+        el.appendChild(g);
+      }
+      el.appendChild(label);
+      list.appendChild(el);
+      return { opt: opt, el: el };
+    });
+    list.appendChild(empty);
+
+    function syncFromSelect() {
+      const sel = select.options[select.selectedIndex];
+      input.value = sel && sel.value ? sel.textContent : '';
+      items.forEach(function (it) {
+        it.el.classList.toggle('sel', it.opt.selected && !!it.opt.value);
+      });
+    }
+    syncFromSelect();
+
+    function openList() { list.classList.add('open'); }
+    function closeList() { list.classList.remove('open'); }
+
+    function filter(query) {
+      const q = query.trim().toLowerCase();
+      let visible = 0;
+      items.forEach(function (it) {
+        const match = !q || it.opt.textContent.toLowerCase().includes(q);
+        it.el.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      empty.style.display = visible ? 'none' : '';
+    }
+
+    input.addEventListener('focus', function () { filter(''); openList(); });
+    input.addEventListener('input', function () { filter(input.value); openList(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closeList(); input.blur(); }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = items.find(function (it) { return it.el.style.display !== 'none'; });
+        if (first) first.el.click();
+      }
+    });
+
+    list.addEventListener('click', function (e) {
+      const item = e.target.closest('.srch-item');
+      if (!item) return;
+      select.value = item.dataset.value;
+      syncFromSelect();
+      closeList();
+      /* Fire so the existing wiring flips Placement Status to Assigned. */
+      select.dispatchEvent(new Event('change', { bubbles: false }));
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!wrap.contains(e.target) && e.target !== select) closeList();
+    });
+
+    pickers[selectId] = { syncFromSelect: syncFromSelect, closeList: closeList };
+  }
+
+  makeSearchable('amAssignedTo');
+  makeSearchable('emAssignedTo');
+
+  /* Lets openMaidEdit() refresh the search box after it sets select.value. */
+  window.syncEmployerSearch = function (select) {
+    const p = pickers[select.id];
+    if (p) p.syncFromSelect();
+  };
+})();
 </script>
 
 <!-- ════ Recommend Maid Modal (lazy-loaded via JSON feed) ════ -->
