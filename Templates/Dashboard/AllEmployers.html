@@ -11,7 +11,11 @@
       --accent:#2563eb; --sidebar-bg:#0f172a; --sidebar-w:260px; }
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Inter',system-ui,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
-    .sidebar { width:var(--sidebar-w); height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:200; display:flex; flex-direction:column; }
+        .sidebar { width:var(--sidebar-w); height:100vh; background:var(--sidebar-bg); position:fixed; top:0; left:0; z-index:200; display:flex; flex-direction:column; transition:transform .25s ease; overflow:hidden; }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:150; }
+    .sidebar-overlay.show { display:block; }
+    .menu-toggle { display:none; background:none; border:none; font-size:1.3rem; color:var(--text); cursor:pointer; }
+    .sidebar.open { transform:translateX(0); }
     .sidebar-brand { padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.07); }
     .sidebar-brand strong { color:#fff; font-size:.95rem; font-weight:800; display:block; }
     .sidebar-brand span { color:#94a3b8; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; }
@@ -30,7 +34,7 @@
     .content { padding:24px 28px; }
     .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:22px; }
     .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; }
-    .stat-card .num { font-size:1.7rem; font-weight:800; }
+        .stat-card .num { font-size:1.7rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; width:100%; box-sizing:border-box; }
     .stat-card .lbl { font-size:.72rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
     .num.blue { color:var(--accent); } .num.green { color:#16a34a; } .num.amber { color:#d97706; }
     .tab-row { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
@@ -64,12 +68,20 @@
     .page-link.active { background:var(--accent); border-color:var(--accent); color:#fff; }
     .empty { padding:56px 20px; text-align:center; color:var(--muted); }
     .empty i { font-size:2.2rem; opacity:.3; display:block; margin-bottom:10px; }
-    @media (max-width:900px) { .main { margin-left:0; } .data-table { display:block; overflow-x:auto; } }
+        @media (max-width:900px) {
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .sidebar-overlay.show { display:block; }
+      .menu-toggle { display:flex; }
+      .main { margin-left:0; }
+      .data-table { display:block; overflow-x:auto; }
+    }
   </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <strong>SelectRoyal Maids</strong>
     <span>Admin Panel</span>
@@ -97,8 +109,11 @@
 
 <!-- MAIN -->
 <div class="main">
-  <header class="topbar">
-    <h1><i class="fa-solid fa-address-book" style="color:var(--accent);margin-right:8px;"></i>All Employers</h1>
+    <header class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+      <h1><i class="fa-solid fa-address-book" style="color:var(--accent);margin-right:8px;"></i>All Employers</h1>
+    </div>
     <a class="btn btn-ghost" href="{% url 'Authentication:admin_dashboard' %}"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
   </header>
 
@@ -264,5 +279,18 @@
 {% endif %}
   </div>
 </div>
+<script>
+  /* Sidebar toggle — mirrors Admin dashboard behavior */
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const menuBtn = document.getElementById('menuToggle');
+  menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+  sidebar.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+    });
+  });
+</script>
 </body>
 </html>

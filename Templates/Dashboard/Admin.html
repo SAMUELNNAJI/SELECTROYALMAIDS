@@ -90,7 +90,20 @@
     .stat-icon.amber { background:var(--amber-lt);  color:var(--amber); }
     .stat-icon.red   { background:var(--red-lt);    color:var(--red); }
     .stat-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
-    .stat-value { font-size:1.9rem; font-weight:800; color:var(--text); line-height:1.1; margin-top:2px; }
+        .stat-value {
+      font-size:clamp(1.05rem, 2.0vw, 1.6rem);
+      font-weight:800;
+      color:var(--text);
+      line-height:1.1;
+      margin-top:2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
+      width:100%;
+      max-width:100%;
+      box-sizing:border-box;
+    }
     .stat-sub   { font-size:.77rem; color:var(--muted); margin-top:3px; }
     /* Card */
     .card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:24px; overflow:hidden; }
