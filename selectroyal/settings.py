@@ -82,11 +82,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'selectroyal.wsgi.application'
 
 # ── Database ──────────────────────────────────────────────────────────────────
-# Uses Neon PostgreSQL by default. Override with DATABASE_URL env var if needed.
-DATABASE_URL = os.environ.get(
-    'DATABASE_URL',
-    'postgresql://neondb_owner:npg_Y6Dvjkcfi1Tt@ep-late-sky-b1le0p0y-pooler.c-5.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
-)
+# DATABASE_URL is supplied by the environment (the VPS' /etc/selectroyal/selectroyal.env
+# via gunicorn, or Render's DATABASE_URL). There is intentionally NO hard-coded
+# hosted fallback here: if DATABASE_URL is unset we only fall back to a local
+# SQLite file for throwaway local dev. This prevents manage.py commands from
+# silently targeting an unintended production database when the variable is not
+# passed through (e.g. under plain `sudo`).
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
 if DATABASE_URL:
     import dj_database_url
