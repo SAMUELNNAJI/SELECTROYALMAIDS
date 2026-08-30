@@ -9,19 +9,21 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Always read this project's environment file when developing locally.  The
-# override makes a corrected value in .env take precedence over an old value
-# inherited by the VS Code/PowerShell process.  Render has no project .env, so
-# its configured service environment variables continue to be used there.
-load_dotenv(BASE_DIR / '.env', override=True)
+# Load the project .env only for local development.  The preliminary DEBUG
+# decides whether .env may *override* environment variables already in the
+# process.  In production (systemd EnvironmentFile / Render service env) DEBUG
+# is False, so a stray .env in the deploy folder can never silently knock the
+# site back onto SQLite or overwrite a real SECRET_KEY/DATABASE_URL.
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+if (BASE_DIR / '.env').exists():
+    load_dotenv(BASE_DIR / '.env', override=DEBUG)
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # ── Security ──────────────────────────────────────────────────────────────────
 SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     'django-insecure-#ft)d8hphvo=s84d#$zm%dq3mq$)h-sy4fj$*&g!p)b3xytq(a',
 )
-
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get(
     'ALLOWED_HOSTS',
