@@ -53,4 +53,18 @@
     </div>
   </div>
 </section>
+
+<script>
+  (function () {
+    var form = document.querySelector('.ram-form');
+    if (!form) return;
+    form.addEventListener('submit', function () {
+      var btn = form.querySelector('button[type="submit"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = 'Submitting… <i class="fa-solid fa-circle-notch fa-spin"></i>';
+      }
+    });
+  })();
+</script>
 {% endblock %}

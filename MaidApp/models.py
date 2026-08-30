@@ -41,7 +41,7 @@ class MaidRegistration(models.Model):
     languages = models.CharField(max_length=255)
     skills = models.TextField()
     bio = models.TextField()
-    nin = models.CharField(max_length=11)
+    nin = models.CharField(max_length=11, unique=True)
     reference_name = models.CharField(max_length=120)
     reference_phone = models.CharField(max_length=30)
     profile_photo = models.FileField(upload_to='maid_profiles/', blank=True, null=True)

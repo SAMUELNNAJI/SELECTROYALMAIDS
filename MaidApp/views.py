@@ -412,7 +412,8 @@ def register_as_maid(request):
             'expected_salary', 'languages', 'skills', 'bio', 'nin', 'reference_name',
             'reference_phone',
         ]
-        application = MaidRegistration(**{field: request.POST[field].strip() for field in fields})
+        data = {field: request.POST[field].strip() for field in fields}
+        nin = data.pop('nin')
 
         # Profile photo is REQUIRED
         profile_photo = request.FILES.get('profile_photo')
@@ -420,21 +421,31 @@ def register_as_maid(request):
             messages.error(request,
                 'Please upload a clear profile photo — it is required to complete your application.')
             return redirect('MaidApp:apply')
-        application.profile_photo = profile_photo
-        application.save()
 
-        try:
-            sent_to_whatsapp = _send_maid_application_to_whatsapp(application)
-        except Exception:
-            sent_to_whatsapp = False
-        sent_to_company = send_maid_application_email(application)
-        send_maid_registration_success_email(application)   # welcome email to the maid
-        if sent_to_whatsapp and sent_to_company:
-            messages.success(request, 'Your application has been received and sent to our verification team by email and WhatsApp.')
-        elif sent_to_whatsapp or sent_to_company:
-            messages.success(request, 'Your application has been received and sent to our verification team.')
+        # One pending application per NIN: a retried or double-submitted form must
+        # not create duplicate rows (and duplicate admin notifications). If the
+        # maid submits again while an application is still pending we just
+        # acknowledge it — the row and alerts are created only on the first submit.
+        application, created = MaidRegistration.objects.get_or_create(nin=nin, defaults=data)
+
+        if created:
+            application.profile_photo = profile_photo
+            application.save()
+
+            try:
+                sent_to_whatsapp = _send_maid_application_to_whatsapp(application)
+            except Exception:
+                sent_to_whatsapp = False
+            sent_to_company = send_maid_application_email(application)
+            send_maid_registration_success_email(application)   # welcome email to the maid
+            if sent_to_whatsapp and sent_to_company:
+                messages.success(request, 'Your application has been received and sent to our verification team by email and WhatsApp.')
+            elif sent_to_whatsapp or sent_to_company:
+                messages.success(request, 'Your application has been received and sent to our verification team.')
+            else:
+                messages.success(request, 'Your application has been received. Our verification team will contact you shortly.')
         else:
-            messages.success(request, 'Your application has been received. Our verification team will contact you shortly.')
+            messages.success(request, 'We already have your application — our verification team will contact you shortly.')
         return redirect('MaidApp:apply')
     return render(request, 'selectroyal/register-as-maid.html')
 
