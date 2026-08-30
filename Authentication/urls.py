@@ -16,6 +16,9 @@ urlpatterns = [
     path('payment/',                               views.payment_page,        name='payment_page'),
     path('payment/redirect/',                      views.payment_redirect,    name='payment_redirect'),
     path('payment/callback/',                      views.payment_callback,    name='payment_callback'),
+    path('payment/webhook/',                       views.payment_webhook,     name='payment_webhook'),
+    path('payment/pending/',                       views.payment_pending,     name='payment_pending'),
+    path('payment/status/',                        views.payment_status,      name='payment_status'),
     path('payment/success/',                       views.payment_success,     name='payment_success'),
     path('payment/failed/',                        views.payment_failed,      name='payment_failed'),
 

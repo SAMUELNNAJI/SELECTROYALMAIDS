@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Received – SelectRoyalMaids</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #fffbeb; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+
+    .pend-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.09);
+      padding: 52px 40px 44px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .pend-icon {
+      width: 88px; height: 88px; background: linear-gradient(135deg, #d97706, #f59e0b);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px; animation: popIn .5s cubic-bezier(.175,.885,.32,1.275) both;
+    }
+    .pend-icon i { font-size: 2.4rem; color: #fff; }
+
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .pend-title { font-size: 1.6rem; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+    .pend-sub   { font-size: .95rem; color: #64748b; line-height: 1.75; margin-bottom: 28px; }
+
+    .pend-note {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 14px;
+      padding: 18px 22px; margin-bottom: 28px; text-align: left;
+    }
+    .pend-note p { font-size: .84rem; color: #78350f; line-height: 1.7; }
+    .pend-note p i { color: #d97706; margin-right: 8px; }
+
+    .pending-spinner { display:inline-block; width:16px; height:16px; border:3px solid #fde68a; border-top-color:#d97706; border-radius:50%; animation:spin 1s linear infinite; vertical-align:-3px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pend-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 15px 24px; background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff; border-radius: 12px; font-size: 1rem; font-weight: 700; text-decoration: none;
+      transition: opacity .2s;
+    }
+    .pend-btn:hover { opacity: .88; color: #fff; }
+
+    .pend-alt { margin-top: 16px; font-size: .82rem; color: #94a3b8; }
+    .pend-alt a { color: #2563eb; font-weight: 600; text-decoration: none; }
+
+    .logo-top { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 32px; text-decoration: none; }
+    .logo-top img { height: 32px; }
+    .logo-top-text { font-size: 1rem; font-weight: 800; color: #1e3a8a; }
+  </style>
+</head>
+<body>
+
+  <div class="pend-card">
+
+    <a href="{% url 'MaidApp:index' %}" class="logo-top">
+      <img src="{% static 'image/logo (1).png' %}" alt="SelectRoyalMaids" />
+      <span class="logo-top-text">SelectRoyalMaids</span>
+    </a>
+
+    {% if finalized %}
+    <div class="pend-icon" style="background:linear-gradient(135deg,#16a34a,#22c55e);">
+      <i class="fa-solid fa-check"></i>
+    </div>
+    <h1 class="pend-title">Payment Confirmed!</h1>
+    <p class="pend-sub">
+      Your payment has been confirmed and your SelectRoyalMaids employer account is now active.
+      Sign in to start browsing verified domestic staff.
+    </p>
+    <a href="{% url 'Authentication:login' %}" class="pend-btn">
+      <i class="fa-solid fa-right-to-bracket"></i> Log In to My Dashboard
+    </a>
+    {% else %}
+    <div class="pend-icon">
+      <i class="fa-solid fa-clock"></i>
+    </div>
+    <h1 class="pend-title">Payment Received — Confirming Now</h1>
+    <p class="pend-sub">
+      Thanks! Your payment method (e.g. bank transfer) can take a couple of minutes
+      to confirm. We'll automatically activate your account as soon as the bank
+      confirms the payment — usually within 1–5 minutes.
+    </p>
+
+    <div class="pend-note">
+      <p><i class="fa-solid fa-circle-info"></i> Your money has been received — this is not an error.</p>
+      <p style="margin-top:8px;"><i class="fa-solid fa-envelope"></i> You'll get a confirmation email and can log in right after. This page will refresh itself automatically.</p>
+    </div>
+
+    <p style="font-size:.85rem;color:#b45309;"><span class="pending-spinner"></span> Checking payment status…</p>
+    <p class="pend-alt">Already received your email? <a href="{% url 'Authentication:login' %}">Log in here</a>.</p>
+    {% endif %}
+
+  </div>
+
+  {% if not finalized %}
+  <script>
+    var poll = setInterval(function () {
+      fetch("{% url 'Authentication:payment_status' %}")
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.finalized && d.known) {
+            clearInterval(poll);
+            window.location.href = "{% url 'Authentication:payment_success' %}?payment=done";
+          }
+        })
+        .catch(function () {
+          // transient network error — keep polling
+        });
+    }, 10000);
+  </script>
+  {% endif %}
+
+</body>
+</html>

@@ -1,3 +1,4 @@
+import json
 import re
 from decimal import Decimal, InvalidOperation
 import logging
@@ -12,7 +13,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.http import HttpResponseNotAllowed, JsonResponse
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth.password_validation import validate_password
@@ -64,6 +66,60 @@ def _send_payment_confirmation_emails_in_background(user, plan):
             logger.exception('Email delivery failed after payment for %s.', user.email)
 
     Thread(target=send_emails, name='payment-confirmation-email', daemon=True).start()
+
+
+def _confirm_paid_payment(pending, transaction_id):
+    """Create (or fetch) the employer account for a *verified, paid* transaction.
+
+    Idempotent — safe for Flutterwave's duplicate webhook deliveries and for a
+    browser callback racing the webhook. Returns (user, created):
+      user    — the paid User, or None if finalization failed
+      created — True only when this call actually created a new account
+    """
+    user = None
+    created = False
+    try:
+        with transaction.atomic():
+            pending = PendingSignup.objects.select_for_update().get(pk=pending.pk)
+            user = User.objects.filter(email__iexact=pending.email).first()
+            created = user is None
+            if created:
+                user = User(
+                    username=pending.email,
+                    email=pending.email,
+                    first_name=pending.first_name,
+                    last_name=pending.last_name,
+                    is_active=True,
+                )
+                try:
+                    identify_hasher(pending.password)
+                    user.password = pending.password
+                except ValueError:
+                    # Supports pending records created before password hashing was added.
+                    user.password = make_password(pending.password)
+                user.save()
+
+            EmployerProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    'phone': pending.phone,
+                    'city': pending.city,
+                    'service_needed': pending.service,
+                    'how_heard': pending.how_heard,
+                    'request_details': pending.request_details,
+                    'plan': pending.plan,
+                    'payment_status': 'paid',
+                    'payment_ref': str(transaction_id),
+                },
+            )
+            pending.delete()
+        return user, created
+    except (IntegrityError, PendingSignup.DoesNotExist):
+        logger.exception('Could not finalize verified Flutterwave payment %s.', transaction_id)
+        return None, False
+    except Exception:
+        logger.exception('Unexpected error finalizing payment %s.', transaction_id)
+        return None, False
 
 
 def _send_new_blog_post_alerts(post):
@@ -335,7 +391,14 @@ def _payment_callback_inner(request):
                 transaction_data.get('amount'), transaction_data.get('currency'),
                 transaction_data.get('tx_ref'))
 
-    if data.get('status') != 'success' or transaction_data.get('status') != 'successful':
+    txn_status = transaction_data.get('status')
+    if data.get('status') != 'success' or txn_status != 'successful':
+        # Async methods (bank transfer / account / USSD) settle AFTER the browser
+        # has been redirected here; the webhook finalises them later — so show the
+        # pending page rather than scaring an already-charged customer.
+        if txn_status in ('success-pending-validation', 'pending'):
+            logger.info('payment_callback: payment %s awaiting validation — showing pending page.', txn_status)
+            return redirect('Authentication:payment_pending')
         logger.warning('payment_callback: verification failed — data=%s', data)
         return redirect('Authentication:payment_failed')
 
@@ -382,51 +445,21 @@ def _payment_callback_inner(request):
         return redirect('Authentication:payment_failed')
 
     # ── Create the account now that payment is confirmed ──────────────────────
-    user = None
-    try:
-        with transaction.atomic():
-            pending = PendingSignup.objects.select_for_update().get(pk=pending.pk)
-            user = User.objects.filter(email__iexact=pending.email).first()
-            if not user:
-                user = User(
-                    username=pending.email,
-                    email=pending.email,
-                    first_name=pending.first_name,
-                    last_name=pending.last_name,
-                    is_active=True,
-                )
-                try:
-                    identify_hasher(pending.password)
-                    user.password = pending.password
-                except ValueError:
-                    # Supports pending records created before password hashing was added.
-                    user.password = make_password(pending.password)
-                user.save()
-
-            EmployerProfile.objects.update_or_create(
-                user=user,
-                defaults={
-                    'phone': pending.phone,
-                    'city': pending.city,
-                    'service_needed': pending.service,
-                    'how_heard': pending.how_heard,
-                    'request_details': pending.request_details,
-                    'plan': pending.plan,
-                    'payment_status': 'paid',
-                    'payment_ref': str(transaction_id),
-                },
-            )
-            pending.delete()
-    except (IntegrityError, PendingSignup.DoesNotExist):
-        logger.exception('Could not finalize verified Flutterwave payment %s.', transaction_id)
-        return redirect('Authentication:payment_failed')
-    except Exception:
-        logger.exception('Unexpected error finalizing payment %s.', transaction_id)
-        return redirect('Authentication:payment_failed')
-
+    user, _created = _confirm_paid_payment(pending, transaction_id)
     if user is None:
-        logger.error('Payment %s verified but user object is None after account creation.', transaction_id)
-        return redirect('Authentication:payment_failed')
+        # Rare race: the webhook may finalise the exact same payment a moment
+        # before this callback reaches the DB. Hoist that paid account into the
+        # success flow instead of alarming a customer who HAS paid.
+        hoisted = User.objects.filter(
+            Q(email__iexact=pending.email)
+            | Q(employer_profile__payment_ref=str(transaction_id))
+        ).filter(employer_profile__isnull=False).first()
+        if hoisted is None or hoisted.employer_profile.payment_status != 'paid':
+            return redirect('Authentication:payment_failed')
+        user = hoisted
+        pending_token = request.session.get('pending_signup_token')
+        if pending_token:
+            PendingSignup.objects.filter(token=pending_token).delete()
 
     # Clear the pending signup token from the session
     try:
@@ -486,6 +519,150 @@ def payment_failed(request):
         except Exception:
             logger.exception('Unable to send payment-failed email.')
     return render(request, 'Authentication/payment_failed.html')
+
+
+# ── Flutterwave webhook (server-to-server) ──────────────────────────────────
+
+@csrf_exempt
+@require_POST
+def payment_webhook(request):
+    """Authoritative 'charge.completed' notification from Flutterwave.
+
+    Flutterwave POSTs this here for every successful charge, and it's the ONLY
+    way to learn that asynchronous methods (bank transfer / account / USSD) have
+    settled — those customers are redirected back to our site while the charge is
+    still pending validation. We verify the signature, re-verify the transaction
+    via the API (Flutterwave's documented best practice), then finalize the
+    account exactly like the browser callback. Idempotent by construction.
+    """
+    from django.conf import settings as django_settings
+
+    secret_hash = django_settings.FLW_SECRET_HASH
+    signature = request.headers.get('verif-hash', '')
+    if not secret_hash or not signature or signature != secret_hash:
+        logger.warning('payment_webhook: bad or missing verif-hash signature.')
+        return HttpResponse('Invalid signature', status=401)
+
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except (ValueError, UnicodeDecodeError):
+        logger.exception('payment_webhook: invalid JSON body.')
+        return HttpResponse('Invalid payload', status=400)
+
+    event = payload.get('event') or payload.get('type')
+    data = payload.get('data') or {}
+    tx_ref = data.get('tx_ref') or ''
+    # Classic accounts send the numeric transaction id under 'id'; some events
+    # also carry a 'transaction_id' field or a 'chg_*' charge id under 'id'.
+    transaction_id = data.get('transaction_id') or data.get('id') or ''
+
+    logger.info('payment_webhook received: event=%s tx_ref=%s transaction_id=%s',
+                event, tx_ref, transaction_id)
+
+    if event != 'charge.completed':
+        # Not a payment event (payouts / transfers / etc.) — ack so Flutterwave
+        # does not keep retrying this URL.
+        return HttpResponse('ok', status=200)
+    if not transaction_id or not tx_ref:
+        logger.warning('payment_webhook: incomplete charge.completed payload.')
+        return HttpResponse('ok', status=200)
+
+    # ── Server-side verification (never trust the payload alone) ─────────────
+    try:
+        verify_url = django_settings.FLUTTERWAVE_VERIFY_URL.format(id=transaction_id)
+        resp = http_requests.get(
+            verify_url,
+            headers={'Authorization': f'Bearer {django_settings.FLUTTERWAVE_SECRET_KEY}'},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        verify_data = resp.json()
+    except (http_requests.RequestException, ValueError):
+        logger.exception('payment_webhook: verification request failed for transaction %s.', transaction_id)
+        return HttpResponse('Verification failed', status=502)
+
+    transaction_data = verify_data.get('data', {})
+    logger.info('payment_webhook verify: status=%s tx_status=%s amount=%s currency=%s tx_ref=%s',
+                verify_data.get('status'), transaction_data.get('status'),
+                transaction_data.get('amount'), transaction_data.get('currency'),
+                transaction_data.get('tx_ref'))
+
+    if verify_data.get('status') != 'success' or transaction_data.get('status') != 'successful':
+        # Not confirmed yet — still pending validation, or truly failed.
+        # A further charge.completed event re-delivers when it settles.
+        logger.warning('payment_webhook: verify not successful — acking: %s', verify_data)
+        return HttpResponse('ok', status=200)
+
+    # ── Locate the signup and re-check the critical fields (amount/currency) ─
+    pending = PendingSignup.objects.filter(token=tx_ref).first()
+    if not pending:
+        # Already finalized by a duplicate webhook or by the browser callback.
+        already = User.objects.filter(employer_profile__payment_ref=str(transaction_id)).first()
+        logger.info('payment_webhook: no PendingSignup for tx_ref=%s (already finalized=%s).',
+                    tx_ref, bool(already))
+        return HttpResponse('ok', status=200)
+
+    if transaction_data.get('tx_ref') != pending.token:
+        logger.error('payment_webhook: tx_ref mismatch flw=%s pending=%s',
+                     transaction_data.get('tx_ref'), pending.token)
+        return HttpResponse('ok', status=200)
+    if transaction_data.get('currency') != 'NGN':
+        logger.error('payment_webhook: currency mismatch: %s', transaction_data.get('currency'))
+        return HttpResponse('ok', status=200)
+    try:
+        flw_amount = round(float(transaction_data.get('amount', 0)))
+    except (TypeError, ValueError):
+        logger.exception('payment_webhook: could not parse amount %s', transaction_data.get('amount'))
+        return HttpResponse('ok', status=200)
+    expected_amt = int(EmployerProfile.PLAN_AMOUNTS[pending.plan])
+    if flw_amount != expected_amt:
+        logger.error('payment_webhook: amount mismatch flw=%s expected=%s', flw_amount, expected_amt)
+        return HttpResponse('ok', status=200)
+
+    # ── Finalize (idempotent) ───────────────────────────────────────────────
+    user, created = _confirm_paid_payment(pending, transaction_id)
+    if user is None:
+        logger.error('payment_webhook: finalization failed for transaction %s.', transaction_id)
+        return HttpResponse('Finalization failed', status=500)  # triggers Flutterwave retry
+
+    if created:
+        _send_payment_confirmation_emails_in_background(user, user.employer_profile.plan)
+
+    logger.info('payment_webhook: account finalized for %s (transaction %s).', user.email, transaction_id)
+    return HttpResponse('ok', status=200)
+
+
+def payment_pending(request):
+    """Shown when the charge is still awaiting validation (bank transfer / USSD).
+
+    The account is NOT finalised by this page — Flutterwave's charge.completed
+    webhook does that moments later (and the browser JS polls our status endpoint
+    to notice it). If the webhook already ran before the customer arrived here,
+    jump straight to the success flow.
+    """
+    token = request.session.get('pending_signup_token')
+    if token and not PendingSignup.objects.filter(token=token).exists():
+        if (
+            request.user.is_authenticated
+            and getattr(getattr(request.user, 'employer_profile', None), 'is_paid', False)
+        ):
+            return redirect('Authentication:payment_success')
+        return render(request, 'Authentication/payment_pending.html', {'finalized': True})
+    return render(request, 'Authentication/payment_pending.html', {'finalized': False})
+
+
+def payment_status(request):
+    """Lightweight poll helper for the 'payment pending' page.
+
+    Returns {'finalized': bool, 'known': bool}. Reveals nothing sensitive — just
+    whether the session's pending signup has been consumed (i.e. the webhook has
+    confirmed the payment and the paid account now exists).
+    """
+    token = request.session.get('pending_signup_token')
+    if not token:
+        return JsonResponse({'finalized': False, 'known': False})
+    finalized = not PendingSignup.objects.filter(token=token).exists()
+    return JsonResponse({'finalized': finalized, 'known': True})
 
 
 def logout_view(request):

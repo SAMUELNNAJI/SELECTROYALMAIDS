@@ -260,3 +260,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 FLUTTERWAVE_PUBLIC_KEY  = os.environ.get('FLUTTERWAVE_PUBLIC_KEY', '').strip("'\" ")
 FLUTTERWAVE_SECRET_KEY  = os.environ.get('FLUTTERWAVE_SECRET_KEY', '').strip("'\" ")
 FLUTTERWAVE_VERIFY_URL  = 'https://api.flutterwave.com/v3/transactions/{id}/verify'
+# Secret hash configured under Flutterwave Dashboard → Settings → Webhooks.
+# Webhook requests that do not carry a matching verif-hash header are rejected.
+FLW_SECRET_HASH = os.environ.get('FLW_SECRET_HASH', '').strip("'\" ")

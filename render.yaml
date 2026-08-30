@@ -22,6 +22,8 @@ services:
         sync: false                  # fill in manually in the Render dashboard
       - key: FLUTTERWAVE_SECRET_KEY
         sync: false                  # fill in manually in the Render dashboard
+      - key: FLW_SECRET_HASH
+        sync: false                  # must match Dashboard → Settings → Webhooks → Secret Hash
       - key: PAYMENT_CALLBACK_URL
         sync: false                  # e.g. https://your-domain.com (no trailing slash)
       - key: NOTIFICATION_EMAIL

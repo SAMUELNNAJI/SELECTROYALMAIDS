@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import timedelta
 from unittest.mock import Mock, patch
 
@@ -159,3 +160,94 @@ class SignupAndPaymentTests(TestCase):
         self.assertEqual(response.status_code, 200)
         send_failed_email.assert_called_once()
         self.assertEqual(send_failed_email.call_args.args[0].email, pending.email)
+
+    # ── Flutterwave webhook (authoritative asynchronous confirmation) ─────────
+
+    @override_settings(FLW_SECRET_HASH='test-secret-hash')
+    @patch('Authentication.views.send_payment_success_email')
+    @patch('Authentication.views.send_signup_welcome_email')
+    @patch('Authentication.views.http_requests.get')
+    def test_webhook_finalizes_verified_payment(self, mock_get, _welcome, _receipt):
+        pending = self._pending_signup()
+        gateway_response = _api_response({
+            'status': 'success',
+            'data': {
+                'status': 'successful',
+                'tx_ref': pending.token,
+                'amount': 10000,
+                'currency': 'NGN',
+            },
+        })
+        mock_get.return_value = gateway_response
+
+        response = self.client.post(
+            reverse('Authentication:payment_webhook'),
+            data=json.dumps({
+                'event': 'charge.completed',
+                'data': {'id': '123456789', 'tx_ref': pending.token},
+            }),
+            content_type='application/json',
+            HTTP_VERIF_HASH='test-secret-hash',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        user = User.objects.get(email=pending.email)
+        self.assertTrue(check_password('Strong-password-123', user.password))
+        self.assertEqual(user.employer_profile.payment_status, 'paid')
+        self.assertEqual(user.employer_profile.payment_ref, '123456789')
+        self.assertFalse(PendingSignup.objects.filter(pk=pending.pk).exists())
+
+        # Idempotent: a duplicate delivery of the same webhook must be a no-op.
+        duplicate = self.client.post(
+            reverse('Authentication:payment_webhook'),
+            data=json.dumps({
+                'event': 'charge.completed',
+                'data': {'id': '123456789', 'tx_ref': pending.token},
+            }),
+            content_type='application/json',
+            HTTP_VERIF_HASH='test-secret-hash',
+        )
+        self.assertEqual(duplicate.status_code, 200)
+        self.assertEqual(User.objects.filter(email=pending.email).count(), 1)
+
+    @override_settings(FLW_SECRET_HASH='test-secret-hash')
+    def test_webhook_rejects_bad_signature(self):
+        pending = self._pending_signup()
+        response = self.client.post(
+            reverse('Authentication:payment_webhook'),
+            data=json.dumps({
+                'event': 'charge.completed',
+                'data': {'id': '123456789', 'tx_ref': pending.token},
+            }),
+            content_type='application/json',
+            HTTP_VERIF_HASH='wrong-secret',
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertFalse(User.objects.filter(email=pending.email).exists())
+        self.assertTrue(PendingSignup.objects.filter(pk=pending.pk).exists())
+
+    @patch('Authentication.views.http_requests.get')
+    def test_callback_with_pending_validation_redirects_to_pending_page(self, mock_get):
+        pending = self._pending_signup()
+        gateway_response = _api_response({
+            'status': 'success',
+            'data': {
+                'status': 'success-pending-validation',
+                'tx_ref': pending.token,
+                'amount': 10000,
+                'currency': 'NGN',
+            },
+        })
+        mock_get.return_value = gateway_response
+
+        response = self.client.get(reverse('Authentication:payment_callback'), {
+            'status': 'success-pending-validation',
+            'tx_ref': pending.token,
+            'transaction_id': '123456789',
+        })
+
+        self.assertRedirects(response, reverse('Authentication:payment_pending'))
+        # Account is NOT created yet — the webhook does that when the charge settles.
+        self.assertFalse(User.objects.filter(email=pending.email).exists())
+        self.assertTrue(PendingSignup.objects.filter(pk=pending.pk).exists())
