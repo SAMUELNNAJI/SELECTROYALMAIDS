@@ -46,13 +46,13 @@ sudo -u selectroyal "$VENV/bin/pip" install --upgrade pip
 sudo -u selectroyal "$VENV/bin/pip" install -r requirements.txt
 
 echo "▶ Applying database migrations…"
-sudo -u selectroyal "$VENV/bin/python" manage.py migrate --noinput
+sudo -u selectroyal bash -c 'set -a; source "$1"; set +a; cd "$2" && "$3" manage.py migrate --noinput' _ "$ENV_FILE" "$APP_DIR" "$PY"
 
 echo "▶ Collecting static files…"
-sudo -u selectroyal "$VENV/bin/python" manage.py collectstatic --noinput
+sudo -u selectroyal bash -c 'set -a; source "$1"; set +a; cd "$2" && "$3" manage.py collectstatic --noinput' _ "$ENV_FILE" "$APP_DIR" "$PY"
 
 echo "▶ Production sanity check…"
-sudo -u selectroyal "$VENV/bin/python" manage.py check --deploy --fail-level WARNING || echo "  (warnings above are advisory only)"
+sudo -u selectroyal bash -c 'set -a; source "$1"; set +a; cd "$2" && "$3" manage.py check --deploy --fail-level WARNING' _ "$ENV_FILE" "$APP_DIR" "$PY" || echo "  (warnings above are advisory only)"
 
 echo "▶ Restarting gunicorn…"
 sudo systemctl restart gunicorn.service
