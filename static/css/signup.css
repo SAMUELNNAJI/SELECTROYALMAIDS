@@ -30,6 +30,11 @@
   gap: 14px;
 }
 
+/* Fields inside rows should fill their cell */
+.af-row .af-field { min-width: 0; width: 100%; }
+.af-row .af-input,
+.af-row .af-select { width: 100%; }
+
 /* Required asterisk */
 .af-req { color: #ef4444; }
 
@@ -100,8 +105,10 @@
 .af-step-dot.done  { background: #22c55e; }
 .af-steps-label { font-size: 12px; color: #94a3b8; font-weight: 600; margin-left: 6px; }
 
-/* Responsive */
-@media (max-width: 480px) {
+/* Responsive — collapse rows to single column on mobile */
+@media (max-width: 900px) {
   .af-row { grid-template-columns: 1fr; }
   .auth-social-row { grid-template-columns: 1fr; }
+  .af-field { width: 100%; }
+  .af-input, .af-select { width: 100%; }
 }

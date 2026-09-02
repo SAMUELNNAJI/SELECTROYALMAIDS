@@ -304,6 +304,32 @@ body {
 .af-submit:hover { background: #A87A22; transform: translateY(-1px); }
 .af-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
+/* Create-account button — full width, distinct from primary Continue */
+.af-submit-create {
+  width: 100%;
+  padding: 14px;
+  background: #fff;
+  color: #001F3F;
+  border: 2px solid #001F3F;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  transition: background .2s, color .2s, transform .15s;
+  margin-bottom: 16px;
+}
+.af-submit-create:hover {
+  background: #001F3F;
+  color: #fff;
+  transform: translateY(-1px);
+}
+.af-submit-create:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
 /* Error */
 .af-error {
   display: none;

@@ -445,8 +445,8 @@
               </label>
             </div>
 
-            <button type="submit" class="af-submit" id="createAccBtn">
-              <i class="fa-solid fa-lock"></i> Continue to Payment
+            <button type="submit" class="af-submit-create" id="createAccBtn">
+              <i class="fa-solid fa-credit-card"></i> Pay &amp; Create Account
             </button>
 
             <div style="text-align:center;margin-top:10px">
@@ -716,12 +716,14 @@
           showError(data.error || 'Something went wrong. Please try again.');
           btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Pay &amp; Create Account';
           btn.disabled  = false;
+          btn.className = 'af-submit-create';
         }
       })
       .catch(function (error) {
         showError(error.message || 'Signup could not be completed. Please try again.');
         btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Pay &amp; Create Account';
         btn.disabled  = false;
+        btn.className = 'af-submit-create';
       });
     });
 
