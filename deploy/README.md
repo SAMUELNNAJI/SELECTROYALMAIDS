@@ -78,8 +78,9 @@ Fill in **at minimum**:
   site falls back to SQLite at `/srv/selectroyal/db.sqlite3`.
 - `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`, `NOTIFICATION_EMAIL`
   (`info@selectroyalmaids.com.ng` is the default — this is where new
-  "Request a Maid" placement requests **and** "Register as a Maid" applications
-  are emailed).
+  "Request a Maid" placement requests are emailed. "Register as a Maid"
+  applications are *not* emailed; they appear only in the admin dashboard under
+  Recent Maid Applications, and are also sent to the team via WhatsApp).
 - `WHATSAPP_ACCESS_TOKEN` + `WHATSAPP_PHONE_NUMBER_ID` — required for Maid
   registration forms to be delivered via WhatsApp to `WHATSAPP_APPLICATION_RECIPIENT`
   (`+234 913 789 4958`, already configured).

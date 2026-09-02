@@ -21,7 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Value
 from django.db.models.functions import Replace
 from .models import BlogPost, BlogSubscriber, EditablePage, FAQ, MaidProfile, MaidRegistration, PlacementRequest, Service, SupportMessage
-from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_contact_ack_email, send_maid_application_email, send_maid_registration_success_email
+from .emails import send_unread_support_email, send_request_form_email, send_employer_action_email, send_blog_alert_email, send_blog_subscribe_email, send_contact_email, send_contact_ack_email, send_maid_registration_success_email
 
 logger = logging.getLogger(__name__)
 
@@ -436,12 +436,13 @@ def register_as_maid(request):
                 sent_to_whatsapp = _send_maid_application_to_whatsapp(application)
             except Exception:
                 sent_to_whatsapp = False
-            sent_to_company = send_maid_application_email(application)
+            # Note: maid applications are intentionally NOT emailed to the company
+            # inbox — they surface only in the admin dashboard under
+            # "Recent Maid Applications". The WhatsApp alert and the applicant's
+            # own welcome/confirmation email are still sent.
             send_maid_registration_success_email(application)   # welcome email to the maid
-            if sent_to_whatsapp and sent_to_company:
-                messages.success(request, 'Your application has been received and sent to our verification team by email and WhatsApp.')
-            elif sent_to_whatsapp or sent_to_company:
-                messages.success(request, 'Your application has been received and sent to our verification team.')
+            if sent_to_whatsapp:
+                messages.success(request, 'Your application has been received and sent to our verification team by WhatsApp.')
             else:
                 messages.success(request, 'Your application has been received. Our verification team will contact you shortly.')
         else:

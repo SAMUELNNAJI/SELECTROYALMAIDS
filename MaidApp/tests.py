@@ -87,35 +87,29 @@ class MaidRegistrationDedupTests(TestCase):
 
     @patch('MaidApp.views._send_maid_application_to_whatsapp', return_value=False)
     @patch('MaidApp.views.send_maid_registration_success_email')
-    @patch('MaidApp.views.send_maid_application_email')
-    def test_double_submit_creates_single_application(self, send_email, send_success, _whatsapp):
+    def test_double_submit_creates_single_application(self, send_success, _whatsapp):
         first = self._post_application(self._valid_data())
         second = self._post_application(self._valid_data())
         self.assertEqual(first.status_code, 200)
         self.assertEqual(second.status_code, 200)
         self.assertEqual(MaidRegistration.objects.count(), 1)
-        send_email.assert_called_once()
         send_success.assert_called_once()
 
     @patch('MaidApp.views._send_maid_application_to_whatsapp', return_value=False)
     @patch('MaidApp.views.send_maid_registration_success_email')
-    @patch('MaidApp.views.send_maid_application_email')
-    def test_resubmission_with_edited_details_does_not_duplicate(self, send_email, send_success, _whatsapp):
+    def test_resubmission_with_edited_details_does_not_duplicate(self, send_success, _whatsapp):
         self._post_application(self._valid_data())
         self._post_application(self._valid_data(phone='07011112222', city='Ikeja'))
         self.assertEqual(MaidRegistration.objects.count(), 1)
         app = MaidRegistration.objects.get()
         self.assertEqual(app.phone, '08012345678')  # the original submission is kept
-        send_email.assert_called_once()
         send_success.assert_called_once()
 
     @patch('MaidApp.views._send_maid_application_to_whatsapp', return_value=False)
     @patch('MaidApp.views.send_maid_registration_success_email')
-    @patch('MaidApp.views.send_maid_application_email')
-    def test_different_nin_is_a_new_application(self, send_email, send_success, _whatsapp):
+    def test_different_nin_is_a_new_application(self, send_success, _whatsapp):
         self._post_application(self._valid_data())
         self._post_application(self._valid_data(nin='09876543210', email='tola@example.com'))
         self.assertEqual(MaidRegistration.objects.count(), 2)
-        self.assertEqual(send_email.call_count, 2)
         self.assertEqual(send_success.call_count, 2)
 

@@ -173,6 +173,77 @@
               </div>
             </div>
 
+            <div class="af-field">
+              <label class="af-label" for="houseAddress">House Address <span class="af-req">*</span></label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-house-chimney af-icon"></i>
+                <input type="text" id="houseAddress" class="af-input" placeholder="e.g. 14 Admiralty Way, Lekki Phase 1" required />
+              </div>
+            </div>
+
+            <div class="af-row">
+              <div class="af-field">
+                <label class="af-label" for="maritalStatus">Marital Status</label>
+                <div class="af-wrap">
+                  <i class="fa-solid fa-people-roof af-icon"></i>
+                  <select id="maritalStatus" class="af-select">
+                    <option value="" selected>Select marital status</option>
+                    <option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down af-select-arr"></i>
+                </div>
+              </div>
+              <div class="af-field">
+                <label class="af-label" for="profession">Profession</label>
+                <div class="af-wrap">
+                  <i class="fa-solid fa-briefcase af-icon"></i>
+                  <input type="text" id="profession" class="af-input" placeholder="e.g. Banker" />
+                </div>
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="company">Company</label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-building af-icon"></i>
+                <input type="text" id="company" class="af-input" placeholder="e.g. First Bank Plc" />
+              </div>
+            </div>
+
+            <div class="af-row">
+              <div class="af-field">
+                <label class="af-label" for="apartmentType">Type of Apartment</label>
+                <div class="af-wrap">
+                  <i class="fa-solid fa-house-circle-check af-icon"></i>
+                  <select id="apartmentType" class="af-select">
+                    <option value="" selected>Select apartment type</option>
+                    <option>Self Contain</option><option>1 Bedroom</option><option>2 Bedroom</option>
+                    <option>3 Bedroom</option><option>4 Bedroom</option><option>Duplex</option><option>Bungalow</option><option>Other</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down af-select-arr"></i>
+                </div>
+              </div>
+              <div class="af-field">
+                <label class="af-label" for="rooms">Rooms</label>
+                <div class="af-wrap">
+                  <i class="fa-solid fa-door-open af-icon"></i>
+                  <input type="number" id="rooms" class="af-input" min="1" max="30" placeholder="e.g. 4" />
+                </div>
+              </div>
+            </div>
+
+            <div class="af-field">
+              <label class="af-label" for="maidGender">Gender of Maid Preferred</label>
+              <div class="af-wrap">
+                <i class="fa-solid fa-person-dress af-icon"></i>
+                <select id="maidGender" class="af-select">
+                  <option value="" selected>No preference</option>
+                  <option>Female</option><option>Male</option><option>Any</option>
+                </select>
+                <i class="fa-solid fa-chevron-down af-select-arr"></i>
+              </div>
+            </div>
+
             <button type="button" class="af-submit" id="step2Continue">
               Continue <i class="fa-solid fa-arrow-right"></i>
             </button>
@@ -305,6 +376,20 @@
               </ul>
             </label>
 
+          </div>
+
+          <!-- Expected resume date -->
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px;margin-bottom:20px;">
+            <label for="expectedResumeDate" style="font-weight:700;font-size:.9rem;color:#1e293b;display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <i class="fa-solid fa-calendar-days" style="color:#2563eb;"></i> Expected Resume Date
+              <span style="font-weight:400;font-size:.72rem;color:#94a3b8;">(when you'd like your maid to start)</span>
+            </label>
+            <p style="font-size:.78rem;color:#64748b;line-height:1.5;margin-bottom:10px;">
+              Pick the date you want the domestic staff to resume. This helps our placement team prioritise your request.
+            </p>
+            <input type="date" id="expectedResumeDate" class="af-input"
+              style="width:100%;"
+              min="{% now 'Y-m-d' %}" />
           </div>
 
           <!-- Employer request area -->
@@ -442,14 +527,26 @@
       var em = document.getElementById('email').value.trim();
       var ph = document.getElementById('phone').value.trim();
       var ct = document.getElementById('city').value;
+      var ha = document.getElementById('houseAddress').value.trim();
+      var ms = document.getElementById('maritalStatus').value;
+      var pf = document.getElementById('profession').value.trim();
+      var co = document.getElementById('company').value.trim();
+      var at = document.getElementById('apartmentType').value;
+      var rm = document.getElementById('rooms').value.trim();
+      var mg = document.getElementById('maidGender').value;
 
       if (!fn)                                              { showError('Please enter your first name.');       return; }
       if (!ln)                                              { showError('Please enter your last name.');        return; }
       if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))  { showError('Please enter a valid email address.'); return; }
       if (!ph)                                              { showError('Please enter your phone number.');     return; }
       if (!ct)                                              { showError('Please select your city.');            return; }
+      if (!ha)                                              { showError('Please enter your house address.');    return; }
 
-      formData = { firstName: fn, lastName: ln, email: em, phone: ph, city: ct };
+      formData = {
+        firstName: fn, lastName: ln, email: em, phone: ph, city: ct,
+        houseAddress: ha, maritalStatus: ms, profession: pf, company: co,
+        apartmentType: at, rooms: rm, maidGender: mg
+      };
       setStep(2);
     });
 
@@ -525,12 +622,21 @@
       formData.plan      = planVal;
       formData.planLabel = planVal === 'premium' ? 'Premium — ₦20,000' : 'Standard — ₦10,000';
       formData.requestDetails = document.getElementById('requestDetails').value;
+      formData.expectedResumeDate = document.getElementById('expectedResumeDate').value;
 
       document.getElementById('reviewDetails').innerHTML = [
         ['Name',  formData.firstName + ' ' + formData.lastName],
         ['Email', formData.email],
         ['Phone', formData.phone],
         ['City',  formData.city],
+        ['House Address', formData.houseAddress || '—'],
+        ['Marital Status', formData.maritalStatus || '—'],
+        ['Profession', formData.profession || '—'],
+        ['Company', formData.company || '—'],
+        ['Type of Apartment', formData.apartmentType || '—'],
+        ['Rooms', formData.rooms || '—'],
+        ['Gender of Maid', formData.maidGender || '—'],
+        ['Expected Resume Date', formData.expectedResumeDate || '—'],
         ['Plan',  formData.planLabel],
         ['Request', formData.requestDetails || '—'],
       ].map(function (r) {
@@ -571,6 +677,14 @@
         email:           formData.email      || '',
         phone:           formData.phone      || '',
         city:            formData.city       || '',
+        houseAddress:    formData.houseAddress    || '',
+        maritalStatus:   formData.maritalStatus   || '',
+        profession:      formData.profession      || '',
+        company:         formData.company         || '',
+        apartmentType:    formData.apartmentType  || '',
+        rooms:            formData.rooms          || '',
+        maidGender:       formData.maidGender     || '',
+        expectedResumeDate: formData.expectedResumeDate || '',
         password:        formData.password   || '',
         confirmPassword: formData.password   || '',
         plan:            formData.plan       || 'standard',

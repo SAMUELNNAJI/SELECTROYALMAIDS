@@ -22,7 +22,7 @@ from django.contrib.auth.hashers import make_password, identify_hasher
 from django.db import IntegrityError, transaction
 from django.db.models import Q, Count, Sum, Case, When, Value, IntegerField
 from django.views.decorators.http import require_POST
-from datetime import timedelta
+from datetime import date, timedelta
 from MaidApp.models import BlogPost, EditablePage, FAQ, LegacyEmployer, MaidProfile, MaidRegistration, MaidRecommendation, PlacementRequest, Service, SupportMessage
 from MaidApp.models import extract_policy_blocks
 from MaidApp.image_utils import resolve_image_url
@@ -107,6 +107,14 @@ def _confirm_paid_payment(pending, transaction_id):
                     'service_needed': pending.service,
                     'how_heard': pending.how_heard,
                     'request_details': pending.request_details,
+                    'house_address': pending.house_address,
+                    'marital_status': pending.marital_status,
+                    'profession': pending.profession,
+                    'company': pending.company,
+                    'apartment_type': pending.apartment_type,
+                    'rooms': pending.rooms,
+                    'maid_gender': pending.maid_gender,
+                    'expected_resume_date': pending.expected_resume_date,
                     'plan': pending.plan,
                     'payment_status': 'paid',
                     'payment_ref': str(transaction_id),
@@ -174,6 +182,20 @@ def signup_view(request):
         confirm_password = request.POST.get('confirmPassword', '')
         phone            = request.POST.get('phone', '').strip()
         city             = request.POST.get('city', '').strip()
+        house_address    = request.POST.get('houseAddress', '').strip()
+        marital_status   = request.POST.get('maritalStatus', '').strip()
+        profession       = request.POST.get('profession', '').strip()
+        company          = request.POST.get('company', '').strip()
+        apartment_type   = request.POST.get('apartmentType', '').strip()
+        rooms            = request.POST.get('rooms', '').strip()
+        maid_gender      = request.POST.get('maidGender', '').strip()
+        expected_resume_raw = request.POST.get('expectedResumeDate', '').strip()
+        expected_resume_date = None
+        if expected_resume_raw:
+            try:
+                expected_resume_date = date.fromisoformat(expected_resume_raw)
+            except ValueError:
+                expected_resume_date = None
         plan_raw         = request.POST.get('plan', 'standard').strip()
         plan             = plan_raw if plan_raw in ('standard', 'premium') else 'standard'
 
@@ -219,6 +241,14 @@ def signup_view(request):
                 'service': request.POST.get('service', '').strip(),
                 'how_heard': request.POST.get('howHeard', '').strip(),
                 'request_details': request.POST.get('requestDetails', '').strip(),
+                'house_address': house_address,
+                'marital_status': marital_status,
+                'profession': profession,
+                'company': company,
+                'apartment_type': apartment_type,
+                'rooms': rooms,
+                'maid_gender': maid_gender,
+                'expected_resume_date': expected_resume_date,
                 'token': token,
                 'expires_at': expires_at,
             },
@@ -1598,6 +1628,132 @@ def all_employers(request):
                          ).count(),
     }
     return render(request, 'Dashboard/AllEmployers.html', context)
+
+
+@login_required
+def employer_view(request, employer_id):
+    """Display a site employer account in document format with print option."""
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    profile = get_object_or_404(EmployerProfile.objects.select_related('user'), pk=employer_id)
+    maids = MaidProfile.objects.filter(assigned_employer=profile.user)
+    places = PlacementRequest.objects.filter(
+        employer=profile.user, candidate__isnull=False, status='concluded'
+    ).select_related('candidate').order_by('-concluded_at')
+
+    doc = {
+        'title': profile.user.get_full_name() or profile.user.username,
+        'meta': (
+            f"Employer #{profile.pk} | {profile.user.email or 'no email'} "
+            f"| {profile.get_plan_display()}"
+        ),
+        'badge': profile.get_payment_status_display(),
+        'sections': [
+            {
+                'title': 'Personal Information',
+                'fields': [
+                    {'label': 'Full Name', 'value': profile.user.get_full_name() or profile.user.username},
+                    {'label': 'Email', 'value': profile.user.email},
+                    {'label': 'Phone', 'value': profile.phone},
+                    {'label': 'City', 'value': profile.city},
+                    {'label': 'Marital Status', 'value': profile.marital_status},
+                ],
+            },
+            {
+                'title': 'Household & Employment',
+                'fields': [
+                    {'label': 'House Address', 'value': profile.house_address, 'full': True},
+                    {'label': 'Profession', 'value': profile.profession},
+                    {'label': 'Company', 'value': profile.company},
+                    {'label': 'Type of Apartment', 'value': profile.apartment_type},
+                    {'label': 'Rooms', 'value': profile.rooms},
+                    {'label': 'Gender of Maid', 'value': profile.maid_gender},
+                    {'label': 'Expected Resume Date',
+                     'value': profile.expected_resume_date.strftime('%d %b %Y') if profile.expected_resume_date else ''},
+                ],
+            },
+            {
+                'title': 'Plan & Payment',
+                'fields': [
+                    {'label': 'Plan', 'value': profile.get_plan_display()},
+                    {'label': 'Payment Status', 'value': profile.get_payment_status_display()},
+                    {'label': 'Payment Reference', 'value': profile.payment_ref},
+                    {'label': 'Joined',
+                     'value': profile.created_at.strftime('%d %b %Y, %H:%M') if profile.created_at else ''},
+                ],
+            },
+        ],
+        'request_details': profile.request_details,
+        'maids': [
+            {'name': m.full_name, 'reg': m.reg_number, 'slug': m.slug}
+            for m in maids
+        ],
+        'placements': [
+            {'name': p.candidate.full_name if p.candidate else '', 'reg': p.candidate.reg_number if p.candidate else ''}
+            for p in places
+        ],
+    }
+    return render(request, 'Dashboard/employer_detail.html', {'doc': doc})
+
+
+@login_required
+def legacy_employer_view(request, employer_id):
+    """Display a legacy request.sql employer in document format with print option."""
+    if not request.user.is_superuser:
+        return redirect('Authentication:employer_dashboard')
+    row = get_object_or_404(LegacyEmployer, pk=employer_id)
+    maids = MaidProfile.objects.filter(assigned_legacy_employer=row)
+    legacy_maid = row.legacy_assigned_maid
+
+    maid_chips = [{'name': m.full_name, 'reg': m.reg_number, 'slug': m.slug} for m in maids]
+    if legacy_maid and not any(m['slug'] == legacy_maid.slug for m in maid_chips):
+        maid_chips.append({'name': legacy_maid.full_name, 'reg': legacy_maid.reg_number, 'slug': legacy_maid.slug})
+
+    doc = {
+        'title': row.full_name or 'Unnamed',
+        'meta': (
+            f"Legacy Employer #{row.legacy_id} | {row.email or 'no email'} "
+            f"| {row.get_plan_display()}"
+        ),
+        'badge': 'SPAM?' if row.is_spam else '',
+        'sections': [
+            {
+                'title': 'Personal Information',
+                'fields': [
+                    {'label': 'Full Name', 'value': row.full_name},
+                    {'label': 'Email', 'value': row.email},
+                    {'label': 'Phone', 'value': row.phone},
+                    {'label': 'Marital Status', 'value': row.marital_status},
+                ],
+            },
+            {
+                'title': 'Household & Employment',
+                'fields': [
+                    {'label': 'Home Address', 'value': row.home_address, 'full': True},
+                    {'label': 'Profession', 'value': row.profession},
+                    {'label': 'Company', 'value': row.company},
+                    {'label': 'Company Address', 'value': row.company_address},
+                    {'label': 'Family Members', 'value': row.family_members},
+                    {'label': 'Type of Apartment', 'value': row.apartment_type},
+                    {'label': 'Gender of Maid', 'value': row.maid_gender},
+                    {'label': 'How Soon', 'value': row.how_soon},
+                ],
+            },
+            {
+                'title': 'Plan & Import',
+                'fields': [
+                    {'label': 'Plan', 'value': row.get_plan_display()},
+                    {'label': 'Assigned Reg Number', 'value': row.assigned_reg_number},
+                    {'label': 'Imported',
+                     'value': row.imported_at.strftime('%d %b %Y, %H:%M') if row.imported_at else ''},
+                ],
+            },
+        ],
+        'request_details': row.requested_service,
+        'maids': maid_chips,
+        'placements': [],
+    }
+    return render(request, 'Dashboard/employer_detail.html', {'doc': doc})
 
 
 @login_required

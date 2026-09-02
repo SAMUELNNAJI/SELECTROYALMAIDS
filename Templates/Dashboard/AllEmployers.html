@@ -192,41 +192,24 @@
   <div class="table-scroll">
   <table class="data-table">
     <thead>
-      <tr><th>Employer</th><th>Phone</th><th>Plan</th><th>Payment</th><th>Sign Up Request</th><th>Joined</th><th>Maids Assigned</th><th>Placement History</th></tr>
+      <tr><th>Employer</th><th>Email</th><th>Phone</th><th>Plan</th><th style="width:140px;">Action</th></tr>
     </thead>
     <tbody>
       {% for entry in site_rows %}
       <tr>
         <td>
-          <strong>{{ entry.profile.user.get_full_name|default:entry.profile.user.username }}</strong><br>
-          <span class="small muted">{{ entry.profile.user.email }}</span>
-          {% if entry.profile.city %}<br><span class="small muted"><i class="fa-solid fa-location-dot"></i> {{ entry.profile.city }}</span>{% endif %}
+          <strong>{{ entry.profile.user.get_full_name|default:entry.profile.user.username }}</strong>
+          <div style="margin-top:6px;"><span class="pill {% if entry.profile.payment_status == 'paid' %}pill-green{% elif entry.profile.payment_status == 'pending' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.profile.get_payment_status_display }}</span></div>
         </td>
-        <td style="white-space:nowrap;">{{ entry.profile.phone|default:"—" }}</td>
-        <td>
-          <span class="pill {% if entry.profile.plan == 'premium' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.profile.get_plan_display }}</span><br>
-          <span class="small muted">{% if entry.profile.plan == 'standard' %}1 maid max{% else %}unlimited{% endif %}</span>
-        </td>
-        <td><span class="pill {% if entry.profile.payment_status == 'paid' %}pill-green{% elif entry.profile.payment_status == 'pending' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.profile.get_payment_status_display }}</span></td>
-        <td class="wrap-cell">
-          {% if entry.profile.service_needed %}<span class="small" style="color:#0f172a;font-weight:600;"><i class="fa-solid fa-broom"></i> {{ entry.profile.service_needed }}</span>{% endif %}
-          {% if entry.profile.request_details %}{% if entry.profile.service_needed %}<br>{% endif %}<span class="small muted">{{ entry.profile.request_details|truncatechars:200 }}</span>{% endif %}
-          {% if not entry.profile.service_needed and not entry.profile.request_details %}<span class="muted">—</span>{% endif %}
-        </td>
-        <td style="white-space:nowrap;">{{ entry.profile.created_at|date:"d M Y" }}</td>
-        <td class="wrap-cell">
-          {% if entry.maids %}
-            {% for maid in entry.maids %}<a class="maid-chip" href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" target="_blank"><i class="fa-solid fa-id-card"></i> {{ maid.reg_number }} · {{ maid.full_name }}</a>{% endfor %}
-          {% else %}<span class="muted">—</span>{% endif %}
-        </td>
-        <td class="wrap-cell">
-          {% if entry.placements %}
-            {% for pr in entry.placements %}<span class="maid-chip" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;"><i class="fa-solid fa-circle-check"></i> {% if pr.candidate %}{{ pr.candidate.reg_number }} · {{ pr.candidate.full_name }}{% else %}—{% endif %}</span>{% endfor %}
-          {% else %}<span class="muted">—</span>{% endif %}
+        <td style="word-break:break-all;overflow-wrap:break-word;">{{ entry.profile.user.email }}</td>
+        <td style="white-space:nowrap;">{% if entry.profile.phone %}{{ entry.profile.phone }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td><span class="pill {% if entry.profile.plan == 'premium' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.profile.get_plan_display }}</span></td>
+        <td style="white-space:nowrap;">
+          <a class="btn btn-primary" href="{% url 'Authentication:employer_view' entry.profile.pk %}"><i class="fa-solid fa-eye"></i> View</a>
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="8"><div class="empty"><i class="fa-solid fa-building"></i>No site employers found{% if query %} matching "<strong>{{ query }}</strong>"{% endif %}.</div></td></tr>
+      <tr><td colspan="5"><div class="empty"><i class="fa-solid fa-building"></i>No site employers found{% if query %} matching "<strong>{{ query }}</strong>"{% endif %}.</div></td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -269,39 +252,27 @@
   <div class="table-scroll">
   <table class="data-table">
     <thead>
-      <tr><th>#</th><th>Employer</th><th>Contact</th><th>Location / Company</th><th>Plan</th><th>Requested Service</th><th>How Soon</th><th>Assigned Maid(s)</th></tr>
+      <tr><th style="width:90px;">Legacy #</th><th>Employer</th><th>Email</th><th>Phone</th><th>Plan</th><th style="width:140px;">Action</th></tr>
     </thead>
     <tbody>
       {% for entry in legacy_rows %}
       <tr>
-        <td class="muted">{{ entry.row.legacy_id }}</td>
+        <td style="white-space:nowrap;color:var(--muted);">#{{ entry.row.legacy_id }}</td>
         <td>
-          <strong>{{ entry.row.full_name|default:"Unnamed" }}</strong>{% if entry.row.is_spam %} <span class="spam-badge">SPAM?</span>{% endif %}<br>
-          <span class="small muted">{{ entry.row.profession|default:"—" }}</span>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong>{{ entry.row.full_name|default:"Unnamed" }}</strong>
+            {% if entry.row.is_spam %}<span class="spam-badge">SPAM?</span>{% endif %}
+          </div>
         </td>
-        <td style="white-space:nowrap;">
-          {{ entry.row.phone|default:"—" }}
-          {% if entry.row.email %}<br><span class="small muted">{{ entry.row.email }}</span>{% endif %}
-        </td>
-        <td class="wrap-cell">
-          {% if entry.row.home_address %}{{ entry.row.home_address }}{% else %}<span class="muted">—</span>{% endif %}
-          {% if entry.row.company %}<br><span class="small muted"><i class="fa-solid fa-briefcase"></i> {{ entry.row.company }}{% if entry.row.company_address %} — {{ entry.row.company_address }}{% endif %}</span>{% endif %}
-        </td>
+        <td style="word-break:break-all;overflow-wrap:break-word;">{% if entry.row.email %}{{ entry.row.email }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td style="white-space:nowrap;">{% if entry.row.phone %}{{ entry.row.phone }}{% else %}<span class="muted">—</span>{% endif %}</td>
         <td><span class="pill {% if entry.row.plan == 'premium' %}pill-amber{% else %}pill-gray{% endif %}">{{ entry.row.get_plan_display }}</span></td>
-        <td class="wrap-cell">{% if entry.row.requested_service %}{{ entry.row.requested_service|truncatechars:140 }}{% else %}<span class="muted">—</span>{% endif %}</td>
-        <td style="white-space:nowrap;">{{ entry.row.how_soon|default:"—" }}</td>
-        <td class="wrap-cell">
-          {% for maid in entry.maids %}<a class="maid-chip" href="{% url 'MaidApp:view-profile' %}?slug={{ maid.slug }}" target="_blank"><i class="fa-solid fa-id-card"></i> {{ maid.reg_number }} · {{ maid.full_name }}</a>{% endfor %}
-          {% if entry.legacy_maid %}
-            <a class="maid-chip" style="background:#fefce8;border-color:#fde68a;color:#854d0e;" href="{% url 'MaidApp:view-profile' %}?slug={{ entry.legacy_maid.slug }}" target="_blank" title="Reg number recorded in the legacy dump"><i class="fa-solid fa-clock-rotate-left"></i> {{ entry.legacy_maid.reg_number }} · {{ entry.legacy_maid.full_name }}</a>
-          {% elif entry.row.assigned_reg_number %}
-            <span class="pill pill-amber" title="Reg number recorded in the legacy dump; this maid is not in the current database">{{ entry.row.assigned_reg_number }}</span>
-          {% endif %}
-          {% if not entry.maids and not entry.legacy_maid and not entry.row.assigned_reg_number %}<span class="muted">—</span>{% endif %}
+        <td style="white-space:nowrap;">
+          <a class="btn btn-primary" href="{% url 'Authentication:legacy_employer_view' entry.row.pk %}"><i class="fa-solid fa-eye"></i> View</a>
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="8"><div class="empty"><i class="fa-solid fa-clock-rotate-left"></i>No legacy employers found{% if query %} matching "<strong>{{ query }}</strong>"{% endif %}.{% if not show_spam and stats.legacy_spam %} <a href="?tab=legacy&amp;spam=1">Show spam-flagged rows</a>.{% endif %}</div></td></tr>
+      <tr><td colspan="6"><div class="empty"><i class="fa-solid fa-clock-rotate-left"></i>No legacy employers found{% if query %} matching "<strong>{{ query }}</strong>"{% endif %}.{% if not show_spam and stats.legacy_spam %} <a href="?tab=legacy&amp;spam=1">Show spam-flagged rows</a>.{% endif %}</div></td></tr>
       {% endfor %}
     </tbody>
   </table>

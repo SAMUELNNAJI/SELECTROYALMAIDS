@@ -28,6 +28,8 @@ urlpatterns = [
     path('employer/dashboard/',                    views.employer_dashboard,  name='employer_dashboard'),
     path('admin/dashboard/',                       views.admin_dashboard,     name='admin_dashboard'),
     path('admin/employers/',                       views.all_employers,       name='all_employers'),
+    path('admin/employer/<int:employer_id>/view/', views.employer_view,      name='employer_view'),
+    path('admin/legacy-employer/<int:employer_id>/view/', views.legacy_employer_view, name='legacy_employer_view'),
     path('admin/placements/<int:placement_id>/conclude/', views.conclude_placement, name='conclude_placement'),
     path('admin/placements/<int:placement_id>/replace/', views.record_free_replacement, name='record_free_replacement'),
     # MaidProfile CRUD
