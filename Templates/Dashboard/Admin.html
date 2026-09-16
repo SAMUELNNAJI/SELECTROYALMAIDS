@@ -154,6 +154,11 @@
     .data-table td { color:var(--text); }
     .data-table tr:last-child td { border-bottom:none; }
     .data-table tbody tr:hover { background:#f8faff; }
+    /* Employers & Payments: Request column shows the complete request text
+       (wraps onto as many lines as needed — never truncated / ellipsised) */
+    .data-table td.request-cell { color:#475569; vertical-align:top; }
+    .data-table td.request-cell .req-text { display:block; min-width:200px; max-width:420px; font-size:.78rem; line-height:1.6; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
+    .data-table td.request-cell i { color:#2563eb; margin-right:5px; }
     /* Badge */
     .badge { display:inline-block; padding:3px 10px; border-radius:100px; font-size:.72rem; font-weight:700; }
     .badge-green  { background:var(--green-lt);  color:var(--green); }
@@ -301,6 +306,7 @@
       .card-head{padding:16px 18px;}
       .card-body{padding:18px;}
       .data-table th,.data-table td{padding:10px 12px;font-size:.82rem;}
+      .data-table td.request-cell .req-text{min-width:170px;max-width:280px;font-size:.8rem;}
       .modal{max-width:95vw;}
       .modal-head,.modal-body,.modal-foot{padding-left:16px;padding-right:16px;}
       .faq-row-head{flex-wrap:wrap;gap:8px;}
@@ -675,10 +681,10 @@
                   <td><strong>{{ ep.user.get_full_name|default:ep.user.username }}</strong></td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.user.email }}</td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.phone|default:"—" }}</td>
-                  <td style="font-size:.78rem;max-width:260px;color:#475569;">
+                  <td class="request-cell">
                     {% if ep.request_details %}
-                      <span title="{{ ep.request_details }}" style="display:inline-block;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;">
-                        <i class="fa-solid fa-clipboard-list" style="color:#2563eb;margin-right:5px;"></i>{{ ep.request_details|truncatechars:70 }}
+                      <span class="req-text">
+                        <i class="fa-solid fa-clipboard-list"></i>{{ ep.request_details }}
                       </span>
                     {% else %}<span style="color:#cbd5e1;">— no request —</span>{% endif %}
                   </td>

@@ -337,6 +337,28 @@ class EmployerListPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'all-employers')
 
+    def test_employers_tab_shows_full_request_text(self):
+        """The Employers & Payments table must show the whole request (no truncation)."""
+        long_request = (
+            'I need a live-in nanny for my two-year-old toddler. Experience with toddlers '
+            'is required, Mondays to Saturdays, must be able to start within two weeks and '
+            'be comfortable around a friendly dog. Salary is negotiable for the right person.'
+        )
+        profile = EmployerProfile.objects.get(user__username='emp2')
+        profile.request_details = long_request
+        profile.payment_status = 'paid'
+        profile.save(update_fields=['request_details', 'payment_status'])
+
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse('Authentication:admin_dashboard'), {'tab': 'employers'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Request')
+        self.assertContains(response, 'request-cell')
+        # The complete request is rendered — nothing is cut off or ellipsised.
+        self.assertContains(response, long_request)
+        self.assertNotContains(response, 'truncatechars')
+
     def test_legacy_filter_keeps_legacy_tab(self):
         """Filtering in the Legacy Employers panel must not bounce back to Site."""
         self.client.force_login(self.admin)
