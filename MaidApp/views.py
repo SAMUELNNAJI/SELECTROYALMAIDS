@@ -26,6 +26,32 @@ from .emails import send_unread_support_email, send_request_form_email, send_emp
 logger = logging.getLogger(__name__)
 
 
+def strip_html(value):
+    """Return plain-text content with all HTML tags removed and whitespace normalised.
+
+    Used wherever a safe text excerpt of a SupportMessage is needed (e.g. the
+    conversation-list preview).  Without this, messages containing HTML markup
+    — such as the system-generated placement-request table — would leak raw
+    tags into the UI.
+    """
+    from django.utils.html import strip_tags
+    text = strip_tags(str(value))
+    return ' '.join(text.split())
+
+
+def strip_html(value):
+    """Return plain-text content with all HTML tags removed and whitespace normalised.
+
+    Used wherever a safe text excerpt of a SupportMessage is needed (e.g. the
+    conversation-list preview).  Without this, messages containing HTML markup
+    — such as the system-generated placement-request table — would leak raw
+    tags into the UI.
+    """
+    from django.utils.html import strip_tags
+    text = strip_tags(str(value))
+    return ' '.join(text.split())
+
+
 def _pdf_escape(value):
     """Return text that is safe for the built-in PDF Helvetica font."""
     import unicodedata
@@ -529,7 +555,8 @@ def _support_message_data(message, viewer):
         'id': message.pk,
         'sender': sender_name,
         'initials': initials,
-        'body': message.body,
+        'body': message.body,                       # HTML (server-generated) or plain text
+        'body_text': strip_html(message.body),      # plain-text excerpt for previews
         'time': message.created_at.strftime('%H:%M'),
         'outgoing': message.sender_id == viewer.id,
     }
@@ -581,7 +608,7 @@ def conversation_list(request):
             'employer_id': employer.pk,
             'name': employer.get_full_name() or employer.username,
             'initials': (employer.first_name[:1] + employer.last_name[:1]).upper() or employer.username[:2].upper(),
-            'last_message': last_msg.body[:60] if last_msg else '',
+                        'last_message': strip_html(last_msg.body)[:60] if last_msg else '',
             'last_time': last_msg.created_at.strftime('%H:%M') if last_msg else '',
             'unread': unread,
             'resolved': resolved,
@@ -602,7 +629,7 @@ def conversation_list(request):
             'employer_id': emp.pk,
             'name': emp.get_full_name() or emp.username,
             'initials': (emp.first_name[:1] + emp.last_name[:1]).upper() or emp.username[:2].upper(),
-            'last_message': last_msg.body[:60],
+                        'last_message': strip_html(last_msg.body)[:60],
             'last_time': last_msg.created_at.strftime('%H:%M'),
             'unread': unread,
             'resolved': resolved,

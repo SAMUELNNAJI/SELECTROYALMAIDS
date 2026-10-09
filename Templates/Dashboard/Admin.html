@@ -159,6 +159,33 @@
     .data-table td.request-cell { color:#475569; vertical-align:top; }
     .data-table td.request-cell .req-text { display:block; min-width:200px; max-width:420px; font-size:.78rem; line-height:1.6; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
     .data-table td.request-cell i { color:#2563eb; margin-right:5px; }
+    /* ── Employers & Payments (redesigned) ─────────────────── */
+    .ep-toolbar { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:20px; flex-wrap:wrap; }
+    .ep-toolbar-info { display:flex; align-items:center; gap:13px; }
+    .ep-toolbar-icon { width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#2563eb,#60a5fa); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; box-shadow:0 3px 10px rgba(37,99,235,.28); flex-shrink:0; }
+    .ep-toolbar-info h2 { font-size:1.05rem; font-weight:800; line-height:1.2; }
+    .ep-toolbar-info p { font-size:.8rem; color:var(--muted); margin-top:3px; }
+    .ep-count-badge { display:inline-flex; align-items:center; gap:7px; padding:6px 14px; border-radius:100px; background:var(--green-lt); color:var(--green); font-size:.78rem; font-weight:700; white-space:nowrap; }
+    .ep-search { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .ep-search input[type="text"] { flex:1; min-width:220px; padding:10px 14px; border:1px solid var(--border); border-radius:9px; font-family:'Inter',sans-serif; font-size:.875rem; background:#fff; transition:border-color .15s, box-shadow .15s; }
+    .ep-search input[type="text"]:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+    .data-table.ep-table thead th { border-bottom:1px solid var(--border); }
+    .data-table.ep-table tbody td { vertical-align:middle; }
+    .ep-employer { display:flex; align-items:center; gap:12px; min-width:210px; }
+    .ep-avatar { width:42px; height:42px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.82rem; font-weight:700; background:linear-gradient(135deg,#2563eb,#60a5fa); box-shadow:0 2px 6px rgba(37,99,235,.25); }
+    .ep-avatar.premium { background:linear-gradient(135deg,#b45309,#f59e0b); box-shadow:0 2px 6px rgba(180,83,9,.25); }
+    .ep-employer-info { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .ep-employer-info strong { font-size:.875rem; font-weight:700; color:var(--text); }
+    .ep-employer-info span { font-size:.76rem; color:var(--muted); word-break:break-all; line-height:1.3; }
+    .ep-amount { font-weight:700; white-space:nowrap; color:var(--text); }
+    .ep-date { font-size:.82rem; color:var(--muted); white-space:nowrap; }
+    .ep-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .ep-actions .btn { padding:8px 13px; font-size:.78rem; border-radius:8px; gap:6px; }
+    .btn-chat { background:var(--green-lt); color:var(--green); border-color:#bbf7d0; }
+    .btn-chat:hover { background:#bbf7d0; color:#15803d; }
+    .btn-recommend { background:var(--accent-lt); color:var(--accent); border-color:#bfdbfe; }
+    .btn-recommend:hover { background:#bfdbfe; color:var(--accent-dk); }
+    @media (max-width:640px){ .ep-actions .btn span{display:none;} }
     /* Badge */
     .badge { display:inline-block; padding:3px 10px; border-radius:100px; font-size:.72rem; font-weight:700; }
     .badge-green  { background:var(--green-lt);  color:var(--green); }
@@ -652,34 +679,57 @@
       </div>
     <!-- ── TAB: Employers ── -->
     <div class="tab-panel" id="tab-employers">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-        <div>
-          <h2 style="font-size:1.05rem;font-weight:800;">Employers &amp; Payments</h2>
-          <p style="font-size:.82rem;color:var(--muted);margin-top:3px;">{{ employers|length }} paid employer{{ employers|length|pluralize }}</p>
+      <div class="ep-toolbar">
+        <div class="ep-toolbar-info">
+          <div class="ep-toolbar-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+          <div>
+            <h2>Employers &amp; Payments</h2>
+            <p>Registered employers who have completed payment</p>
+          </div>
         </div>
+        <span class="ep-count-badge"><i class="fa-solid fa-circle-check"></i> {{ employers|length }} paid employer{{ employers|length|pluralize }}</span>
       </div>
-      <form method="get" action="{% url 'Authentication:admin_dashboard' %}" style="display:flex;gap:10px;margin-bottom:20px;">
+      <form method="get" action="{% url 'Authentication:admin_dashboard' %}" class="ep-search">
         <input type="hidden" name="tab" value="employers" />
         <input type="text" name="eq" value="{{ employer_query }}"
-               placeholder="Search by name, email or phone…"
-               style="flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;" />
-        <button type="submit" class="btn btn-primary" style="padding:9px 18px;">
+               placeholder="Search by name, email or phone…" />
+        <button type="submit" class="btn btn-primary" style="padding:10px 18px;">
           <i class="fa-solid fa-magnifying-glass"></i> Search
         </button>
         {% if employer_query %}
-        <a href="{% url 'Authentication:admin_dashboard' %}?tab=employers" class="btn btn-ghost" style="padding:9px 14px;">Clear</a>
+        <a href="{% url 'Authentication:admin_dashboard' %}?tab=employers" class="btn btn-ghost" style="padding:10px 14px;">Clear</a>
         {% endif %}
       </form>
       <div class="card">
-        <div class="card-body">
-          <div style="overflow-x:auto;">
-            <table class="data-table">
-              <thead><tr><th>Employer</th><th>Email</th><th>Phone</th><th>Request</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <div class="card-body" style="padding:0;">
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <table class="data-table ep-table" style="min-width:1080px;">
+              <thead>
+                <tr>
+                  <th>Employer</th>
+                  <th>Phone</th>
+                  <th>Request</th>
+                  <th>Plan</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th style="width:210px;">Actions</th>
+                </tr>
+              </thead>
               <tbody>
                 {% for ep in employers %}
                 <tr>
-                  <td><strong>{{ ep.user.get_full_name|default:ep.user.username }}</strong></td>
-                  <td style="font-size:.82rem;white-space:nowrap;">{{ ep.user.email }}</td>
+                  <td>
+                    <div class="ep-employer">
+                      <div class="ep-avatar {% if ep.plan == 'premium' %}premium{% endif %}">
+                        {{ ep.user.first_name|first|upper }}{{ ep.user.last_name|first|upper }}
+                      </div>
+                      <div class="ep-employer-info">
+                        <strong>{{ ep.user.get_full_name|default:ep.user.username }}</strong>
+                        <span>{{ ep.user.email }}</span>
+                      </div>
+                    </div>
+                  </td>
                   <td style="font-size:.82rem;white-space:nowrap;">{{ ep.phone|default:"—" }}</td>
                   <td class="request-cell">
                     {% if ep.request_details %}
@@ -689,17 +739,24 @@
                     {% else %}<span style="color:#cbd5e1;">— no request —</span>{% endif %}
                   </td>
                   <td><span class="badge {% if ep.plan == 'premium' %}badge-amber{% else %}badge-blue{% endif %}">{{ ep.get_plan_display }}</span></td>
-                  <td style="white-space:nowrap;">₦{{ ep.amount|intcomma }}</td>
-                  <td style="font-size:.82rem;white-space:nowrap;">{{ ep.created_at|date:"d M Y" }}</td>
-                  <td><span class="status-pill active">Paid</span></td>
+                  <td class="ep-amount">₦{{ ep.amount|intcomma }}</td>
+                  <td class="ep-date">{{ ep.created_at|date:"d M Y" }}</td>
+                  <td><span class="status-pill active"><i class="fa-solid fa-circle-check"></i> Paid</span></td>
                   <td>
-                    <button type="button" class="btn btn-primary btn-sm" data-recommend-target="{{ ep.user.id }}" data-employer-name="{{ ep.user.get_full_name|default:ep.user.username }}">
-                      <i class="fa-solid fa-user-plus"></i> Recommend Maid
-                    </button>
+                    <div class="ep-actions">
+                      <a href="{% url 'MaidApp:support-chat' %}?employer={{ ep.user.id }}"
+                         class="btn btn-chat" target="_blank" rel="noopener"
+                         title="Chat with {{ ep.user.get_full_name|default:ep.user.username }}">
+                        <i class="fa-solid fa-comment-dots"></i><span>Chat</span>
+                      </a>
+                      <button type="button" class="btn btn-recommend" data-recommend-target="{{ ep.user.id }}" data-employer-name="{{ ep.user.get_full_name|default:ep.user.username }}" title="Recommend a maid">
+                        <i class="fa-solid fa-user-plus"></i><span>Recommend</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">No paid employers yet.</td></tr>
+                <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">No paid employers yet.</td></tr>
                 {% endfor %}
               </tbody>
             </table>
@@ -754,7 +811,14 @@
               <td style="white-space:nowrap;padding:14px 16px;font-size:.82rem;">{% if entry.profile.phone %}{{ entry.profile.phone }}{% else %}<span class="muted">—</span>{% endif %}</td>
               <td style="padding:14px 16px;"><span class="badge {% if entry.profile.plan == 'premium' %}badge-amber{% else %}badge-blue{% endif %}">{{ entry.profile.get_plan_display }}</span></td>
               <td style="white-space:nowrap;padding:14px 16px;">
-                <a href="{% url 'Authentication:employer_view' entry.profile.pk %}" class="btn btn-primary" style="padding:8px 16px;"><i class="fa-solid fa-eye"></i> View</a>
+                <div class="ep-actions">
+                  <a href="{% url 'MaidApp:support-chat' %}?employer={{ entry.profile.user.id }}"
+                     class="btn btn-chat" target="_blank" rel="noopener"
+                     title="Chat with {{ entry.profile.user.get_full_name|default:entry.profile.user.username }}">
+                    <i class="fa-solid fa-comment-dots"></i><span>Chat</span>
+                  </a>
+                  <a href="{% url 'Authentication:employer_view' entry.profile.pk %}" class="btn btn-primary" style="padding:8px 13px;font-size:.78rem;border-radius:8px;"><i class="fa-solid fa-eye"></i><span>View</span></a>
+                </div>
               </td>
             </tr>
             {% empty %}

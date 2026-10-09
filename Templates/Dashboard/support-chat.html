@@ -524,6 +524,7 @@
   data-conv-list-url="{% url 'MaidApp:conversation-list' %}"
   data-resolve-url="{% url 'MaidApp:resolve-conversation' %}"
   data-employer-id="{{ chat_employer.id|default:'' }}"
+  data-chat-employer-name="{% if chat_employer %}{{ chat_employer.get_full_name|default:chat_employer.username|escapejs }}{% endif %}"
   data-is-staff="{% if user.is_staff %}1{% else %}0{% endif %}"
   data-is-resolved="{% if is_resolved %}1{% else %}0{% endif %}"
 >

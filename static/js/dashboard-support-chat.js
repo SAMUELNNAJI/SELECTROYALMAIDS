@@ -37,6 +37,7 @@
   const initResolved = body.dataset.isResolved === '1';
 
   let activeEmployerId = body.dataset.employerId || '';
+  const initEmployerName = body.dataset.chatEmployerName || '';
   let pollTimer        = null;
   let allConversations = [];
   let isResolved       = false;
@@ -60,10 +61,39 @@
       .map(el => Number(el.dataset.messageId))
   );
 
-  function escHtml(str) {
+         function escHtml(str) {
     return String(str || '')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* ── Sanitize server HTML for the chat bubble ────────────────── */
+  // Only a safe subset of tags & attributes is permitted.  Everything else is
+  // stripped so that user-supplied content can never inject markup into the DOM.
+  const SAFE_TAGS = ['b','strong','i','em','u','br','p','ul','ol','li','a','span','div','h1','h2','h3','blockquote','img','table','thead','tbody','tr','th','td'];
+  const SAFE_ATTRS = ['href','title','alt'];
+
+  function sanitizeHtml(dirty) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = dirty || '';
+    const nodes = [];
+    const walker = document.createTreeWalker(tmp, NodeFilter.SHOW_ELEMENT);
+    let el;
+    while (el = walker.nextNode()) nodes.push(el);
+    for (const node of nodes) {
+      const tag = node.tagName.toLowerCase();
+      if (!SAFE_TAGS.includes(tag)) {
+        // unwrap — keep the text content but drop the element itself
+        while (node.firstChild) node.parentNode.insertBefore(node.firstChild, node);
+        node.remove();
+        continue;
+      }
+      // remove any attribute that is not explicitly allowed
+      [...node.attributes].forEach(attr => {
+        if (!SAFE_ATTRS.includes(attr.name.toLowerCase())) node.removeAttribute(attr.name);
+      });
+    }
+    return tmp.innerHTML;
   }
 
   /* ══════════════════════════════════════════════════════
@@ -155,7 +185,7 @@
         <div class="conv-avatar ${c.resolved ? 'resolved-avatar' : ''}">${escHtml(c.initials)}</div>
         <div class="conv-info">
           <div class="conv-name">${escHtml(c.name)}</div>
-          <div class="conv-preview">${escHtml(c.last_message)}</div>
+                              <div class="conv-preview">${escHtml(c.body_text || c.last_message || '')}</div>
         </div>
         <div class="conv-meta">
           <span class="conv-time">${escHtml(c.last_time)}</span>
@@ -262,7 +292,7 @@
       </div>`;
 
     row.innerHTML = outgoing ? `${content}${avatar}` : `${avatar}${content}`;
-    row.querySelector('.msg-bubble').innerHTML = bodyText; // server-generated, safe
+    row.querySelector('.msg-bubble').innerHTML = sanitizeHtml(bodyText); // sanitize server HTML
     msgBox.appendChild(row);
     scrollBottom();
   }
@@ -403,7 +433,8 @@
 
       if (activeEmployerId) {
         // Pre-selected via ?employer= query param
-        if (chatTitleName) chatTitleName.textContent = 'Loading…';
+        if (chatTitleName) chatTitleName.textContent = initEmployerName || 'Support Chat';
+        if (chatTitleSub)  chatTitleSub.textContent  = 'Live support';
         if (noConvPH)  noConvPH.style.display  = 'none';
         if (msgBox)    msgBox.style.display    = 'flex';
         if (inputBar)  inputBar.style.display  = 'block';

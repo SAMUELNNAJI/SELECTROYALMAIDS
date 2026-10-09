@@ -1,0 +1,10 @@
+p='staticfiles/js/dashboard-support-chat.js'
+f=open(p,encoding='utf-8')
+c=f.read()
+f.close()
+c=c.replace('escHtml(c.last_message)', "escHtml(c.body_text || c.last_message || '')",1)
+c=c.replace('innerHTML = bodyText; // server-generated, safe', 'innerHTML = sanitizeHtml(bodyText); // sanitize server HTML',1)
+f=open(p,'w',encoding='utf-8')
+f.write(c)
+f.close()
+print('done')
