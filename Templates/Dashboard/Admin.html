@@ -2058,7 +2058,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Long request text: clamp and show a toggle arrow only when it overflows
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.ep-request .req-text').forEach(function(text) {
-    if (text.scrollHeight <= text.clientHeight + 1) return;
+    // The tab is hidden at load, so measuring height is unreliable; use length.
+    if (text.textContent.trim().length <= 70) return;
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'req-toggle';
