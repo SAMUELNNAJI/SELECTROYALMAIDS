@@ -906,6 +906,11 @@ def admin_dashboard(request):
             Q(phone__icontains=employer_query)
         )
 
+    # Paginate the Employers & Payments cards — 9 per page keeps the grid tidy
+    # (a clean 3×3 on wide screens) and the page light; search still covers
+    # the whole table.
+    employers_page = Paginator(employers_qs, 9)    .get_page(request.GET.get('ep', 1))
+
     paid_employers = EmployerProfile.objects.filter(payment_status='paid')
     # Revenue + count computed in a single DB query instead of iterating every
     # employer row in Python (this used to fetch all rows on every page load).
@@ -1046,7 +1051,7 @@ def admin_dashboard(request):
         'all_maids':             maids_page,
         # employers tab
         'employer_query':        employer_query,
-        'employers':             employers_qs,
+        'employers':             employers_page,
         # all employers tab
         'ae_tab': ae_tab,
         'ae_query': ae_query,

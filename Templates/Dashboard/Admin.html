@@ -201,6 +201,10 @@
     .ep-request { margin:0 20px 16px; padding:14px 15px; background:linear-gradient(135deg,#f8fafc,#eef2ff); border:1px solid var(--border); border-radius:12px; }
     .ep-request-label { display:flex; align-items:center; gap:7px; font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--accent); margin-bottom:7px; }
     .ep-request .req-text { display:block; min-width:0; max-width:none; font-size:.8rem; line-height:1.65; color:#475569; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
+    .ep-request .req-text:not(.expanded) { display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .req-toggle { display:inline-flex; align-items:center; gap:6px; margin-top:8px; padding:0; background:none; border:none; color:var(--accent); font-size:.75rem; font-weight:700; cursor:pointer; font-family:inherit; }
+    .req-toggle i { font-size:.65rem; transition:transform .2s; }
+    .req-toggle.open i { transform:rotate(180deg); }
     .ep-request-empty { font-size:.8rem; color:#94a3b8; font-style:italic; }
 
     /* Card foot — actions pinned to the bottom, aligned across cards */
@@ -729,7 +733,7 @@
             <p>Registered employers who have completed payment</p>
           </div>
         </div>
-        <span class="ep-count-badge"><i class="fa-solid fa-circle-check"></i> {{ employers|length }} paid employer{{ employers|length|pluralize }}</span>
+        <span class="ep-count-badge"><i class="fa-solid fa-circle-check"></i> {{ employers.paginator.count }} paid employer{{ employers.paginator.count|pluralize }}</span>
       </div>
       <form method="get" action="{% url 'Authentication:admin_dashboard' %}" class="ep-search">
         <input type="hidden" name="tab" value="employers" />
@@ -820,6 +824,15 @@
         </div>
         {% endfor %}
       </div>
+      {% if employers.has_other_pages %}
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:24px 0 4px;flex-wrap:wrap;">
+        {% if employers.has_previous %}<a href="?tab=employers&eq={{ employer_query|urlencode }}&ep={{ employers.previous_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">‹ Prev</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">‹ Prev</span>{% endif %}
+        {% for num in employers.paginator.page_range %}
+          {% if num == employers.number %}<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:#fff;font-size:.82rem;font-weight:700;">{{ num }}</span>{% elif num|add:'-2' <= employers.number and num|add:'2' >= employers.number or num == 1 or num == employers.paginator.num_pages %}<a href="?tab=employers&eq={{ employer_query|urlencode }}&ep={{ num }}" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);color:var(--text);font-size:.82rem;text-decoration:none;">{{ num }}</a>{% endif %}
+        {% endfor %}
+        {% if employers.has_next %}<a href="?tab=employers&eq={{ employer_query|urlencode }}&ep={{ employers.next_page_number }}" class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;">Next ›</a>{% else %}<span class="btn btn-ghost" style="padding:6px 14px;font-size:.82rem;opacity:.4;cursor:default;">Next ›</span>{% endif %}
+      </div>
+      {% endif %}
     </div>
     <!-- ── TAB: All Employers ── -->
     <div class="tab-panel" id="tab-all-employers">
@@ -2039,6 +2052,25 @@ document.addEventListener('DOMContentLoaded', function() {
   // Copy reason to hidden input before submit
   form.addEventListener('submit', function() {
     reasonInput.value = reasonTextarea.value;
+  });
+});
+
+// Long request text: clamp and show a toggle arrow only when it overflows
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.ep-request .req-text').forEach(function(text) {
+    if (text.scrollHeight <= text.clientHeight + 1) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'req-toggle';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = '<span class="req-toggle-label">View full request</span> <i class="fa-solid fa-chevron-down"></i>';
+    btn.addEventListener('click', function() {
+      var open = text.classList.toggle('expanded');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open);
+      btn.querySelector('.req-toggle-label').textContent = open ? 'Show less' : 'View full request';
+    });
+    text.insertAdjacentElement('afterend', btn);
   });
 });
 </script>
